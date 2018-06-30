@@ -1,0 +1,47 @@
+image: java:8
+
+pipelines:
+  branches:
+    master:
+     - step:
+        name: build and deploy
+        services:
+          - docker
+        caches:
+          - gradle
+          - gradlewrapper
+          - docker
+        script:
+          - bash ./gradlew clean sonarqube -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN build
+          - docker login --username $DOCKER_USER --password $DOCKER_PWD
+          - docker build -t bobobo/pb-integration:latest .
+          - docker tag bobobo/pb-integration:latest bobobo/pb-integration
+          - docker push bobobo/pb-integration
+    # - step:
+      #  name: deploy to production
+      #  deployment: production
+       # script:
+         # - mkdir -p ~/.ssh
+         # - (umask 077; echo $MY_SSH_KEY | base64 --decode -i > ~/.ssh/id_rsa)
+          #- ssh-keygen -R $SSH_HOST
+          #- ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+          #- ssh $SSH_USER@$SSH_HOST -p $PORT 'cd $HOME && docker-compose pull && docker-compose stop && docker-compose rm -f && docker-compose up -d'
+
+    develop:
+     - step:
+        name: build
+        caches:
+          - gradle
+          - gradlewrapper
+        script:
+          - bash ./gradlew clean sonarqube -Dsonar.branch.name=develop -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN build
+
+definitions:
+  caches:
+    gradlewrapper: ~/.gradle/wrapper
+  services:
+    docker:
+      memory: 2048
+
+options:
+  docker: true

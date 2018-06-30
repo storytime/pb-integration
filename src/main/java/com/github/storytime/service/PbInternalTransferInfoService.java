@@ -1,0 +1,62 @@
+package com.github.storytime.service;
+
+import com.github.storytime.model.db.User;
+import com.github.storytime.model.jaxb.history.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.repository.PbInternalTransferInfoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import static com.github.storytime.config.Constants.CARD_TWO_DIGITS;
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.right;
+
+@Component
+public class PbInternalTransferInfoService {
+
+    private final PbInternalTransferInfoRepository pbInternalTransferInfoRepository;
+    private final RegExpService regExpService;
+
+    @Autowired
+    public PbInternalTransferInfoService(PbInternalTransferInfoRepository pbInternalTransferInfoRepository,
+                                         RegExpService regExpService) {
+        this.pbInternalTransferInfoRepository = pbInternalTransferInfoRepository;
+        this.regExpService = regExpService;
+    }
+
+    //TODO: IMPROVE
+    public String generateIdForFromTransfer(User u, Statement cardNum, Float opAmount, String comment) {
+        final String card = String.valueOf(cardNum.getCard());
+        return u.getId() +
+                left(card, CARD_TWO_DIGITS) +
+                right(card, CARD_TWO_DIGITS) +
+                regExpService.getCardFirstDigits(comment) +
+                regExpService.getCardLastDigits(comment) +
+                opAmount +
+                cardNum.getTrandate();
+
+    }
+
+    public String generateIdForToTransfer(User u, Statement cardNum, Float opAmount, String comment) {
+        final String card = String.valueOf(cardNum.getCard());
+        return u.getId() +
+                regExpService.getCardFirstDigits(comment) +
+                regExpService.getCardLastDigits(comment) +
+                left(card, CARD_TWO_DIGITS) +
+                right(card, CARD_TWO_DIGITS) +
+                opAmount +
+                cardNum.getTrandate();
+    }
+
+    public void save(String id) {
+        pbInternalTransferInfoRepository.save(id);
+    }
+
+    public void remove(String id) {
+        pbInternalTransferInfoRepository.remove(id);
+    }
+
+    public boolean isAlreadyHandled(String id) {
+        return pbInternalTransferInfoRepository.isExist(id);
+    }
+
+}

@@ -1,0 +1,160 @@
+buildscript {
+    ext {
+        springBootVersion = '2.0.2.RELEASE'
+        apacheClientVersion = '4.5.5'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+plugins {
+    id 'com.adarshr.test-logger' version '1.1.2'
+    id 'net.nemerosa.versioning' version '2.0.0'
+    id "org.hidetake.ssh" version "2.9.0"
+    id "org.sonarqube" version "2.6"
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+sourceCompatibility = '1.8'
+archivesBaseName = 'pb-24-integration'
+
+repositories {
+    mavenCentral()
+}
+
+testlogger {
+    theme 'standard' // pick a theme - mocha, standard or plain
+    showExceptions true // set to false to disable detailed failure logs
+    slowThreshold 1000 // set threshold in milliseconds to highlight slow tests
+    showSummary true // displays a breakdown of passes, failures and skips along with total duration
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("com.h2database:h2")
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    compile("ru.lanwen.verbalregex:java-verbal-expressions:1.5");
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+project.ext {
+    jaxbTargetDir = file("src/main/java")
+}
+
+configurations {
+    xsd2java
+}
+
+dependencies {
+    xsd2java "com.sun.xml.bind:jaxb-xjc:2.2.6"
+    xsd2java "com.sun.xml.bind:jaxb-impl:2.2.6"
+}
+
+//task xsd2java() {
+//
+//    doLast {
+//        jaxbTargetDir.mkdirs()
+//
+//        ant.taskdef(name: 'xjc', classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.xsd2java.asPath)
+//        ant.jaxbTargetDir = jaxbTargetDir
+//
+//
+//        ant.xjc(
+//                destdir: '${jaxbTargetDir}',
+//                package: 'com.github.storytime.model.jaxb.history.response.error',
+//                schema: 'src/main/resources/xsd/HistoryErrorRespnse.xsd'
+//        )
+//
+//        ant.xjc(
+//                destdir: '${jaxbTargetDir}',
+//                package: 'com.github.storytime.model.jaxb.history.response.ok',
+//                schema: 'src/main/resources/xsd/HistoryOkResponse.xsd'
+//        )
+//
+//        ant.xjc(
+//                destdir: '${jaxbTargetDir}',
+//                package: 'com.github.storytime.model.jaxb.history.request',
+//                schema: 'src/main/resources/xsd/HistoryRequest.xsd'
+//        )
+//
+//    }
+//}
+//compileJava.dependsOn xsd2java
+
+task depsize {
+    doLast {
+        final formatStr = "%,10.2f"
+        final conf = configurations.default
+        final size = conf.collect { it.length() / (1024 * 1024) }.sum()
+        final out = new StringBuffer()
+        out << 'Total dependencies size:'.padRight(45)
+        out << "${String.format(formatStr, size)} Mb\n\n"
+        conf.sort { -it.length() }
+                .each {
+            out << "${it.name}".padRight(45)
+            out << "${String.format(formatStr, (it.length() / 1024))} kb\n"
+        }
+        println(out)
+    }
+}
+compileJava.dependsOn depsize
+
+task saveVersionToFile(dependsOn: processResources) {
+
+    def format = new Date().format('yyyy-MM-dd  HH:mm')
+    doLast {
+        new File("src/main/resources/version.properties").withWriter('UTF-8') {
+            it.writeLine "${format}"
+        }
+    }
+}
+
+classes {
+    dependsOn saveVersionToFile
+}
+
+/**
+ * SSH deploy
+ */
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+remotes {
+    devServer {
+        /**
+         * You need create a gradle.properties and put all need value into that file
+         */
+        host = project.property('pb.ssh.host')
+        user = project.property('pb.ssh.user')
+
+        identity = file(System.getProperty("user.home") + '/.ssh/id_rsa')
+    }
+}
+
+task upladComposeFileToServer {
+    doLast {
+        ssh.run {
+            session(remotes.devServer) {
+                execute("sudo rm -f ~/docker-compose.yml", pty: true)
+                execute("sudo rm -f ~/app.env", pty: true)
+                put from: "docker-compose.yml", into: "/root/docker-compose.yml"
+                put from: "app.env", into: "app.env"
+                execute("docker-compose stop", pty: true)
+                execute("docker-compose rm -f", pty: true)
+                execute("docker-compose up -d", pty: true)
+            }
+        }
+    }
+}
+
