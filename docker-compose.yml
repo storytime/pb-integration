@@ -1,7 +1,7 @@
 version: '3'
 services:
     pb-24-integration:
-        container_name: pb-24-integration
+        container_name: pb-integration
         image: bobobo/pb-integration:latest
         env_file:
           - ./variables.env

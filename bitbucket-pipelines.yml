@@ -4,7 +4,7 @@ pipelines:
   branches:
     master:
      - step:
-        name: build and deploy
+        name: build and deploy to docker hub
         services:
           - docker
         caches:

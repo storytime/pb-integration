@@ -1,6 +1,6 @@
 # README #
 
-![Build status](https://sonarcloud.io/api/project_badges/measure?project=pb-24-integration&metric=alert_status)
+![Build status](https://sonarcloud.io/api/project_badges/measure?project=pb-integration&metric=alert_status)
 [![](https://images.microbadger.com/badges/image/bobobo/pb-integration.svg)](https://microbadger.com/images/bobobo/pb-integration "Size")
 [![](https://images.microbadger.com/badges/version/bobobo/pb-integration.svg)](https://microbadger.com/images/bobobo/pb-integration "Version")
 

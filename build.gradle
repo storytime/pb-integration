@@ -23,6 +23,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jacoco'
 
 sourceCompatibility = '1.8'
 archivesBaseName = 'pb-24-integration'
@@ -135,8 +136,8 @@ remotes {
         /**
          * You need create a gradle.properties and put all need value into that file
          */
-        host = project.property('pb.ssh.host')
-        user = project.property('pb.ssh.user')
+        host = project.hasProperty('pb.ssh.host') ? project.property('pb.ssh.host') : ""
+        user = project.hasProperty('pb.ssh.user') ? project.property('pb.ssh.user') : ""
 
         identity = file(System.getProperty("user.home") + '/.ssh/id_rsa')
     }
@@ -146,10 +147,10 @@ task upladComposeFileToServer {
     doLast {
         ssh.run {
             session(remotes.devServer) {
-                execute("sudo rm -f ~/docker-compose.yml", pty: true)
-                execute("sudo rm -f ~/app.env", pty: true)
+                execute("sudo rm -f ~/docker-compose.yml > /dev/null", pty: true)
+                execute("sudo rm -f ~/variables.env > /dev/null", pty: true)
                 put from: "docker-compose.yml", into: "/root/docker-compose.yml"
-                put from: "app.env", into: "app.env"
+                put from: "variables.env", into: "/root/variables.env"
                 execute("docker-compose stop", pty: true)
                 execute("docker-compose rm -f", pty: true)
                 execute("docker-compose up -d", pty: true)
@@ -157,4 +158,3 @@ task upladComposeFileToServer {
         }
     }
 }
-
