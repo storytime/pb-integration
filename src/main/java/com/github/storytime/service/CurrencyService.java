@@ -3,11 +3,13 @@ package com.github.storytime.service;
 import com.github.storytime.config.Constants;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.currency.minfin.MinfinResponse;
+import com.github.storytime.model.currency.minfin.Usd;
 import com.github.storytime.model.currency.pb.archive.ExchangeRateItem;
 import com.github.storytime.model.currency.pb.archive.PbRatesResponse;
 import com.github.storytime.model.currency.pb.cash.CashResponse;
 import com.github.storytime.model.db.CurrencyRates;
 import com.github.storytime.model.db.inner.CurrencySource;
+import com.github.storytime.model.db.inner.CurrencyType;
 import com.github.storytime.model.jaxb.history.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.repository.CurrencyRepository;
 import org.apache.logging.log4j.Logger;
@@ -24,14 +26,15 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.github.storytime.config.Constants.CURRENCY_SCALE;
+import static com.github.storytime.config.Constants.UAH;
 import static com.github.storytime.model.db.inner.CurrencySource.NBU;
 import static com.github.storytime.model.db.inner.CurrencySource.PB_CASH;
-import static com.github.storytime.model.db.inner.CurrencyType.USD;
 import static java.lang.Math.abs;
 import static java.math.BigDecimal.*;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -69,78 +72,96 @@ public class CurrencyService {
         return cardSum.divide(rate, CURRENCY_SCALE, ROUND_HALF_UP).setScale(CURRENCY_SCALE, ROUND_DOWN);
     }
 
-    public Optional<BigDecimal> nbuPrevMouthLastBusinessDayRate(Statement s, String timeZone) {
+    public Optional<CurrencyRates> nbuPrevMouthLastBusinessDayRate(Statement s, String timeZone) {
 
         final ZonedDateTime lastDay = dateService.getPrevMouthLastBusiness(s, timeZone);
         final long date = lastDay.toInstant().toEpochMilli();
-        return ofNullable(currencyRepository
-                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(NBU, USD, date)
-                .orElseGet(() -> supplyAsync(getNbuCurrencyRates(lastDay)).join())
-                .getBuyRate());
+        return currencyRepository
+                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(NBU, CurrencyType.USD, date)
+                .map(Optional::of)
+                .orElseGet(() -> supplyAsync(getNbuCurrencyRates(lastDay)).join());
     }
 
-    public Optional<BigDecimal> pbCashDayRates(String timeZone) {
+    public Optional<CurrencyRates> pbCashDayRates(String timeZone) {
 
         final ZonedDateTime now = now(of(timeZone));
-        return ofNullable(currencyRepository
-                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, USD, now.toInstant().toEpochMilli())
-                .orElseGet(() -> supplyAsync(getPbCashDayRates(now)).join())
-                .getBuyRate());
+        return currencyRepository
+                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, CurrencyType.USD, now.toInstant().toEpochMilli())
+                .map(Optional::of)
+                .orElseGet(() -> supplyAsync(getPbCashDayRates(now)).join());
     }
 
-    private Supplier<CurrencyRates> getPbCashDayRates(ZonedDateTime now) {
+    private Supplier<Optional<CurrencyRates>> getPbCashDayRates(ZonedDateTime now) {
         return () -> {
             LOGGER.info("Pulling PB Cash currency");
 
             final Optional<List<CashResponse>> cashResponses = pullPbCashRate();
             if (cashResponses.isPresent()) {
-                final CashResponse cashResponse = cashResponses
+                final Optional<String> maybeCashRate = cashResponses
                         .get()
                         .stream()
-                        .filter(cr -> cr.getBaseCcy().equalsIgnoreCase(Constants.UAH)
+                        .filter(cr -> cr.getBaseCcy().equalsIgnoreCase(UAH)
                                 && cr.getCcy().equalsIgnoreCase(Constants.USD))
                         .findFirst()
-                        .get();
+                        .map(CashResponse::getBuy);
 
-                final CurrencyRates dbRate = buildNbuRate(PB_CASH, now, new BigDecimal(cashResponse.getBuy()));
-                return currencyRepository.save(dbRate);
+                if (maybeCashRate.isPresent()) {
+                    final CurrencyRates dbRate = buildNbuRate(PB_CASH, now, new BigDecimal(maybeCashRate.get()));
+                    return of(currencyRepository.save(dbRate));
+                } else {
+                    LOGGER.warn("Cannot get PB cash rate form response");
+                    return empty();
+                }
             }
-            return null;
+            LOGGER.error("No info about PB cash rate all!");
+            return empty();
         };
     }
 
-    private Supplier<CurrencyRates> getNbuCurrencyRates(ZonedDateTime lastDay) {
+    private Supplier<Optional<CurrencyRates>> getNbuCurrencyRates(ZonedDateTime lastDay) {
         return () -> {
             LOGGER.info("Pulling NBU currency form external service for date: {}", lastDay);
 
             final Optional<MinfinResponse> minFinRates = pullMinfinRatesForDate(dateService.toMinfinFormat(lastDay));
             if (minFinRates.isPresent()) {
-                final CurrencyRates dbRate = buildNbuRate(NBU, lastDay, new BigDecimal(minFinRates.get().getUsd().getAsk()));
-                return currencyRepository.save(dbRate);
+                final Optional<String> maybeUsdRate = minFinRates.map(MinfinResponse::getUsd).map(Usd::getAsk);
+                if (maybeUsdRate.isPresent()) {
+                    final CurrencyRates dbRate = buildNbuRate(NBU, lastDay, new BigDecimal(maybeUsdRate.get()));
+                    return of(currencyRepository.save(dbRate));
+                } else {
+                    LOGGER.warn("Cannot find NBU currency in minfin response");
+                    return empty();
+                }
             }
 
             // sometimes there is no info at minfin so second try
             final Optional<PbRatesResponse> pbRates = pullPbRatesForDate(dateService.toPbFormat(lastDay));
             if (pbRates.isPresent()) {
-                final Double rate = pbRates.get()
+                final Optional<Double> maybeUsdRate = pbRates.get()
                         .getExchangeRate()
                         .stream()
-                        .filter(r -> r.getBaseCurrency().equalsIgnoreCase(Constants.UAH) &&
+                        .filter(r -> r.getBaseCurrency().equalsIgnoreCase(UAH) &&
                                 r.getCurrency().equalsIgnoreCase(Constants.USD))
                         .findFirst()
-                        .map(ExchangeRateItem::getPurchaseRateNB)
-                        .get();
-                final CurrencyRates dbRate = buildNbuRate(NBU, lastDay, valueOf(rate));
-                return currencyRepository.save(dbRate);
+                        .map(ExchangeRateItem::getPurchaseRateNB);
+
+                if (maybeUsdRate.isPresent()) {
+                    final CurrencyRates dbRate = buildNbuRate(NBU, lastDay, valueOf(maybeUsdRate.get()));
+                    return of(currencyRepository.save(dbRate));
+                } else {
+                    LOGGER.warn("Cannot find NBU currency in PB response");
+                    return empty();
+                }
             }
-            return null;
+            LOGGER.error("No info about NBU rate all!");
+            return empty();
         };
     }
 
     private CurrencyRates buildNbuRate(CurrencySource cs, ZonedDateTime lastDay, BigDecimal rate) {
         return new CurrencyRates()
                 .setCurrencySource(cs)
-                .setCurrencyType(USD)
+                .setCurrencyType(CurrencyType.USD)
                 .setDate(lastDay.toInstant().toEpochMilli())
                 .setBuyRate(rate)
                 .setSellRate(rate);
@@ -150,7 +171,7 @@ public class CurrencyService {
         try {
             return ofNullable(restTemplate.getForEntity(customConfig.getMinExchangeUrl() + lastBusinessDay, MinfinResponse.class).getBody());
         } catch (Exception e) {
-            LOGGER.warn("Cannot get NBU USD minfin rate for date: {}, reason: {}", lastBusinessDay, e.getMessage());
+            LOGGER.error("Cannot get NBU USD minfin rate for date: {}, reason: {}", lastBusinessDay, e.getMessage());
             return empty();
         }
     }
@@ -160,7 +181,7 @@ public class CurrencyService {
             final ResponseEntity<CashResponse[]> forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
             return ofNullable(Arrays.asList(forEntity.getBody()));
         } catch (Exception e) {
-            LOGGER.warn("Cannot get pb cash rate reason: {}", e.getMessage());
+            LOGGER.error("Cannot get pb cash rate reason: {}", e.getMessage());
             return empty();
         }
     }
@@ -170,9 +191,9 @@ public class CurrencyService {
             final PbRatesResponse body = restTemplate
                     .getForEntity(customConfig.getPbExchangeUrl() + lastBusinessDay, PbRatesResponse.class).getBody();
 
-            return body.getExchangeRate().isEmpty() ? empty() : Optional.of(body);
+            return body.getExchangeRate().isEmpty() ? empty() : of(body);
         } catch (Exception e) {
-            LOGGER.warn("Cannot get NBU USD PB rate for date: {}, reason: {}", lastBusinessDay, e.getMessage());
+            LOGGER.error("Cannot get NBU USD PB rate for date: {}, reason: {}", lastBusinessDay, e.getMessage());
             return empty();
         }
     }

@@ -35,7 +35,7 @@ public class AdditionalCommentService {
                             .nbuPrevMouthLastBusinessDayRate(s, timeZone)
                             .ifPresent(rate -> {
                                 final BigDecimal sum = currencyService
-                                        .convertDivide(valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR)), rate);
+                                        .convertDivide(valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR)), rate.getBuyRate());
                                 comment.append("In: ").append(sum).append("$ ");
                             });
                     break;
@@ -44,7 +44,7 @@ public class AdditionalCommentService {
                     currencyService.pbCashDayRates(timeZone)
                             .ifPresent(rate -> {
                                 final BigDecimal sum = currencyService
-                                        .convertDivide(valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR)), rate);
+                                        .convertDivide(valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR)), rate.getBuyRate());
                                 comment.append("BC: ").append(sum).append("$ ");
                             });
                     break;
