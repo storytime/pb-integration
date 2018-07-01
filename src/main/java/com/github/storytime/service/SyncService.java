@@ -90,7 +90,7 @@ public class SyncService {
                 .thenAccept(ozr -> ozr.ifPresent(zenDiff -> {
                             final ZenDiffRequest request = pbToZenMapper
                                     .buildZenReqFromPbData(newPbData, zenDiff, u);
-//                    zenDiffService.pushToZen(u, request).ifPresent(zr -> merchantService.saveAll(merchants));
+                            zenDiffService.pushToZen(u, request).ifPresent(zr -> merchantService.saveAll(merchants));
                         })
                 );
     }
