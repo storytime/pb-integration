@@ -88,8 +88,7 @@ public class DateService {
                                                   final String timeZone) {
         final XMLGregorianCalendar trandate = s.getTrandate();
         //if we have transaction for May we need to get currency for April
-        final ZonedDateTime startDate = of(trandate.getYear(), trandate.getMonth(), trandate.getDay(), 0, 0, 0)
-                .atZone(ZoneId.of(timeZone))
+        final ZonedDateTime startDate = getPbStatementZonedDateTime(timeZone, trandate)
                 .minusMonths(1);
 
         ZonedDateTime start = startDate.with(firstDayOfMonth());
@@ -104,5 +103,10 @@ public class DateService {
         }
 
         return businessDays.get(businessDays.size() - 1);
+    }
+
+    public ZonedDateTime getPbStatementZonedDateTime(String timeZone, XMLGregorianCalendar trandate) {
+        return of(trandate.getYear(), trandate.getMonth(), trandate.getDay(), 0, 0, 0)
+                .atZone(ZoneId.of(timeZone));
     }
 }

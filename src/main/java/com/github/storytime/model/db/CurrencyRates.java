@@ -5,12 +5,17 @@ import com.github.storytime.model.db.inner.CurrencyType;
 
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 import static javax.persistence.EnumType.STRING;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"currencySource", "currencyType", "date"})
+})
 public class CurrencyRates extends BaseEntity {
 
     @NotNull

@@ -31,11 +31,7 @@ import static com.github.storytime.model.db.inner.CurrencySource.NBU;
 import static com.github.storytime.model.db.inner.CurrencySource.PB_CASH;
 import static java.lang.Math.abs;
 import static java.math.BigDecimal.*;
-import static java.time.ZoneId.of;
-import static java.time.ZonedDateTime.now;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.*;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
@@ -82,13 +78,12 @@ public class CurrencyService {
                 .orElseGet(() -> supplyAsync(getNbuCurrencyRates(lastDay)).join());
     }
 
-    public Optional<CurrencyRates> pbCashDayRates(String timeZone) {
-
-        final ZonedDateTime now = now(of(timeZone));
+    public Optional<CurrencyRates> pbCashDayRates(Statement s, String timeZone) {
+        final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
         return currencyRepository
-                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, CurrencyType.USD, now.toInstant().toEpochMilli())
+                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, CurrencyType.USD, startDate.toInstant().toEpochMilli())
                 .map(Optional::of)
-                .orElseGet(() -> supplyAsync(getPbCashDayRates(now)).join());
+                .orElseGet(() -> supplyAsync(getPbCashDayRates(startDate)).join());
     }
 
     private Supplier<Optional<CurrencyRates>> getPbCashDayRates(ZonedDateTime now) {
@@ -158,11 +153,11 @@ public class CurrencyService {
         };
     }
 
-    private CurrencyRates buildNbuRate(CurrencySource cs, ZonedDateTime lastDay, BigDecimal rate) {
+    private CurrencyRates buildNbuRate(CurrencySource cs, ZonedDateTime date, BigDecimal rate) {
         return new CurrencyRates()
                 .setCurrencySource(cs)
                 .setCurrencyType(CurrencyType.USD)
-                .setDate(lastDay.toInstant().toEpochMilli())
+                .setDate(date.toInstant().toEpochMilli())
                 .setBuyRate(rate)
                 .setSellRate(rate);
     }

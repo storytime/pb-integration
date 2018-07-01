@@ -41,7 +41,7 @@ public class AdditionalCommentService {
                     break;
 
                 case PB_CURRENT_BUSINESS_DAY:
-                    currencyService.pbCashDayRates(timeZone)
+                    currencyService.pbCashDayRates(s, timeZone)
                             .ifPresent(rate -> {
                                 final BigDecimal sum = currencyService
                                         .convertDivide(valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR)), rate.getBuyRate());
