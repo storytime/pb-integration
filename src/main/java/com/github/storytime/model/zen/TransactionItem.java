@@ -345,14 +345,14 @@ public class TransactionItem {
 
     @Override
     public String toString() {
-        return "{" +
-                    "date = '" + date + '\'' +
-                    ",income = '" + income + '\'' +
-                    ",outcome = '" + outcome + '\'' +
-                    ",originalPayee = '" + originalPayee + '\'' +
-                    ",payee = '" + payee + '\'' +
-                    ",created = '" + created + '\'' +
-                    ",comment = '" + comment + '\'' +
-                "}";
+        return new StringBuilder()
+                .append("date: ").append(date)
+                .append("income: ").append(income)
+                .append("outcome: ").append(outcome)
+                .append("opayee: ").append(originalPayee)
+                .append("payee: ").append(payee)
+                .append("cr: ").append(created)
+                .append("com: ").append(comment)
+                .toString();
     }
 }
