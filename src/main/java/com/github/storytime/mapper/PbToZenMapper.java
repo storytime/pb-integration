@@ -5,6 +5,7 @@ import com.github.storytime.model.jaxb.history.response.ok.Response.Data.Info.St
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +17,12 @@ import java.util.Objects;
 import static java.time.Instant.now;
 import static java.util.Comparator.comparingLong;
 import static java.util.stream.Collectors.toList;
+import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
 public class PbToZenMapper {
 
+    private static final Logger LOGGER = getLogger(PbToZenMapper.class);
     private final PbToZenAccountMapper pbToZenAccountMapper;
     private final PbToZenTransactionMapper pbToZenTransactionMapper;
 
@@ -43,6 +46,8 @@ public class PbToZenMapper {
                 .filter(Objects::nonNull)
                 .sorted(comparingLong(TransactionItem::getCreated).reversed())
                 .collect(toList());
+
+        transactionsToZen.forEach(t -> LOGGER.debug("New transaction: {}", t));
 
         return new ZenDiffRequest()
                 .setCurrentClientTimestamp(now().getEpochSecond())

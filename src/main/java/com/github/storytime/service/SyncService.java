@@ -32,8 +32,9 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 @Service
 public class SyncService {
 
-    public static final int ONE_DAY = 1;
     private static final Logger LOGGER = getLogger(SyncService.class);
+    private static final int ONE_DAY = 1;
+
     private final MerchantService merchantService;
     private final HistoryRequestBuilder historyRequestBuilder;
     private final BankHistoryService bankHistoryService;
@@ -103,7 +104,7 @@ public class SyncService {
         final ZonedDateTime now = now().withZoneSameInstant(of(u.getTimeZone()));
         final ZonedDateTime endDate = between(startDate, now).toMillis() < m.getSyncPeriod() ? now : startDate.plus(period);
 
-        LOGGER.debug("Syncing user {} merchant info id {} merchantId: {} startDate: {} lastSync: {} card: {}",
+        LOGGER.info("Syncing user {} merchant info id {} merchantId: {} startDate: {} lastSync: {} card: {}",
                 u.getId(),
                 m.getId(),
                 m.getMerchantId(),

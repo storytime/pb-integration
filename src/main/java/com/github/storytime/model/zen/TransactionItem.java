@@ -345,36 +345,14 @@ public class TransactionItem {
 
     @Override
     public String toString() {
-        return
-                "TransactionItem{" +
-                        "date = '" + date + '\'' +
-                        ",income = '" + income + '\'' +
-                        ",opIncome = '" + opIncome + '\'' +
-                        ",originalPayee = '" + originalPayee + '\'' +
-                        ",opOutcome = '" + opOutcome + '\'' +
-                        ",latitude = '" + latitude + '\'' +
-                        ",hold = '" + hold + '\'' +
-                        ",payee = '" + payee + '\'' +
-                        ",qrCode = '" + qrCode + '\'' +
-                        ",opIncomeInstrument = '" + opIncomeInstrument + '\'' +
-                        ",id = '" + id + '\'' +
-                        ",tag = '" + tag + '\'' +
-                        ",outcomeBankID = '" + outcomeBankID + '\'' +
-                        ",outcome = '" + outcome + '\'' +
-                        ",opOutcomeInstrument = '" + opOutcomeInstrument + '\'' +
-                        ",longitude = '" + longitude + '\'' +
-                        ",outcomeAccount = '" + outcomeAccount + '\'' +
-                        ",created = '" + created + '\'' +
-                        ",incomeAccount = '" + incomeAccount + '\'' +
-                        ",merchant = '" + merchant + '\'' +
-                        ",reminderMarker = '" + reminderMarker + '\'' +
-                        ",deleted = '" + deleted + '\'' +
-                        ",incomeBankID = '" + incomeBankID + '\'' +
-                        ",outcomeInstrument = '" + outcomeInstrument + '\'' +
-                        ",comment = '" + comment + '\'' +
-                        ",user = '" + user + '\'' +
-                        ",incomeInstrument = '" + incomeInstrument + '\'' +
-                        ",changed = '" + changed + '\'' +
-                        "}";
+        return "{" +
+                    "date = '" + date + '\'' +
+                    ",income = '" + income + '\'' +
+                    ",outcome = '" + outcome + '\'' +
+                    ",originalPayee = '" + originalPayee + '\'' +
+                    ",payee = '" + payee + '\'' +
+                    ",created = '" + created + '\'' +
+                    ",comment = '" + comment + '\'' +
+                "}";
     }
 }
