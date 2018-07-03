@@ -104,7 +104,7 @@ public class SyncService {
         final ZonedDateTime now = now().withZoneSameInstant(of(u.getTimeZone()));
         final ZonedDateTime endDate = between(startDate, now).toMillis() < m.getSyncPeriod() ? now : startDate.plus(period);
 
-        LOGGER.info("Syncing user {} merchant info id {} merchantId: {} startDate: {} lastSync: {} card: {}",
+        LOGGER.info("Syncing u {} m id {} m id: {} sd: {} lastSync: {} card: {}",
                 u.getId(),
                 m.getId(),
                 m.getMerchantId(),
