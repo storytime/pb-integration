@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jre-alpine
 COPY build/libs/pb-24-integration.jar /var/webapps/
 EXPOSE 10080
 WORKDIR /var/webapps/

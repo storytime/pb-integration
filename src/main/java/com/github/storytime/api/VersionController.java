@@ -23,7 +23,9 @@ public class VersionController {
     public String getVersion() {
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream(VERSION_PROPERTIES)) {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            return reader.lines().collect(Collectors.joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR);
+            final String version = reader.lines().collect(Collectors.joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR);
+            LOGGER.error("Return version: {} ", version);
+            return version;
         } catch (final Exception e) {
             LOGGER.error("Cannot read version", e);
             return N_A;
