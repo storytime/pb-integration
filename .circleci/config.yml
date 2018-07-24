@@ -96,9 +96,9 @@ workflows:
                 - develop
   build_prod_flow:
     jobs:
-      - build_prod_artifact:
+      - build_prod_docker_image:
           requires:
-            - build_prod_docker_image
+            - build_prod_artifact
           filters:
             branches:
               only:
