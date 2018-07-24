@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build_artifact:
+  build_prod_artifact:
     docker:
       - image: circleci/openjdk:8-jdk
     environment:
@@ -18,7 +18,7 @@ jobs:
           command: ./gradlew dependencies
       - run:
           name: Build and verify on sonar
-          command: ./gradlew clean sonarqube -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN build
+          command: ./gradlew clean build
       - save_cache:
           paths:
             - ~/.gradle
@@ -31,33 +31,7 @@ jobs:
           path: Dockerfile
           destination: Dockerfile
 
-### DEV (clean build and do sonar tests)
-  develop_build_artifact:
-    docker:
-      - image: circleci/openjdk:8-jdk
-    environment:
-      JVM_OPTS: -Xmx3200m
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-          - build-cache-{{ checksum "build.gradle" }}
-      - run:
-          name: Chmod permissions
-          command: chmod +x ./gradlew
-      - run:
-          name: Download dependencies
-          command: ./gradlew dependencies
-      - run:
-          name: Build and verify on sonar
-          command: ./gradlew clean sonarqube -Dsonar.branch.name=develop -Dsonar.branch.target=develop -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN build
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-          key: build-cache-{{ checksum "build.gradle" }}
-
-  build_docker_image:
+  build_prod_docker_image:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -85,13 +59,48 @@ jobs:
           name: Push docker image
           command: docker push bobobo/pb-integration:latest && docker push bobobo/pb-integration:$(( $CIRCLE_BUILD_NUM - 1 ))
 
+### DEVELOP (clean build and do sonar tests)
+  build_and_verify_on_sonar:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - build-cache-{{ checksum "build.gradle" }}
+      - run:
+          name: Chmod permissions
+          command: chmod +x ./gradlew
+      - run:
+          name: Download dependencies
+          command: ./gradlew dependencies
+      - run: ### Free sonar cloud can analyze only one branch
+          name: Build and verify on sonar
+          command: ./gradlew clean sonarqube -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN build
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.m2
+          key: build-cache-{{ checksum "build.gradle" }}
+
 workflows:
   version: 2
-  build_develop_branch_and_do_tests:
+  build_and_verify_on_sonar_flow:
     jobs:
-      - develop_build_artifact:
+      - build_and_verify_on_sonar:
           filters:
             branches:
               only:
                 - develop
-                - move-to-circle-ci
+
+  build_prod_flow:
+    jobs:
+      - build_prod_docker_image:
+          requires:
+            - build_prod_artifact
+          filters:
+            branches:
+              only:
+                - master
