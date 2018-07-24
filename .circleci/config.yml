@@ -94,12 +94,14 @@ workflows:
             branches:
               only:
                 - develop
-
   build_prod_flow:
     jobs:
+      - build_prod_artifact:
+          filters:
+            branches:
+              only:
+                - master
       - build_prod_docker_image:
-          requires:
-            - build_prod_artifact
           filters:
             branches:
               only:
