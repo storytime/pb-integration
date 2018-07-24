@@ -151,9 +151,9 @@ task upladComposeFileToServer {
                 execute("sudo rm -f ~/variables.env > /dev/null", pty: true)
                 put from: "docker-compose.yml", into: "/root/docker-compose.yml"
                 put from: "variables.env", into: "/root/variables.env"
-                execute("docker-compose stop", pty: true)
-                execute("docker-compose rm -f", pty: true)
-                execute("docker-compose up -d", pty: true)
+//                execute("docker-compose stop", pty: true)
+//                execute("docker-compose rm -f", pty: true)
+//                execute("docker-compose up -d", pty: true)
             }
         }
     }
