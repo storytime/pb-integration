@@ -1,0 +1,32 @@
+/**
+ * SSH deploy
+ */
+
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+remotes {
+    devServer {
+        /**
+         * You need create a gradle.properties and put all need value into that file
+         */
+        host = project.hasProperty('pb.ssh.host') ? project.property('pb.ssh.host') : ""
+        user = project.hasProperty('pb.ssh.user') ? project.property('pb.ssh.user') : ""
+        identity = file(System.getProperty("user.home") + '/.ssh/id_rsa')
+    }
+}
+
+task upladComposeFileToServer {
+    doLast {
+        ssh.run {
+            session(remotes.devServer) {
+                put from: "docker-compose.yml", into: "/tmp/docker-compose.yml"
+                put from: "variables.env", into: "/tmp/variables.env"
+                // need to avoid user name
+                execute("mv /tmp/docker-compose.yml ~/docker-compose.yml", pty: true)
+                execute("mv /tmp/variables.env  ~/variables.env", pty: true)
+            }
+        }
+    }
+}

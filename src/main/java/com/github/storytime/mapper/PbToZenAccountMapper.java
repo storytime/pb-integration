@@ -92,7 +92,7 @@ public class PbToZenAccountMapper {
                 .setPayoffStep(null)
                 .setPayoffInterval(null);
 
-        LOGGER.info("Create new account {} with cards {}", newZenAccount.getId(), cardsFromBank);
+        LOGGER.info("Create new account: {} with cards: {}", newZenAccount.getId(), cardsFromBank);
         return newZenAccount;
     }
 
@@ -101,7 +101,7 @@ public class PbToZenAccountMapper {
 
         // if any new cards
         if (zenCards.containsAll(cardsFromBank)) {
-            LOGGER.debug("No new cards for account {}", existingAccount.getId());
+            LOGGER.debug("No new cards for account: {}", existingAccount.getId());
         } else {
             final List<String> uniqueCards = concat(zenCards.stream(), cardsFromBank.stream())
                     .distinct()

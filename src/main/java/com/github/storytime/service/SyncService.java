@@ -77,10 +77,10 @@ public class SyncService {
 
             final long amountOfNewData = newPbDataList.stream().mapToLong(List::size).sum(); // any new
             if (amountOfNewData > 0) {
-                LOGGER.info("User {} has new transactions from bank {}", u.getId(), amountOfNewData);
+                LOGGER.info("User: {} has new transactions from bank: {}", u.getId(), amountOfNewData);
                 doUpdateZenInfoRequest(u, newPbDataList, merchants);
             } else {
-                LOGGER.warn("User {} has NO new transactions from bank", u.getId());
+                LOGGER.warn("User: {} has NO new transactions from bank", u.getId());
             }
         });
     }
@@ -104,7 +104,7 @@ public class SyncService {
         final ZonedDateTime now = now().withZoneSameInstant(of(u.getTimeZone()));
         final ZonedDateTime endDate = between(startDate, now).toMillis() < m.getSyncPeriod() ? now : startDate.plus(period);
 
-        LOGGER.info("Syncing u {} m id {} m id: {} sd: {} lastSync: {} card: {}",
+        LOGGER.info("Syncing u: {} mId: {} mNumb: {} sd: {} lastSync: {} card: {}",
                 u.getId(),
                 m.getId(),
                 m.getMerchantId(),
@@ -149,7 +149,7 @@ public class SyncService {
         } catch (PbSignatureException e) {
             // roll back for one day
             final long rollBackStartDate = startDate.minusDays(ONE_DAY).toInstant().toEpochMilli();
-            LOGGER.error("Invalid signature, going to roll back from: {} to: {}", startDate, rollBackStartDate);
+                LOGGER.error("Invalid signature, going to roll back from: {} to: {}", startDate, rollBackStartDate);
             merchantService.save(m.setSyncStartDate(rollBackStartDate));
             return emptyList();
         }
