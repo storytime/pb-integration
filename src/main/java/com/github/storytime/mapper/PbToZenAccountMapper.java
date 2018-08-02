@@ -92,7 +92,7 @@ public class PbToZenAccountMapper {
                 .setPayoffStep(null)
                 .setPayoffInterval(null);
 
-        LOGGER.info("Create new account {} with cards {}", newZenAccount.getId(), cardsFromBank);
+        LOGGER.info("Create new account: {} with cards: {}", newZenAccount.getId(), cardsFromBank);
         return newZenAccount;
     }
 
@@ -101,7 +101,7 @@ public class PbToZenAccountMapper {
 
         // if any new cards
         if (zenCards.containsAll(cardsFromBank)) {
-            LOGGER.debug("No new cards for account {}", existingAccount.getId());
+            LOGGER.debug("No new cards for account: {}", existingAccount.getId());
         } else {
             final List<String> uniqueCards = concat(zenCards.stream(), cardsFromBank.stream())
                     .distinct()
@@ -114,12 +114,19 @@ public class PbToZenAccountMapper {
     }
 
     private Optional<AccountItem> isPbAccountExistsInZen(List<AccountItem> zenAccounts, List<String> cardsFromBank) {
-        return zenAccounts.stream()
-                .filter(za -> ofNullable(za.getSyncID())
-                        .orElseGet(Collections::emptyList)
-                        .stream()
-                        .filter(cardsFromBank::contains).collect(toList()).size() > 0)
+        return zenAccounts
+                .stream()
+                .filter(za -> !isAccountEmpty(cardsFromBank, za))
                 .findFirst();
+    }
+
+    private boolean isAccountEmpty(List<String> cardsFromBank, AccountItem za) {
+        return ofNullable(za.getSyncID())
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .filter(cardsFromBank::contains)
+                .collect(toList())
+                .isEmpty();
     }
 
     private List<String> getCardsFromBank(List<Statement> statementList) {

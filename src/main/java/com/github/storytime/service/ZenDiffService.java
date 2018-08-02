@@ -42,7 +42,7 @@ public class ZenDiffService {
             final ResponseEntity<ZenResponse> zenResponseResponseEntity = restTemplate
                     .postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
             final Optional<ZenResponse> body = of(zenResponseResponseEntity.getBody());
-            LOGGER.info("Diff was pushed to zen for user id {}", u.getId());
+            LOGGER.info("Diff was pushed to zen for user id: {}", u.getId());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot push Diff to ZEN request: {}", e.getMessage());
@@ -61,10 +61,10 @@ public class ZenDiffService {
             final Optional<ZenResponse> body = of(restTemplate
                     .postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
 
-            LOGGER.debug("Initial sync was successfully completed for user {}", u.getId());
+            LOGGER.debug("Initial sync was successfully completed for user: {}", u.getId());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot do initial sync request for user {} : {}", u.getId(), e.getMessage());
+            LOGGER.error("Cannot do initial sync request for user: {} : {}", u.getId(), e.getMessage());
             return empty();
         }
     }

@@ -1,0 +1,30 @@
+// calculate fat jar size
+task depsize {
+    doLast {
+        final formatStr = "%,10.2f"
+        final conf = configurations.default
+        final size = conf.collect { it.length() / (1024 * 1024) }.sum()
+        final out = new StringBuffer()
+        out << 'Total dependencies size:'.padRight(45)
+        out << "${String.format(formatStr, size)} Mb\n\n"
+        conf.sort { -it.length() }
+                .each {
+            out << "${it.name}".padRight(45)
+            out << "${String.format(formatStr, (it.length() / 1024))} kb\n"
+        }
+        println(out)
+    }
+}
+
+// save build version to file
+task saveVersionToFile {
+    def format = new Date().format('yyyy-MM-dd  HH:mm')
+    doLast {
+        new File("src/main/resources/version.properties").withWriter('UTF-8') {
+            it.writeLine "${format}"
+        }
+    }
+}
+
+
+

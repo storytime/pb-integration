@@ -1,0 +1,42 @@
+project.ext {
+    jaxbTargetDir = file("src/main/java")
+}
+
+configurations {
+    xsd2java
+}
+
+dependencies {
+    xsd2java "com.sun.xml.bind:jaxb-xjc:2.2.6"
+    xsd2java "com.sun.xml.bind:jaxb-impl:2.2.6"
+}
+
+task xsd2java() {
+
+    doLast {
+        jaxbTargetDir.mkdirs()
+
+        ant.taskdef(name: 'xjc', classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.xsd2java.asPath)
+        ant.jaxbTargetDir = jaxbTargetDir
+
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                package: 'com.github.storytime.model.jaxb.history.response.error',
+                schema: 'src/main/resources/xsd/HistoryErrorRespnse.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                package: 'com.github.storytime.model.jaxb.history.response.ok',
+                schema: 'src/main/resources/xsd/HistoryOkResponse.xsd'
+        )
+
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                package: 'com.github.storytime.model.jaxb.history.request',
+                schema: 'src/main/resources/xsd/HistoryRequest.xsd'
+        )
+
+    }
+}
