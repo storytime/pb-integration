@@ -114,12 +114,19 @@ public class PbToZenAccountMapper {
     }
 
     private Optional<AccountItem> isPbAccountExistsInZen(List<AccountItem> zenAccounts, List<String> cardsFromBank) {
-        return zenAccounts.stream()
-                .filter(za -> ofNullable(za.getSyncID())
-                        .orElseGet(Collections::emptyList)
-                        .stream()
-                        .filter(cardsFromBank::contains).collect(toList()).size() > 0)
+        return zenAccounts
+                .stream()
+                .filter(za -> !isAccountEmpty(cardsFromBank, za))
                 .findFirst();
+    }
+
+    private boolean isAccountEmpty(List<String> cardsFromBank, AccountItem za) {
+        return ofNullable(za.getSyncID())
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .filter(cardsFromBank::contains)
+                .collect(toList())
+                .isEmpty();
     }
 
     private List<String> getCardsFromBank(List<Statement> statementList) {
