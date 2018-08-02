@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.security.NoSuchAlgorithmException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -26,7 +24,7 @@ public class SignatureGeneratorServiceTest {
     private SignatureGeneratorService signatureGeneratorService;
 
     @Test
-    public void multiplicationOfZeroIntegersShouldReturnZero() throws NoSuchAlgorithmException {
+    public void testWithValidData() {
         final String signature = signatureGeneratorService.generateSignature(START_DATE, END_DATE, CARD, PASS);
         assertThat(signature).as(EXPECTED_VALID_SIGN).isNotNull();
         assertThat(signature).as(EXPECTED_VALID_SIGN).isEqualTo(VALID_SIGNATURE);
