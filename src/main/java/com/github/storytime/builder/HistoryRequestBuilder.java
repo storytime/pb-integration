@@ -1,6 +1,6 @@
 package com.github.storytime.builder;
 
-import com.github.storytime.config.TextProperties;
+import com.github.storytime.config.props.TextProperties;
 import com.github.storytime.model.jaxb.history.request.Request;
 import com.github.storytime.service.SignatureGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.github.storytime.config.Constants.*;
+import static com.github.storytime.config.props.Constants.*;
 import static java.util.regex.Pattern.compile;
 import static org.springframework.util.Assert.*;
 

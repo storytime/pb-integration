@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-import static com.github.storytime.config.Constants.CARD_LAST_DIGITS;
+import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;

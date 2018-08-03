@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.github.storytime.config.Constants.SPACE_SEPARATOR;
+import static com.github.storytime.config.props.Constants.SPACE_SEPARATOR;
 import static java.lang.Float.valueOf;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.substringBefore;

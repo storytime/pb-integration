@@ -2,15 +2,13 @@ package com.github.storytime.config;
 
 
 import com.github.storytime.other.RequestLoggerInterceptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,44 +17,29 @@ import static java.util.Collections.singletonList;
 @Configuration
 public class ApplicationConfig {
 
+    @Value("${http.connect.timeout}")
+    private int httpConnectTimeout;
+
+    @Value("${http.request.timeout}")
+    private int httpRequestTimeout;
+
     @Bean
-    public StringWriter stringWriter() {
-        return new StringWriter();
+    public SimpleClientHttpRequestFactory simpleClientHttpRequestFactory() {
+        final SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
+        simpleClientHttpRequestFactory.setConnectTimeout(httpConnectTimeout);
+        simpleClientHttpRequestFactory.setReadTimeout(httpRequestTimeout);
+        return simpleClientHttpRequestFactory;
     }
 
     @Bean
-    public RestTemplate restTemplate() {
-        // TODO: req time out
-        final RestTemplate restTemplate = new RestTemplate();
+    public RestTemplate restTemplate(ClientHttpRequestFactory simpleClientHttpRequestFactory) {
+        final RestTemplate restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
         restTemplate.setInterceptors(singletonList(new RequestLoggerInterceptor()));
         return restTemplate;
-    }
-
-    @Bean
-    public Marshaller jaxbMarshaller() throws JAXBException {
-        final JAXBContext jaxbContext = JAXBContext.newInstance(
-                com.github.storytime.model.jaxb.history.response.ok.Response.class
-        );
-        return jaxbContext.createMarshaller();
-    }
-
-    @Bean
-    public Unmarshaller jaxbHistoryErrorUnmarshaller() throws JAXBException {
-        final JAXBContext jaxbContext = JAXBContext
-                .newInstance(com.github.storytime.model.jaxb.history.response.error.Response.class);
-        return jaxbContext.createUnmarshaller();
-    }
-
-    @Bean
-    public Unmarshaller jaxbHistoryOkUnmarshaller() throws JAXBException {
-        final JAXBContext jaxbContext = JAXBContext
-                .newInstance(com.github.storytime.model.jaxb.history.response.ok.Response.class);
-        return jaxbContext.createUnmarshaller();
     }
 
     @Bean
     public Set<String> pbTransferInfo() {
         return new HashSet<>();
     }
-
 }

@@ -6,7 +6,7 @@ import com.github.storytime.repository.PbInternalTransferInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static com.github.storytime.config.Constants.CARD_TWO_DIGITS;
+import static com.github.storytime.config.props.Constants.CARD_TWO_DIGITS;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.right;
 

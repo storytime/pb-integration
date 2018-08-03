@@ -9,7 +9,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static com.github.storytime.config.Constants.*;
+import static com.github.storytime.config.props.Constants.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service

@@ -1,4 +1,4 @@
-package com.github.storytime.config;
+package com.github.storytime.config.props;
 
 
 import org.springframework.beans.factory.annotation.Value;

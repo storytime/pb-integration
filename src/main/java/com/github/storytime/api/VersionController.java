@@ -9,7 +9,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static com.github.storytime.config.Constants.*;
+import static com.github.storytime.config.props.Constants.*;
 import static java.util.stream.Collectors.joining;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
