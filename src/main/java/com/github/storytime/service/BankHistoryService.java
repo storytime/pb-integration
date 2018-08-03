@@ -58,7 +58,7 @@ public class BankHistoryService {
             st.start();
             final Optional<ResponseEntity<String>> response = of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
             st.stop();
-            LOGGER.debug("Receive bank response, request execution time: {} sec", st.getTotalTimeSeconds());
+            LOGGER.debug("Receive bank response, execution time: {} sec", st.getTotalTimeSeconds());
             return response;
         } catch (Exception e) {
             LOGGER.error("Cannot do bank request: {}", e.getMessage());

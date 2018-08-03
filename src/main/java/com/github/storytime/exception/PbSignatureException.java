@@ -5,7 +5,6 @@ package com.github.storytime.exception;
  * To fix this issue roll back for one day in sync procedure is needed
  */
 public class PbSignatureException extends RuntimeException {
-
     public PbSignatureException(String message) {
         super(message);
     }

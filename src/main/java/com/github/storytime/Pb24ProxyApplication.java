@@ -16,6 +16,7 @@ public class Pb24ProxyApplication {
     private static final Logger LOGGER = getLogger(Pb24ProxyApplication.class);
 
     public static void main(final String[] args) {
+        LOGGER.info("================= Starting APP ==================");
         SpringApplication.run(Pb24ProxyApplication.class, args);
         LOGGER.info("================= APP Started ==================");
     }
