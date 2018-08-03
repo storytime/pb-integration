@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 
 import static com.github.storytime.config.Constants.*;
+import static java.util.stream.Collectors.joining;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @RestController
@@ -22,7 +22,7 @@ public class VersionController {
     public String getVersion() {
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream(VERSION_PROPERTIES)) {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            final String version = reader.lines().collect(Collectors.joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR);
+            final String version = reader.lines().collect(joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR).trim();
             LOGGER.info("Return version: {} ", version);
             return version;
         } catch (final Exception e) {

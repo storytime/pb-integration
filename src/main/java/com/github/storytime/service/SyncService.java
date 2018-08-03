@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import static com.github.storytime.config.Constants.CARD_LAST_DIGITS;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
@@ -27,6 +28,7 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.right;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
@@ -110,7 +112,8 @@ public class SyncService {
                 m.getMerchantId(),
                 dateService.toIsoFormat(startDate),
                 dateService.toIsoFormat(endDate),
-                m.getCardNumber());
+                right(m.getCardNumber(), CARD_LAST_DIGITS)
+        );
 
         final Request requestToBank = historyRequestBuilder.buildHistoryRequest(m.getMerchantId(),
                 m.getPassword(),
