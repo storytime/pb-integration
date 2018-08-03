@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.github.storytime.config.Constants.*;
+import static com.github.storytime.config.props.Constants.*;
 import static java.time.Instant.now;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;

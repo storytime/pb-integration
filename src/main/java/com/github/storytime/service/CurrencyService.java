@@ -1,7 +1,7 @@
 package com.github.storytime.service;
 
-import com.github.storytime.config.Constants;
 import com.github.storytime.config.CustomConfig;
+import com.github.storytime.config.props.Constants;
 import com.github.storytime.model.currency.minfin.MinfinResponse;
 import com.github.storytime.model.currency.minfin.Usd;
 import com.github.storytime.model.currency.pb.archive.ExchangeRateItem;
@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.github.storytime.config.Constants.CURRENCY_SCALE;
-import static com.github.storytime.config.Constants.UAH;
+import static com.github.storytime.config.props.Constants.CURRENCY_SCALE;
+import static com.github.storytime.config.props.Constants.UAH;
 import static com.github.storytime.model.db.inner.CurrencySource.NBU;
 import static com.github.storytime.model.db.inner.CurrencySource.PB_CASH;
 import static java.lang.Math.abs;

@@ -1,7 +1,7 @@
 package com.github.storytime.service;
 
-import com.github.storytime.config.Constants;
 import com.github.storytime.config.CustomConfig;
+import com.github.storytime.config.props.Constants;
 import com.github.storytime.model.db.User;
 import com.github.storytime.model.zen.*;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
-import static com.github.storytime.config.Constants.*;
+import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.other.Utils.createHeader;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;

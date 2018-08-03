@@ -16,8 +16,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.github.storytime.config.Constants.RATE;
-import static com.github.storytime.config.Constants.SPACE_SEPARATOR;
+import static com.github.storytime.config.props.Constants.RATE;
+import static com.github.storytime.config.props.Constants.SPACE_SEPARATOR;
 import static java.lang.Float.valueOf;
 import static java.lang.Math.abs;
 import static java.time.Instant.now;
