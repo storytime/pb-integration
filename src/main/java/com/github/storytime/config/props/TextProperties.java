@@ -39,6 +39,9 @@ public class TextProperties {
     @Value("${card.format}")
     private String cardFormat;
 
+    @Value("${zen.user.not.found}")
+    private String zenUserNotFound;
+
     public String getMerchIdNull() {
         return merchIdNull;
     }
@@ -77,5 +80,9 @@ public class TextProperties {
 
     public String getCardFormat() {
         return cardFormat;
+    }
+
+    public String getZenUserNotFound() {
+        return zenUserNotFound;
     }
 }

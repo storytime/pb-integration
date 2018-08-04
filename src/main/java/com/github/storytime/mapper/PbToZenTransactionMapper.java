@@ -1,5 +1,7 @@
 package com.github.storytime.mapper;
 
+import com.github.storytime.config.props.TextProperties;
+import com.github.storytime.exception.ZenUserNotFoundException;
 import com.github.storytime.model.db.User;
 import com.github.storytime.model.jaxb.history.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.storytime.config.props.Constants.RATE;
@@ -21,6 +22,7 @@ import static com.github.storytime.config.props.Constants.SPACE_SEPARATOR;
 import static java.lang.Float.valueOf;
 import static java.lang.Math.abs;
 import static java.time.Instant.now;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
@@ -35,17 +37,20 @@ public class PbToZenTransactionMapper {
     private final CurrencyService currencyService;
     private final RegExpService regExpService;
     private final PbInternalTransferInfoService transferInfoService;
+    private final TextProperties textProperties;
 
     @Autowired
     public PbToZenTransactionMapper(final PbInternalTransferInfoService pbInternalTransferInfoService,
                                     final DateService dateService,
                                     final CurrencyService currencyService,
                                     final RegExpService regExpService,
+                                    final TextProperties textProperties,
                                     final ZenDiffService zenDiffService) {
         this.dateService = dateService;
         this.transferInfoService = pbInternalTransferInfoService;
         this.currencyService = currencyService;
         this.regExpService = regExpService;
+        this.textProperties = textProperties;
         this.zenDiffService = zenDiffService;
     }
 
@@ -70,10 +75,11 @@ public class PbToZenTransactionMapper {
 
                     setAppCode(s, t, cardAmount);
 
-                    t.setId(UUID.randomUUID().toString());
+                    t.setId(randomUUID().toString());
                     t.setChanged(0);
                     t.setCreated(now().toEpochMilli() + i.incrementAndGet());
-                    t.setUser(zenDiff.getUser().stream().findFirst().get().getId());
+                    t.setUser(zenDiff.getUser().stream().findFirst()
+                            .orElseThrow(() -> new ZenUserNotFoundException(textProperties.getZenUserNotFound())).getId());
                     t.setDeleted(false);
                     t.setPayee(payee);
                     t.setOriginalPayee(payee);
@@ -121,7 +127,6 @@ public class PbToZenTransactionMapper {
                             final String id = transferInfoService.generateIdForFromTransfer(u, s, opAmount, transactionDesc);
                             if (transferInfoService.isAlreadyHandled(id)) {
                                 LOGGER.info("FROM transfer id: {} that is already handled", id);
-                                // transferInfoService.remove(id); /TODO: If remove id duplicates may occurs
                                 return null;
                             }
 
@@ -146,7 +151,6 @@ public class PbToZenTransactionMapper {
                             final String id = transferInfoService.generateIdForToTransfer(u, s, opAmount, transactionDesc);
                             if (transferInfoService.isAlreadyHandled(id)) {
                                 LOGGER.info("TO transfer id: {} that is already handled", id);
-                                // transferInfoService.remove(id); /TODO: If remove id duplicates may occurs
                                 return null;
                             }
 

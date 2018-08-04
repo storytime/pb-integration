@@ -17,14 +17,13 @@ public class PbInternalTransferInfoService {
     private final RegExpService regExpService;
 
     @Autowired
-    public PbInternalTransferInfoService(PbInternalTransferInfoRepository pbInternalTransferInfoRepository,
-                                         RegExpService regExpService) {
+    public PbInternalTransferInfoService(final PbInternalTransferInfoRepository pbInternalTransferInfoRepository,
+                                         final RegExpService regExpService) {
         this.pbInternalTransferInfoRepository = pbInternalTransferInfoRepository;
         this.regExpService = regExpService;
     }
 
-    //TODO: IMPROVE
-    public String generateIdForFromTransfer(User u, Statement cardNum, Float opAmount, String comment) {
+    public String generateIdForFromTransfer(final User u, final Statement cardNum, final Float opAmount, final String comment) {
         final String card = String.valueOf(cardNum.getCard());
         return u.getId() +
                 left(card, CARD_TWO_DIGITS) +
@@ -36,7 +35,7 @@ public class PbInternalTransferInfoService {
 
     }
 
-    public String generateIdForToTransfer(User u, Statement cardNum, Float opAmount, String comment) {
+    public String generateIdForToTransfer(final User u, final Statement cardNum, final Float opAmount, final String comment) {
         final String card = String.valueOf(cardNum.getCard());
         return u.getId() +
                 regExpService.getCardFirstDigits(comment) +
@@ -47,15 +46,11 @@ public class PbInternalTransferInfoService {
                 cardNum.getTrandate();
     }
 
-    public void save(String id) {
+    public void save(final String id) {
         pbInternalTransferInfoRepository.save(id);
     }
 
-    public void remove(String id) {
-        pbInternalTransferInfoRepository.remove(id);
-    }
-
-    public boolean isAlreadyHandled(String id) {
+    public boolean isAlreadyHandled(final String id) {
         return pbInternalTransferInfoRepository.isExist(id);
     }
 

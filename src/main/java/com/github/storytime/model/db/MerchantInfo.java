@@ -2,6 +2,7 @@ package com.github.storytime.model.db;
 
 
 import com.github.storytime.model.db.inner.AdditionalComment;
+import com.github.storytime.model.db.inner.SyncPriority;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -36,6 +37,9 @@ public class MerchantInfo extends BaseEntity {
     @Enumerated(STRING)
     @ElementCollection(fetch = EAGER)
     private List<AdditionalComment> additionalComment;
+
+    @Enumerated(STRING)
+    private SyncPriority syncPriority;
 
     public List<AdditionalComment> getAdditionalComment() {
         return additionalComment;
@@ -97,6 +101,15 @@ public class MerchantInfo extends BaseEntity {
 
     public MerchantInfo setSyncPeriod(Long syncPeriod) {
         this.syncPeriod = syncPeriod;
+        return this;
+    }
+
+    public SyncPriority getSyncPriority() {
+        return syncPriority;
+    }
+
+    public MerchantInfo setSyncPriority(SyncPriority syncPriority) {
+        this.syncPriority = syncPriority;
         return this;
     }
 }
