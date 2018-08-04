@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
@@ -32,9 +33,9 @@ import static org.apache.commons.lang3.StringUtils.right;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
-public class SyncService {
+public class PbSyncService {
 
-    private static final Logger LOGGER = getLogger(SyncService.class);
+    private static final Logger LOGGER = getLogger(PbSyncService.class);
     private static final int ONE_DAY = 1;
 
     private final MerchantService merchantService;
@@ -47,14 +48,14 @@ public class SyncService {
     private final AdditionalCommentService additionalCommentService;
 
     @Autowired
-    public SyncService(final MerchantService merchantService,
-                       final HistoryRequestBuilder historyRequestBuilder,
-                       final BankHistoryService bankHistoryService,
-                       final UserService userService,
-                       final ZenDiffService zenDiffService,
-                       final PbToZenMapper pbToZenMapper,
-                       final AdditionalCommentService additionalCommentService,
-                       final DateService dateService) {
+    public PbSyncService(final MerchantService merchantService,
+                         final HistoryRequestBuilder historyRequestBuilder,
+                         final BankHistoryService bankHistoryService,
+                         final UserService userService,
+                         final ZenDiffService zenDiffService,
+                         final PbToZenMapper pbToZenMapper,
+                         final AdditionalCommentService additionalCommentService,
+                         final DateService dateService) {
         this.merchantService = merchantService;
         this.historyRequestBuilder = historyRequestBuilder;
         this.userService = userService;
@@ -66,9 +67,9 @@ public class SyncService {
     }
 
     @Async
-    public void sync() {
+    public void sync(Function<MerchantService, List<MerchantInfo>> function) {
         userService.findAll().forEach(u -> {
-            final List<MerchantInfo> merchants = merchantService.getAllEnabledMerchants();
+            final List<MerchantInfo> merchants = function.apply(merchantService);
             final List<List<Statement>> newPbDataList = merchants
                     .stream()
                     .map(m -> getPbTransactions(u, m))
@@ -79,7 +80,7 @@ public class SyncService {
 
             final long amountOfNewData = newPbDataList.stream().mapToLong(List::size).sum(); // any new
             if (amountOfNewData > 0) {
-                LOGGER.info("User: {} has new transactions from bank: {}", u.getId(), amountOfNewData);
+                LOGGER.info("User: {} has new: {} transactions", u.getId(), amountOfNewData);
                 doUpdateZenInfoRequest(u, newPbDataList, merchants);
             } else {
                 LOGGER.warn("User: {} has NO new transactions from bank", u.getId());
@@ -91,8 +92,7 @@ public class SyncService {
 
         supplyAsync(() -> zenDiffService.getZenDiffByUser(u))
                 .thenAccept(ozr -> ozr.ifPresent(zenDiff -> {
-                            final ZenDiffRequest request = pbToZenMapper
-                                    .buildZenReqFromPbData(newPbData, zenDiff, u);
+                    final ZenDiffRequest request = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, u);
                             zenDiffService.pushToZen(u, request).ifPresent(zr -> merchantService.saveAll(merchants));
                         })
                 );
@@ -152,7 +152,7 @@ public class SyncService {
         } catch (PbSignatureException e) {
             // roll back for one day
             final long rollBackStartDate = startDate.minusDays(ONE_DAY).toInstant().toEpochMilli();
-                LOGGER.error("Invalid signature, going to roll back from: {} to: {}", startDate, rollBackStartDate);
+            LOGGER.error("Invalid signature, going to roll back from: {} to: {}", startDate, rollBackStartDate);
             merchantService.save(m.setSyncStartDate(rollBackStartDate));
             return emptyList();
         }

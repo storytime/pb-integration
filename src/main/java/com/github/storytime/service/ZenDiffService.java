@@ -18,13 +18,15 @@ import static com.github.storytime.other.Utils.createHeader;
 import static java.lang.String.valueOf;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
-import static java.util.Optional.*;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.right;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
 public class ZenDiffService {
 
+    private static final long INITIAL_TIMESTAMP = 0L;
     private static final Logger LOGGER = getLogger(ZenDiffService.class);
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
@@ -41,7 +43,7 @@ public class ZenDiffService {
             final HttpEntity<ZenDiffRequest> diffObject = new HttpEntity<>(request, createHeader(u.getZenAuthToken()));
             final ResponseEntity<ZenResponse> zenResponseResponseEntity = restTemplate
                     .postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
-            final Optional<ZenResponse> body = of(zenResponseResponseEntity.getBody());
+            final Optional<ZenResponse> body = ofNullable(zenResponseResponseEntity.getBody());
             LOGGER.info("Diff was pushed to zen for user id: {}", u.getId());
             return body;
         } catch (Exception e) {
@@ -52,14 +54,12 @@ public class ZenDiffService {
 
     public Optional<ZenResponse> getZenDiffByUser(User u) {
         try {
-            //todo need to get only partial data if exists
             final InitialSyncRequest initialSyncRequest = new InitialSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
-                    .setServerTimestamp(0L);
+                    .setServerTimestamp(INITIAL_TIMESTAMP);
 
             final HttpEntity<InitialSyncRequest> request = new HttpEntity<>(initialSyncRequest, createHeader(u.getZenAuthToken()));
-            final Optional<ZenResponse> body = of(restTemplate
-                    .postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
+            final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
 
             LOGGER.debug("Initial sync was successfully completed for user: {}", u.getId());
             return body;
@@ -107,8 +107,7 @@ public class ZenDiffService {
                 .stream()
                 .filter(a -> !ofNullable(a.getSyncID()).orElse(emptyList()).contains(carLastDigits))
                 .filter(a -> ofNullable(a.getSyncID()).orElse(emptyList())
-                        .stream().anyMatch(s -> right(valueOf(s), CARD_TWO_DIGITS).equalsIgnoreCase(lastTwoDigits))
-                )
+                        .stream().anyMatch(s -> right(valueOf(s), CARD_TWO_DIGITS).equalsIgnoreCase(lastTwoDigits)))
                 .findFirst()
                 .map(AccountItem::getId);
     }

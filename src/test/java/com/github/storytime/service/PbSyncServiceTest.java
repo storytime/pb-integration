@@ -10,13 +10,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Pb24ProxyApplication.class)
-public class SyncServiceTest {
+public class PbSyncServiceTest {
 
     @Autowired
     private BankHistoryService bankHistoryService;
 
     @Autowired
-    private SyncService syncService;
+    private PbSyncService pbSyncService;
 
     @Test
     public void test() {
@@ -31,7 +31,7 @@ public class SyncServiceTest {
 //
 //            bankHistoryService.buildZenReqFromPbData(pbResponseMock, null);
 
-        syncService.sync();
+        //   pbSyncService.sync();
     }
 
 }
