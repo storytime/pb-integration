@@ -5,6 +5,7 @@ buildscript {
         h2Version = '1.4.197'
         commonsVersion = '3.7'
         verbalRexExpVersion = '1.5'
+        flywayVersion = '5.1.4'
     }
     repositories {
         mavenCentral()
@@ -45,6 +46,7 @@ dependencies {
     compile("com.h2database:h2:$h2Version")
     compile("org.apache.commons:commons-lang3:$commonsVersion")
     compile("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
+    compile("org.flywaydb:flyway-core:$flywayVersion")
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 
