@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class PbSyncServiceTest {
 
     @Autowired
-    private BankHistoryService bankHistoryService;
+    private PbStatementsService pbStatementsService;
 
     @Autowired
     private PbSyncService pbSyncService;

@@ -1,12 +1,9 @@
-package com.github.storytime.model.jaxb.history.response.ok;
+package com.github.storytime.model.jaxb.statement.response.ok;
 
 import javax.xml.bind.annotation.XmlRegistry;
 
 @XmlRegistry
 public class ObjectFactory {
-
-    public ObjectFactory() {
-    }
 
     public Response createResponse() {
         return new Response();

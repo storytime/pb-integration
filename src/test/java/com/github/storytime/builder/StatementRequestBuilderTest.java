@@ -1,7 +1,7 @@
 package com.github.storytime.builder;
 
 import com.github.storytime.config.props.TextProperties;
-import com.github.storytime.model.jaxb.history.request.Request;
+import com.github.storytime.model.jaxb.statement.request.Request;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class HistoryRequestBuilderTest {
+public class StatementRequestBuilderTest {
 
     private static final String EXPECTED_NOT_NULL_MERCH = "Merchant be not null or empty";
     private static final String EXPECTED_NOT_NULL_CARD = "Card be not null or empty";
@@ -38,7 +38,7 @@ public class HistoryRequestBuilderTest {
     private static final String LONG_CARD = "1234512345123451234512345123451234512345";
 
     @Autowired
-    private HistoryRequestBuilder historyRequestBuilder;
+    private StatementRequestBuilder statementRequestBuilder;
 
     @Autowired
     private TextProperties messages;
@@ -46,7 +46,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyMerchant() {
         try {
-            historyRequestBuilder.buildHistoryRequest(null, EMPTY, EMPTY, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(null, EMPTY, EMPTY, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getMerchIdNull()).as(EXPECTED_NOT_NULL_MERCH).isEqualTo(re.getMessage());
             throw re;
@@ -56,7 +56,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNegativeMerchant() {
         try {
-            historyRequestBuilder.buildHistoryRequest(-10, EMPTY, EMPTY, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(-10, EMPTY, EMPTY, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getMerchIdFormat()).as(EXPECTED_MERCH_FORMAT).isEqualTo(re.getMessage());
             throw re;
@@ -66,7 +66,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyPassword() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, "", EMPTY, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, "", EMPTY, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getPasswordNull()).as(EXPECTED_NOT_NULL_PASSWORD).isEqualTo(re.getMessage());
             throw re;
@@ -76,7 +76,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testShortPassword() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, SHORT_PASSWORD, EMPTY, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, SHORT_PASSWORD, EMPTY, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getPasswordLength()).as(EXPECTED_PASSWORD_FORMAT).isEqualTo(re.getMessage());
             throw re;
@@ -86,7 +86,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testLongPassword() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, LONG_PASSWORD, EMPTY, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, LONG_PASSWORD, EMPTY, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getPasswordLength()).as(EXPECTED_PASSWORD_FORMAT).isEqualTo(re.getMessage());
             throw re;
@@ -96,7 +96,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyStartDate() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, EMPTY, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, EMPTY, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getStartDateNull()).as(EXPECTED_NOT_NULL_DATE).isEqualTo(re.getMessage());
             throw re;
@@ -106,7 +106,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNotValidStartDate() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, NOT_VALID_DATE, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, NOT_VALID_DATE, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getStartDateFormat()).as(EXPECTED_DATE_FORMAT).isEqualTo(re.getMessage());
             throw re;
@@ -116,7 +116,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyEndDate() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, EMPTY, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, EMPTY, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getEndDateNull()).as(EXPECTED_NOT_NULL_DATE).isEqualTo(re.getMessage());
             throw re;
@@ -126,7 +126,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNotValidEndDate() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, NOT_VALID_DATE, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, NOT_VALID_DATE, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getStartDateFormat()).as(EXPECTED_DATE_FORMAT).isEqualTo(re.getMessage());
             throw re;
@@ -136,7 +136,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyCard() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, EMPTY);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, EMPTY);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getCardNull()).as(EXPECTED_NOT_NULL_CARD).isEqualTo(re.getMessage());
             throw re;
@@ -146,7 +146,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testShortCard() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, SHORT_CARD);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, SHORT_CARD);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getCardFormat()).as(EXPECTED_CARD_FORMAT).isEqualTo(re.getMessage());
             throw re;
@@ -156,7 +156,7 @@ public class HistoryRequestBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void testLogCard() {
         try {
-            historyRequestBuilder.buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, LONG_CARD);
+            statementRequestBuilder.buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, LONG_CARD);
         } catch (IllegalArgumentException re) {
             assertThat(messages.getCardFormat()).as(EXPECTED_CARD_FORMAT).isEqualTo(re.getMessage());
             throw re;
@@ -165,8 +165,8 @@ public class HistoryRequestBuilderTest {
 
     @Test
     public void testWitValidData() {
-        final Request request = historyRequestBuilder
-                .buildHistoryRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, VALID_CARD);
+        final Request request = statementRequestBuilder
+                .buildStatementRequest(VALID_MERCHANT_ID, VALID_PASSWORD, VALID_DATE, VALID_DATE, VALID_CARD);
         assertThat(request).as(EXPECTED_NOT_NULL_REQUEST).isNotNull();
     }
 }

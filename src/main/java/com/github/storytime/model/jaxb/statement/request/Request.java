@@ -1,4 +1,4 @@
-package com.github.storytime.model.jaxb.history.request;
+package com.github.storytime.model.jaxb.statement.request;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;

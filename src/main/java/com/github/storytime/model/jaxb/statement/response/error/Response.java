@@ -1,4 +1,4 @@
-package com.github.storytime.model.jaxb.history.response.error;
+package com.github.storytime.model.jaxb.statement.response.error;
 
 import javax.xml.bind.annotation.*;
 

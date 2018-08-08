@@ -34,7 +34,7 @@
 //    @Test
 //    public void contextLoads() throws JAXBException, IOException, NoSuchAlgorithmException {
 //        final Request request1 = historyRequestBuilder
-//                .buildHistoryRequest(133800, "G7156LLiWn7100nKq4SvtrBC0OVZPKJ9", "01.01.2018", "01.02.2018", "4731185613017182");
+//                .buildStatementRequest(133800, "G7156LLiWn7100nKq4SvtrBC0OVZPKJ9", "01.01.2018", "01.02.2018", "4731185613017182");
 //
 //        jaxbMarshaller.marshal(request1, stringWriter);
 //        final String xmlString1 = stringWriter.toString();
