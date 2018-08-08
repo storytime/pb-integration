@@ -1,4 +1,4 @@
-package com.github.storytime.model.jaxb.history.response.ok;
+package com.github.storytime.model.jaxb.statement.response.ok;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -108,7 +108,7 @@ public class Response {
 
                 public List<Response.Data.Info.Statements.Statement> getStatement() {
                     if (statement == null) {
-                        statement = new ArrayList<Response.Data.Info.Statements.Statement>();
+                        statement = new ArrayList<>();
                     }
                     return this.statement;
                 }

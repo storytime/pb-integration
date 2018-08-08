@@ -1,7 +1,7 @@
 package com.github.storytime.builder;
 
 import com.github.storytime.config.props.TextProperties;
-import com.github.storytime.model.jaxb.history.request.Request;
+import com.github.storytime.model.jaxb.statement.request.Request;
 import com.github.storytime.service.SignatureGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,14 +13,14 @@ import static java.util.regex.Pattern.compile;
 import static org.springframework.util.Assert.*;
 
 @Service
-public class HistoryRequestBuilder {
+public class StatementRequestBuilder {
 
     private final SignatureGeneratorService signatureGeneratorService;
     private final TextProperties textProperties;
 
     @Autowired
-    public HistoryRequestBuilder(final SignatureGeneratorService signatureGeneratorService,
-                                 final TextProperties textProperties) {
+    public StatementRequestBuilder(final SignatureGeneratorService signatureGeneratorService,
+                                   final TextProperties textProperties) {
         this.signatureGeneratorService = signatureGeneratorService;
         this.textProperties = textProperties;
     }
@@ -74,8 +74,8 @@ public class HistoryRequestBuilder {
         return request;
     }
 
-    public Request buildHistoryRequest(final Integer merchantId, final String password, final String startDate,
-                                       final String endDate, final String card) {
+    public Request buildStatementRequest(final Integer merchantId, final String password, final String startDate,
+                                         final String endDate, final String card) {
         notNull(merchantId, textProperties.getMerchIdNull());
         isTrue(merchantId > 0, textProperties.getMerchIdFormat());
         hasLength(password, textProperties.getPasswordNull());

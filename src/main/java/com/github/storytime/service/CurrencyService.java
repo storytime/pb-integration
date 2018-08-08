@@ -10,7 +10,7 @@ import com.github.storytime.model.currency.pb.cash.CashResponse;
 import com.github.storytime.model.db.CurrencyRates;
 import com.github.storytime.model.db.inner.CurrencySource;
 import com.github.storytime.model.db.inner.CurrencyType;
-import com.github.storytime.model.jaxb.history.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.repository.CurrencyRepository;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

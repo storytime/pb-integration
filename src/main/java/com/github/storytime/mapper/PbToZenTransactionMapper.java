@@ -3,7 +3,7 @@ package com.github.storytime.mapper;
 import com.github.storytime.config.props.TextProperties;
 import com.github.storytime.exception.ZenUserNotFoundException;
 import com.github.storytime.model.db.User;
-import com.github.storytime.model.jaxb.history.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;

@@ -21,22 +21,22 @@ public class JAXBConfig {
     @Bean
     public Marshaller jaxbMarshaller() throws JAXBException {
         final JAXBContext jaxbContext = JAXBContext.newInstance(
-                com.github.storytime.model.jaxb.history.response.ok.Response.class
+                com.github.storytime.model.jaxb.statement.response.ok.Response.class
         );
         return jaxbContext.createMarshaller();
     }
 
     @Bean
-    public Unmarshaller jaxbHistoryErrorUnmarshaller() throws JAXBException {
+    public Unmarshaller jaxbStatementErrorUnmarshaller() throws JAXBException {
         final JAXBContext jaxbContext = JAXBContext
-                .newInstance(com.github.storytime.model.jaxb.history.response.error.Response.class);
+                .newInstance(com.github.storytime.model.jaxb.statement.response.error.Response.class);
         return jaxbContext.createUnmarshaller();
     }
 
     @Bean
-    public Unmarshaller jaxbHistoryOkUnmarshaller() throws JAXBException {
+    public Unmarshaller jaxbStatementOkUnmarshaller() throws JAXBException {
         final JAXBContext jaxbContext = JAXBContext
-                .newInstance(com.github.storytime.model.jaxb.history.response.ok.Response.class);
+                .newInstance(com.github.storytime.model.jaxb.statement.response.ok.Response.class);
         return jaxbContext.createUnmarshaller();
     }
 }

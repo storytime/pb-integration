@@ -1,7 +1,7 @@
 package com.github.storytime.service;
 
 import com.github.storytime.model.db.User;
-import com.github.storytime.model.jaxb.history.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

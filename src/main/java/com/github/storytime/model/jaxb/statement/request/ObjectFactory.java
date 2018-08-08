@@ -1,12 +1,9 @@
-package com.github.storytime.model.jaxb.history.request;
+package com.github.storytime.model.jaxb.statement.request;
 
 import javax.xml.bind.annotation.XmlRegistry;
 
 @XmlRegistry
 public class ObjectFactory {
-
-    public ObjectFactory() {
-    }
 
     public Request createRequest() {
         return new Request();
