@@ -5,12 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import static com.github.storytime.config.props.Constants.*;
-import static java.util.stream.Collectors.joining;
+import static java.lang.ClassLoader.getSystemResource;
+import static java.nio.file.Files.readAllBytes;
+import static java.nio.file.Paths.get;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @RestController
@@ -20,10 +18,9 @@ public class VersionController {
 
     @GetMapping(value = API_PREFIX + "/version", produces = TEXT_PLAIN_VALUE)
     public String getVersion() {
-        try (final InputStream is = getClass().getClassLoader().getResourceAsStream(VERSION_PROPERTIES)) {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            final String version = reader.lines().collect(joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR).trim();
-            LOGGER.info("Return version: {} ", version);
+        try {
+            final String version = new String(readAllBytes(get(getSystemResource(VERSION_PROPERTIES).toURI())));
+            LOGGER.info("Return version: {}", version);
             return version;
         } catch (final Exception e) {
             LOGGER.error("Cannot read version", e);
