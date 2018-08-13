@@ -120,7 +120,9 @@ public class PbStatementsService {
         } catch (PbSignatureException e) {
             // roll back for one day
             final long rollBackStartDate = startDate.minusDays(ONE_DAY).toInstant().toEpochMilli();
-            LOGGER.error("Invalid signature, going to roll back from: {} to: {}", startDate, rollBackStartDate);
+            LOGGER.error("Invalid signature, going to roll back from: {} to: {}",
+                    dateService.toIsoFormat(startDate),
+                    dateService.toIsoFormat(rollBackStartDate, u));
             merchantService.save(m.setSyncStartDate(rollBackStartDate));
             return emptyList();
         }
