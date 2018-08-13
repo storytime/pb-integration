@@ -6,6 +6,8 @@ buildscript {
         commonsVersion = '3.7'
         verbalRexExpVersion = '1.5'
         flywayVersion = '5.1.4'
+        jUnitParamsVersion = '1.1.1'
+        jfairyVersion = '0.5.9'
     }
     repositories {
         mavenCentral()
@@ -48,13 +50,21 @@ dependencies {
     compile("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
     compile("org.flywaydb:flyway-core:$flywayVersion")
     testCompile("org.springframework.boot:spring-boot-starter-test")
+    testCompile ("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
+    testCompile("io.codearte.jfairy:jfairy:$jfairyVersion")
 }
 
 testlogger {
     theme 'standard' // pick a theme - mocha, standard or plain
     showExceptions true // set to false to disable detailed failure logs
-    slowThreshold 1000 // set threshold in milliseconds to highlight slow tests
+    slowThreshold 3000 // set threshold in milliseconds to highlight slow tests
     showSummary true // displays a breakdown of passes, failures and skips along with total duration
+}
+
+subprojects {
+    tasks.withType(Test) {
+        maxParallelForks = Runtime.runtime.availableProcessors()
+    }
 }
 
 // compileJava.dependsOn xsd2java

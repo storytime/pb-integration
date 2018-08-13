@@ -1,7 +1,9 @@
 package com.github.storytime.config;
 
 
+import com.github.storytime.model.db.CustomPayee;
 import com.github.storytime.other.RequestLoggerInterceptor;
+import com.github.storytime.repository.CustomPayeeRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +43,10 @@ public class ApplicationConfig {
     @Bean
     public Set<String> pbTransferInfo() {
         return new HashSet<>();
+    }
+
+    @Bean
+    public Set<CustomPayee> customPayeeValues(final CustomPayeeRepository customPayeeRepository) {
+        return new HashSet<>(customPayeeRepository.findAll());
     }
 }
