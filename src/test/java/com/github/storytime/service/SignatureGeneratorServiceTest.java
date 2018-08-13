@@ -1,17 +1,13 @@
 package com.github.storytime.service;
 
 
+import com.github.storytime.BaseTestConfig;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class SignatureGeneratorServiceTest {
+public class SignatureGeneratorServiceTest extends BaseTestConfig {
 
     private static final String EXPECTED_VALID_SIGN = "Signature must be not null";
     private static final String START_DATE = "01.01.2018";

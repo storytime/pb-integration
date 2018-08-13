@@ -1,16 +1,11 @@
 package com.github.storytime.service;
 
-import com.github.storytime.Pb24ProxyApplication;
+import com.github.storytime.BaseTestConfig;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Pb24ProxyApplication.class)
-public class PbSyncServiceTest {
+public class PbSyncServiceTest extends BaseTestConfig {
 
     @Autowired
     private PbStatementsService pbStatementsService;

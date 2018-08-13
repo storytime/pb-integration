@@ -1,4 +1,4 @@
-package com.github.storytime.executor;
+package com.github.storytime.scheduler;
 
 import com.github.storytime.service.MerchantService;
 import com.github.storytime.service.PbSyncService;
@@ -12,13 +12,13 @@ import static com.github.storytime.model.db.inner.SyncPriority.SECOND;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
-public class SyncScheduleExecutor {
+public class PbSyncSchedulerExecutor {
 
-    private static final Logger LOGGER = getLogger(SyncScheduleExecutor.class);
+    private static final Logger LOGGER = getLogger(PbSyncSchedulerExecutor.class);
     private final PbSyncService pbSyncService;
 
     @Autowired
-    public SyncScheduleExecutor(final PbSyncService pbSyncService) {
+    public PbSyncSchedulerExecutor(final PbSyncService pbSyncService) {
         this.pbSyncService = pbSyncService;
     }
 

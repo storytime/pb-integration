@@ -38,6 +38,7 @@ public class PbToZenTransactionMapper {
     private final RegExpService regExpService;
     private final PbInternalTransferInfoService transferInfoService;
     private final TextProperties textProperties;
+    private final CustomPayeeService customPayeeService;
 
     @Autowired
     public PbToZenTransactionMapper(final PbInternalTransferInfoService pbInternalTransferInfoService,
@@ -45,6 +46,7 @@ public class PbToZenTransactionMapper {
                                     final CurrencyService currencyService,
                                     final RegExpService regExpService,
                                     final TextProperties textProperties,
+                                    final CustomPayeeService customPayeeService,
                                     final ZenDiffService zenDiffService) {
         this.dateService = dateService;
         this.transferInfoService = pbInternalTransferInfoService;
@@ -52,6 +54,7 @@ public class PbToZenTransactionMapper {
         this.regExpService = regExpService;
         this.textProperties = textProperties;
         this.zenDiffService = zenDiffService;
+        this.customPayeeService = customPayeeService;
     }
 
 
@@ -71,7 +74,7 @@ public class PbToZenTransactionMapper {
                     final String cardCurrency = substringAfter(s.getCardamount(), SPACE_SEPARATOR);
                     final String accountId = zenDiffService.findAccountIdByPbCard(zenDiff, s.getCard());
                     final Integer currency = zenDiffService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
-                    final String payee = regExpService.parseComment(transactionDesc);
+                    //final String payee = regExpService.parseComment(transactionDesc);
 
                     setAppCode(s, t, cardAmount);
 
@@ -81,8 +84,8 @@ public class PbToZenTransactionMapper {
                     t.setUser(zenDiff.getUser().stream().findFirst()
                             .orElseThrow(() -> new ZenUserNotFoundException(textProperties.getZenUserNotFound())).getId());
                     t.setDeleted(false);
-                    t.setPayee(payee);
-                    t.setOriginalPayee(payee);
+                    t.setPayee(customPayeeService.getNicePayee(transactionDesc));
+                    t.setOriginalPayee(transactionDesc);
                     t.setComment(s.getCustomComment());
                     t.setDate(dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone()));
                     t.setIncomeAccount(accountId);
