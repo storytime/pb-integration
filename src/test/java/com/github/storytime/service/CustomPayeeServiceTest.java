@@ -57,6 +57,7 @@ public class CustomPayeeServiceTest extends BaseTestConfig {
                 new Object[]{randomTextString1, randomTextString1},
                 new Object[]{randomTextString2, randomTextString2},
                 new Object[]{"АЗС AZS OKKO 60 KYIV", "OKKO"},
+                new Object[]{"АЗС AZS OKKO 60 KYIV", "OKKO"},
         };
     }
 

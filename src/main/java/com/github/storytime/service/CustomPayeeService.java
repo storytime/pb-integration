@@ -31,7 +31,7 @@ public class CustomPayeeService {
                 .findAny()
                 .map(CustomPayee::getPayee)
                 .orElse(originalPayee).trim();
-        LOGGER.debug("Found custom payee: {}", customPayee);
+        LOGGER.debug("Found custom payee: '{}'", customPayee);
         return customPayee;
     }
 }
