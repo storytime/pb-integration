@@ -7,6 +7,9 @@ import ru.lanwen.verbalregex.VerbalExpression;
 
 import static ru.lanwen.verbalregex.VerbalExpression.regex;
 
+/*
+    .withAnyCase() is now working in VerbalExpression lib
+ */
 @Configuration
 public class VerbalExpressionConfig {
 
@@ -29,7 +32,8 @@ public class VerbalExpressionConfig {
     @Bean
     public VerbalExpression cashWithdrawal() {
         return regex()
-                .startOfLine().withAnyCase()
+                .startOfLine()
+                .anything()
                 .then(customConfig.getPbCashWithdrawal())
                 .anything()
                 .endOfLine()
@@ -39,9 +43,9 @@ public class VerbalExpressionConfig {
     @Bean
     public VerbalExpression internalTransfer() {
         return VerbalExpression.regex()
-                .startOfLine().anything()
+                .startOfLine()
+                .anything()
                 .oneOf(customConfig.getPbInternalTransferTo(), customConfig.getPbInternalTransferFrom())
-                .space()
                 .anything()
                 .endOfLine()
                 .build();
@@ -50,9 +54,9 @@ public class VerbalExpressionConfig {
     @Bean
     public VerbalExpression internalTo() {
         return VerbalExpression.regex()
-                .startOfLine().anything()
+                .startOfLine()
+                .anything()
                 .then(customConfig.getPbInternalTransferTo())
-                .space()
                 .anything()
                 .endOfLine()
                 .build();
@@ -61,9 +65,9 @@ public class VerbalExpressionConfig {
     @Bean
     public VerbalExpression internalFrom() {
         return VerbalExpression.regex()
-                .startOfLine().anything()
+                .startOfLine()
+                .anything()
                 .then(customConfig.getPbInternalTransferFrom())
-                .space()
                 .anything()
                 .endOfLine()
                 .build();

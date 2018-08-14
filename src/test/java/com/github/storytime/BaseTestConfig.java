@@ -5,6 +5,7 @@ import com.github.storytime.scheduler.CustomPayeeSchedulerExecutor;
 import com.github.storytime.scheduler.PbSyncSchedulerExecutor;
 import io.codearte.jfairy.Fairy;
 import junitparams.JUnitParamsRunner;
+import org.flywaydb.core.Flyway;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -31,6 +32,9 @@ public class BaseTestConfig {
 
     @MockBean
     private PbSyncSchedulerExecutor pbSyncSchedulerExecutor;
+
+    @MockBean
+    private Flyway flyway;
 
     public String getRandomTextString() {
         return Fairy.create().textProducer().sentence(5);

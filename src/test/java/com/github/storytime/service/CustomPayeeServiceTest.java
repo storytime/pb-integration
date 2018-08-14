@@ -34,25 +34,23 @@ public class CustomPayeeServiceTest extends BaseTestConfig {
 
     @Test
     @Parameters(method = "validData")
-    public void testWithValidData(final String in, final String expect) {
-        final String nicePayee = customPayeeService.getNicePayee(in);
-        assertThat(nicePayee).isNotNull();
-        assertThat(nicePayee).isEqualTo(expect);
+    public void testWithValidData(final String in, final String expected) {
+        final String actual = customPayeeService.getNicePayee(in);
+        assertThat(actual).isNotNull();
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     @Parameters(method = "notValidData")
-    public void testWithNotValidData(final String in, final String expect) {
-        final String nicePayee = customPayeeService.getNicePayee(in);
-        assertThat(nicePayee).isNotNull();
-        assertThat(nicePayee).isNotEqualTo(expect);
+    public void testWithNotValidData(final String in, final String expected) {
+        final String actual = customPayeeService.getNicePayee(in);
+        assertThat(actual).isNotNull();
+        assertThat(actual).isNotEqualTo(expected);
     }
 
     private Object[] validData() {
-
         final String randomTextString1 = getRandomTextString();
         final String randomTextString2 = getRandomTextString();
-
         return new Object[]{
                 new Object[]{EMPTY, EMPTY},
                 new Object[]{null, EMPTY},

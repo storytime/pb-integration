@@ -1,11 +1,11 @@
 package com.github.storytime.service;
 
-import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.lanwen.verbalregex.VerbalExpression;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Component
 public class RegExpService {
@@ -70,14 +70,13 @@ public class RegExpService {
         return internalTransferComment.getText(comment, GROUP_1);
     }
 
-    public String normalizeDescription(Statement s) {
-        return s.getDescription()
+    public String normalizeDescription(final String desc) {
+        return ofNullable(desc).orElse(EMPTY)
                 .replace("&quot;", "\"")
-                .replace("&apos;", "'")
-                .replace("&gt;", " ")
-                .replace("&lt;", " ")
-                .replace("<[^>]*", " ")
+                .replace("&apos;", SPACE)
+                .replace("&gt;", SPACE)
+                .replace("&lt;", SPACE)
+                .replace("<[^>]*", SPACE)
                 .trim();
     }
-
 }

@@ -67,7 +67,7 @@ public class PbToZenTransactionMapper {
                 .stream()
                 .map((Statement s) -> {
                     final TransactionItem t = new TransactionItem();
-                    final String transactionDesc = regExpService.normalizeDescription(s);
+                    final String transactionDesc = regExpService.normalizeDescription(s.getDescription());
                     final Float opAmount = valueOf(substringBefore(s.getAmount(), SPACE_SEPARATOR));
                     final String opCurrency = substringAfter(s.getAmount(), SPACE_SEPARATOR);
                     final Float cardAmount = valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR));

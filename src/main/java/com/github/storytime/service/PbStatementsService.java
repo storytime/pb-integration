@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.right;
 @Service
 public class PbStatementsService {
 
-    private static final int ONE_DAY = 1;
+    private static final int ONE = 1;
     private static final Logger LOGGER = LogManager.getLogger(PbStatementsService.class);
 
     private final RestTemplate restTemplate;
@@ -119,7 +119,7 @@ public class PbStatementsService {
             return onlyNewPbTransactions;
         } catch (PbSignatureException e) {
             // roll back for one day
-            final long rollBackStartDate = startDate.minusDays(ONE_DAY).toInstant().toEpochMilli();
+            final long rollBackStartDate = startDate.minusHours(ONE).toInstant().toEpochMilli();
             LOGGER.error("Invalid signature, going to roll back from: {} to: {}",
                     dateService.toIsoFormat(startDate),
                     dateService.toIsoFormat(rollBackStartDate, u));
