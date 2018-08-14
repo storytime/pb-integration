@@ -64,7 +64,7 @@ jobs:
     docker:
       - image: circleci/openjdk:8-jdk
     environment:
-      JVM_OPTS: -Xmx3200m
+      JAVA_OPTS: "-Xms1G -Xmx3G"
     steps:
       - checkout
       - restore_cache:
