@@ -8,7 +8,7 @@ import java.util.List;
 public class ZenDiffRequest {
 
     private Long currentClientTimestamp;
-    private Integer lastServerTimestamp;
+    private long lastServerTimestamp;
     private List<AccountItem> account;
     private List<TransactionItem> transaction;
 
@@ -40,11 +40,11 @@ public class ZenDiffRequest {
         return this;
     }
 
-    public Integer getLastServerTimestamp() {
+    public long getLastServerTimestamp() {
         return lastServerTimestamp;
     }
 
-    public ZenDiffRequest setLastServerTimestamp(Integer lastServerTimestamp) {
+    public ZenDiffRequest setLastServerTimestamp(long lastServerTimestamp) {
         this.lastServerTimestamp = lastServerTimestamp;
         return this;
     }

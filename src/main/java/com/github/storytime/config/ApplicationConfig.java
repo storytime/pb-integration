@@ -25,6 +25,9 @@ public class ApplicationConfig {
     @Value("${http.request.timeout}")
     private int httpRequestTimeout;
 
+    @Value("#{'${zen.sync.force.fetch.items}'.split(',')}")
+    private Set<String> zenSyncForceFetchItems;
+
     @Bean
     public SimpleClientHttpRequestFactory simpleClientHttpRequestFactory() {
         final SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();

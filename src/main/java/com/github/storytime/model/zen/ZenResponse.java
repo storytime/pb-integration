@@ -68,7 +68,7 @@ public class ZenResponse {
         this.reminder = reminder;
     }
 
-    public int getServerTimestamp() {
+    public long getServerTimestamp() {
         return serverTimestamp;
     }
 

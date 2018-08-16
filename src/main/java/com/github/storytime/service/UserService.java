@@ -21,4 +21,8 @@ public class UserService {
         return repository.findAll();
     }
 
+    public void updateUserLastZenSyncTime(final User u) {
+        repository.save(u);
+    }
+
 }

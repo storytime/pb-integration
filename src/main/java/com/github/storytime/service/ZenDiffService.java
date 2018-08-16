@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.other.Utils.createHeader;
@@ -30,12 +31,16 @@ public class ZenDiffService {
     private static final Logger LOGGER = getLogger(ZenDiffService.class);
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
+    private final Set<String> zenSyncForceFetchItems;
 
 
     @Autowired
-    public ZenDiffService(final RestTemplate restTemplate, CustomConfig customConfig) {
+    public ZenDiffService(final RestTemplate restTemplate,
+                          final Set<String> zenSyncForceFetchItems,
+                          final CustomConfig customConfig) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
+        this.zenSyncForceFetchItems = zenSyncForceFetchItems;
     }
 
     public Optional<ZenResponse> pushToZen(User u, ZenDiffRequest request) {
@@ -52,16 +57,23 @@ public class ZenDiffService {
         }
     }
 
-    public Optional<ZenResponse> getZenDiffByUser(User u) {
+    public Optional<ZenResponse> getZenDiffByUser(final User u) {
         try {
-            final InitialSyncRequest initialSyncRequest = new InitialSyncRequest()
-                    .setCurrentClientTimestamp(now().getEpochSecond())
-                    .setServerTimestamp(INITIAL_TIMESTAMP);
+            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
+                    .setCurrentClientTimestamp(now().getEpochSecond());
 
-            final HttpEntity<InitialSyncRequest> request = new HttpEntity<>(initialSyncRequest, createHeader(u.getZenAuthToken()));
+            if (u.getZenLastSyncTimestamp() == null || u.getZenLastSyncTimestamp() == INITIAL_TIMESTAMP) {
+                zenSyncRequest.setForceFetch(null);
+                zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
+            } else {
+                zenSyncRequest.setForceFetch(zenSyncForceFetchItems);
+                zenSyncRequest.setServerTimestamp(u.getZenLastSyncTimestamp());
+            }
+
+
+            final HttpEntity<ZenSyncRequest> request = new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
             final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
-
-            LOGGER.debug("Initial sync was successfully completed for user: {}", u.getId());
+            LOGGER.debug("Initial sync was completed for u: {} last zen diff time {}", u.getId(), zenSyncRequest.getServerTimestamp());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot do initial sync request for user: {} : {}", u.getId(), e.getMessage());

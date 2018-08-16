@@ -12,6 +12,9 @@ public class User extends BaseEntity {
     @NotNull
     private String timeZone;
 
+    @NotNull
+    private Long zenLastSyncTimestamp;
+
     public String getZenAuthToken() {
         return zenAuthToken;
     }
@@ -27,6 +30,15 @@ public class User extends BaseEntity {
 
     public User setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+        return this;
+    }
+
+    public Long getZenLastSyncTimestamp() {
+        return zenLastSyncTimestamp;
+    }
+
+    public User setZenLastSyncTimestamp(Long zenLastSyncTimestamp) {
+        this.zenLastSyncTimestamp = zenLastSyncTimestamp;
         return this;
     }
 }
