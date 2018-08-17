@@ -26,7 +26,7 @@ public class ApplicationConfig {
     private int httpRequestTimeout;
 
     @Value("#{'${zen.sync.force.fetch.items}'.split(',')}")
-    private Set<String> zenSyncForceFetchItems;
+    private Set<String> zenSyncForceFetchItemsValues;
 
     @Bean
     public SimpleClientHttpRequestFactory simpleClientHttpRequestFactory() {
@@ -51,5 +51,10 @@ public class ApplicationConfig {
     @Bean
     public Set<CustomPayee> customPayeeValues(final CustomPayeeRepository customPayeeRepository) {
         return new HashSet<>(customPayeeRepository.findAll());
+    }
+
+    @Bean
+    public Set<String> zenSyncForceFetchItems() {
+        return new HashSet<>(zenSyncForceFetchItemsValues);
     }
 }

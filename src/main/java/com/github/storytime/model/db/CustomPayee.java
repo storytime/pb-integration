@@ -17,6 +17,14 @@ public class CustomPayee extends BaseEntity {
     @NotNull
     private String containsValue;
 
+    public CustomPayee(@NotNull String payee, @NotNull String containsValue) {
+        this.payee = payee;
+        this.containsValue = containsValue;
+    }
+
+    public CustomPayee() {
+    }
+
     public String getPayee() {
         return payee;
     }
@@ -33,14 +41,6 @@ public class CustomPayee extends BaseEntity {
     public CustomPayee setContainsValue(String containsValue) {
         this.containsValue = containsValue;
         return this;
-    }
-
-    public CustomPayee(@NotNull String payee, @NotNull String containsValue) {
-        this.payee = payee;
-        this.containsValue = containsValue;
-    }
-
-    public CustomPayee() {
     }
 
 }

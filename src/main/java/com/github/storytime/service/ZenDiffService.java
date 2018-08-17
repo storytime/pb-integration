@@ -70,7 +70,6 @@ public class ZenDiffService {
                 zenSyncRequest.setServerTimestamp(u.getZenLastSyncTimestamp());
             }
 
-
             final HttpEntity<ZenSyncRequest> request = new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
             final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
             LOGGER.debug("Initial sync was completed for u: {} last zen diff time {}", u.getId(), zenSyncRequest.getServerTimestamp());

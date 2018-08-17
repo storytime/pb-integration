@@ -46,6 +46,12 @@ public class PbSyncService {
     public void sync(final Function<MerchantService, List<MerchantInfo>> selectFunction) {
         userService.findAll().forEach(user -> {
             final List<MerchantInfo> merchants = selectFunction.apply(merchantService);
+
+            if (merchants.isEmpty()) {
+                LOGGER.warn("There are no merchants to sync");
+                return;
+            }
+
             final List<List<Statement>> newPbDataList = merchants
                     .stream()
                     .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo))

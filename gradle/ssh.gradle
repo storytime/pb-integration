@@ -17,7 +17,7 @@ remotes {
     }
 }
 
-task upladComposeFileToServer {
+task uploadComposeFileToServer {
     doLast {
         ssh.run {
             session(remotes.devServer) {
