@@ -1,8 +1,10 @@
 package com.github.storytime.model.zen;
 
-import org.springframework.lang.Nullable;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Set;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public class ZenSyncRequest {
 
@@ -10,7 +12,7 @@ public class ZenSyncRequest {
 
     private Long serverTimestamp;
 
-    @Nullable
+    @JsonInclude(NON_NULL)
     private Set<String> forceFetch;
 
     public Long getCurrentClientTimestamp() {
