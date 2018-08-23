@@ -17,7 +17,7 @@ public class PushedPbZenTransactionStorageServiceTest extends BaseTestConfig {
 
     public static final long TRANSACTION_ITEM_TIME1 = 1534971600000L;
     public static final long TRANSACTION_ITEM_TIME = 1532293200000L;
-    public static final int EXPECTED = 2;
+    public static final int EXPECTED = 1;
 
     @Autowired
     private PushedPbZenTransactionStorageService pushedPbZenTransactionStorageService;
