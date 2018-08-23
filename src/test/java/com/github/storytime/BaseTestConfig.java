@@ -3,6 +3,7 @@ package com.github.storytime;
 
 import com.github.storytime.scheduler.CustomPayeeSchedulerExecutor;
 import com.github.storytime.scheduler.PbSyncSchedulerExecutor;
+import com.github.storytime.scheduler.PushedPbZenTransactionStorageSchedulerExecutor;
 import io.codearte.jfairy.Fairy;
 import junitparams.JUnitParamsRunner;
 import org.flywaydb.core.Flyway;
@@ -32,6 +33,9 @@ public class BaseTestConfig {
 
     @MockBean
     private PbSyncSchedulerExecutor pbSyncSchedulerExecutor;
+
+    @MockBean
+    private PushedPbZenTransactionStorageSchedulerExecutor pushedPbZenTransactionStorageSchedulerExecutor;
 
     @MockBean
     private Flyway flyway;

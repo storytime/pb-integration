@@ -62,7 +62,7 @@ public class PbSyncService {
 
             final long amountOfNewData = newPbDataList.stream().mapToLong(List::size).sum(); // any new
             if (amountOfNewData > 0) {
-                LOGGER.info("User: {} has new: {} transactions", user.getId(), amountOfNewData);
+                LOGGER.info("User: {} has  {} transactions sync period", user.getId(), amountOfNewData);
                 doUpdateZenInfoRequest(user, newPbDataList, merchants);
             } else {
                 LOGGER.warn("User: {} has NO new transactions from bank", user.getId());
@@ -84,6 +84,5 @@ public class PbSyncService {
                         })
                 );
     }
-
 
 }

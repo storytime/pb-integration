@@ -25,9 +25,9 @@ public class CustomPayeeSchedulerExecutor {
         this.customPayeeValues = customPayeeValues;
     }
 
-    @Scheduled(fixedRateString = "${refresh.custom.payee.period}", initialDelayString = "${refresh.custom.payee.delay}")
+    @Scheduled(fixedRateString = "${refresh.custom.payee.period.millis}", initialDelayString = "${refresh.custom.payee.delay.millis}")
     public void refreshCustomPayeeValue() {
-        LOGGER.debug("Updating custom payee values");
+        LOGGER.debug("Updating custom payee values from DB");
         customPayeeValues.clear();
         customPayeeValues.addAll(customPayeeRepository.findAll());
     }

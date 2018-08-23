@@ -57,7 +57,11 @@ public class PbToZenMapper {
             }
         });
 
-        notPushedTransactionsToZen.forEach(transactionItem -> LOGGER.debug("New transaction: {}", transactionItem));
+        if (notPushedTransactionsToZen.isEmpty()) {
+            LOGGER.warn("All Transaction for user: {} were already pushed", user.getId());
+        } else {
+            notPushedTransactionsToZen.forEach(transactionItem -> LOGGER.debug("New transaction: {}", transactionItem));
+        }
 
         return new ZenDiffRequest()
                 .setCurrentClientTimestamp(now().getEpochSecond())

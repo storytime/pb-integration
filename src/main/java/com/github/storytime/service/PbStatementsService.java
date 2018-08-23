@@ -148,7 +148,7 @@ public class PbStatementsService {
     public List<Statement> filterNewPbTransactions(ZonedDateTime start, ZonedDateTime end, List<Statement> pbStatements, User user) {
         final Comparator<ZonedDateTime> comparator = comparing(zdt -> zdt.truncatedTo(MILLIS));
         // sometimes new transactions can be available with delay, so we need to change start time of filtering
-        final ZonedDateTime searchStartTime = start.minusMinutes(customConfig.getFilterTime());
+        final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
         return pbStatements
                 .stream()
                 .filter(t -> {

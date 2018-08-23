@@ -14,7 +14,13 @@ public class ExpiredTransactionItem {
 
     public ExpiredTransactionItem(TransactionItem zenTransactionItem) {
         this.zenTransactionItem = zenTransactionItem;
-        this.transactionItemTime = now().getEpochSecond();
+        this.transactionItemTime = now().toEpochMilli();
+    }
+
+    public ExpiredTransactionItem(final long transactionItemTime,
+                                  final TransactionItem zenTransactionItem) {
+        this.transactionItemTime = transactionItemTime;
+        this.zenTransactionItem = zenTransactionItem;
     }
 
     public long getTransactionItemTime() {

@@ -20,11 +20,11 @@ import static java.util.Collections.singletonList;
 @Configuration
 public class ApplicationConfig {
 
-    @Value("${http.connect.timeout}")
-    private int httpConnectTimeout;
+    @Value("${http.connect.timeout.millis}")
+    private int httpConnectTimeoutMillis;
 
-    @Value("${http.request.timeout}")
-    private int httpRequestTimeout;
+    @Value("${http.request.timeout.millis}")
+    private int httpRequestTimeoutMillis;
 
     @Value("#{'${zen.sync.force.fetch.items}'.split(',')}")
     private Set<String> zenSyncForceFetchItemsValues;
@@ -32,8 +32,8 @@ public class ApplicationConfig {
     @Bean
     public SimpleClientHttpRequestFactory simpleClientHttpRequestFactory() {
         final SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
-        simpleClientHttpRequestFactory.setConnectTimeout(httpConnectTimeout);
-        simpleClientHttpRequestFactory.setReadTimeout(httpRequestTimeout);
+        simpleClientHttpRequestFactory.setConnectTimeout(httpConnectTimeoutMillis);
+        simpleClientHttpRequestFactory.setReadTimeout(httpRequestTimeoutMillis);
         return simpleClientHttpRequestFactory;
     }
 
@@ -45,12 +45,12 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public Set<String> pbTransferInfo() {
+    public Set<String> pbTransferInfoStorage() {
         return new HashSet<>();
     }
 
     @Bean
-    public Set<CustomPayee> customPayeeValues(final CustomPayeeRepository customPayeeRepository) {
+    public Set<CustomPayee> customPayeeValuesStorage(final CustomPayeeRepository customPayeeRepository) {
         return new HashSet<>(customPayeeRepository.findAll());
     }
 
@@ -60,7 +60,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public Set<ExpiredTransactionItem> alreadyMappedPbZenTransaction() {
+    public Set<ExpiredTransactionItem> pushedPbZenTransactionStorage() {
         return new HashSet<>();
     }
 }

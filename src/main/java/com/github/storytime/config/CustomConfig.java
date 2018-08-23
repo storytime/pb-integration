@@ -27,8 +27,8 @@ public class CustomConfig {
     @Value("${pb.cash.url}")
     private String pbCashUrl;
 
-    @Value("${filter.new.transactions.start.time}")
-    private Integer filterTime;
+    @Value("${filter.new.transactions.start.time.millis}")
+    private Integer filterTimeMillis;
 
     @Value("${pb.bank.signature.error}")
     private String pbBankSignature;
@@ -57,6 +57,9 @@ public class CustomConfig {
     @Value("${verbal.regexp.pb.transfer.digit.separator}")
     private String pbInternalTransferSeparator;
 
+    @Value("${pushed.pb.zen.transaction.storage.clean.older.millis}")
+    private Integer pushedPbZenTransactionStorageCleanOlderMillis;
+
     public String getPbExchangeUrl() {
         return pbExchangeUrl;
     }
@@ -73,8 +76,8 @@ public class CustomConfig {
         return zenDiffUrl;
     }
 
-    public Integer getFilterTime() {
-        return filterTime;
+    public Integer getFilterTimeMillis() {
+        return filterTimeMillis;
     }
 
     public String getPbBankSignature() {
@@ -116,5 +119,9 @@ public class CustomConfig {
 
     public String getPbCashUrl() {
         return pbCashUrl;
+    }
+
+    public Integer getPushedPbZenTransactionStorageCleanOlderMillis() {
+        return pushedPbZenTransactionStorageCleanOlderMillis;
     }
 }

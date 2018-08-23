@@ -8,23 +8,19 @@ import java.util.Set;
 @Component
 public class PbInternalTransferInfoRepository {
 
-    private Set<String> pbTransferInfo;
+    private Set<String> pbTransferInfoStorage;
 
     @Autowired
-    PbInternalTransferInfoRepository(Set<String> pbTransferInfo) {
-        this.pbTransferInfo = pbTransferInfo;
+    PbInternalTransferInfoRepository(final Set<String> pbTransferInfoStorage) {
+        this.pbTransferInfoStorage = pbTransferInfoStorage;
     }
 
     public void save(String obj) {
-        pbTransferInfo.add(obj);
-    }
-
-    public void remove(String obj) {
-        pbTransferInfo.remove(obj);
+        pbTransferInfoStorage.add(obj);
     }
 
     public boolean isExist(String obj) {
-        return pbTransferInfo.contains(obj);
+        return pbTransferInfoStorage.contains(obj);
     }
 
 }
