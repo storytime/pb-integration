@@ -3,6 +3,7 @@ package com.github.storytime.model.zen;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Generated;
+import java.util.Objects;
 
 @Generated("com.robohorse.robopojogenerator")
 public class TransactionItem {
@@ -354,5 +355,28 @@ public class TransactionItem {
                 .append(" cr: ").append(created)
                 .append(" com: ").append(comment)
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TransactionItem)) return false;
+        TransactionItem that = (TransactionItem) o;
+        return getOpOutcome() == that.getOpOutcome() &&
+                getUser() == that.getUser() &&
+                Objects.equals(getDate(), that.getDate()) &&
+                Objects.equals(getIncome(), that.getIncome()) &&
+                Objects.equals(getOpIncome(), that.getOpIncome()) &&
+                Objects.equals(getOriginalPayee(), that.getOriginalPayee()) &&
+                Objects.equals(getOutcomeBankID(), that.getOutcomeBankID()) &&
+                Objects.equals(getOutcome(), that.getOutcome()) &&
+                Objects.equals(getOutcomeAccount(), that.getOutcomeAccount()) &&
+                Objects.equals(getIncomeBankID(), that.getIncomeBankID());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getDate(), getIncome(), getOpIncome(), getOriginalPayee(), getOpOutcome(),
+                getOutcomeBankID(), getOutcome(), getOutcomeAccount(), getIncomeBankID(), getUser());
     }
 }

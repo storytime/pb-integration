@@ -6,13 +6,14 @@ import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+@JsonInclude(NON_NULL)
 public class ZenSyncRequest {
 
     private Long currentClientTimestamp;
 
     private Long serverTimestamp;
 
-    @JsonInclude(NON_NULL)
+
     private Set<String> forceFetch;
 
     public Long getCurrentClientTimestamp() {

@@ -1,6 +1,7 @@
 package com.github.storytime.config;
 
 
+import com.github.storytime.model.ExpiredTransactionItem;
 import com.github.storytime.model.db.CustomPayee;
 import com.github.storytime.other.RequestLoggerInterceptor;
 import com.github.storytime.repository.CustomPayeeRepository;
@@ -56,5 +57,10 @@ public class ApplicationConfig {
     @Bean
     public Set<String> zenSyncForceFetchItems() {
         return new HashSet<>(zenSyncForceFetchItemsValues);
+    }
+
+    @Bean
+    public Set<ExpiredTransactionItem> alreadyMappedPbZenTransaction() {
+        return new HashSet<>();
     }
 }

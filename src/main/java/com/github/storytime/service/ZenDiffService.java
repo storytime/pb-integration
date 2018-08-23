@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
@@ -46,10 +47,13 @@ public class ZenDiffService {
     public Optional<ZenResponse> pushToZen(User u, ZenDiffRequest request) {
         try {
             final HttpEntity<ZenDiffRequest> diffObject = new HttpEntity<>(request, createHeader(u.getZenAuthToken()));
+            final StopWatch st = new StopWatch();
+            st.start();
             final ResponseEntity<ZenResponse> zenResponseResponseEntity = restTemplate
                     .postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
+            st.stop();
             final Optional<ZenResponse> body = ofNullable(zenResponseResponseEntity.getBody());
-            LOGGER.info("Diff was pushed to zen for user id: {}", u.getId());
+            LOGGER.info("Diff was pushed to zen for user id: {} time: {}", u.getId(), st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot push Diff to ZEN request: {}", e.getMessage());
@@ -71,8 +75,11 @@ public class ZenDiffService {
             }
 
             final HttpEntity<ZenSyncRequest> request = new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
+            final StopWatch st = new StopWatch();
+            st.start();
             final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
-            LOGGER.debug("Initial sync was completed for u: {} last zen diff time {}", u.getId(), zenSyncRequest.getServerTimestamp());
+            st.stop();
+            LOGGER.debug("Initial sync was completed for u: {} last zen diff time: {}, time: {}", u.getId(), zenSyncRequest.getServerTimestamp(), st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot do initial sync request for user: {} : {}", u.getId(), e.getMessage());
