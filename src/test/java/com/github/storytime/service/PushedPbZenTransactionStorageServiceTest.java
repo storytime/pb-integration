@@ -35,12 +35,6 @@ public class PushedPbZenTransactionStorageServiceTest extends BaseTestConfig {
         pushedPbZenTransactionStorage
                 .add(new ExpiredTransactionItem(TRANSACTION_ITEM_TIME, new TransactionItem().setIncome(50F)));
         pushedPbZenTransactionStorage
-                .add(new ExpiredTransactionItem(now().toEpochMilli() - 1 - customConfig.getPushedPbZenTransactionStorageCleanOlderMillis(),
-                        new TransactionItem().setIncome(500F)));
-        pushedPbZenTransactionStorage
-                .add(new ExpiredTransactionItem(now().toEpochMilli() + 1 - customConfig.getPushedPbZenTransactionStorageCleanOlderMillis(),
-                        new TransactionItem().setIncome(501F)));
-        pushedPbZenTransactionStorage
                 .add(new ExpiredTransactionItem(now().toEpochMilli(), new TransactionItem().setIncome(1000F)));
     }
 
