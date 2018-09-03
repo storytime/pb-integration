@@ -37,6 +37,7 @@ public class PushedPbZenTransactionStorageService {
                 .collect(toSet());
 
         LOGGER.debug("Deleting: {} pushed PB from storage that contains: {}", toDelete.size(), pushedPbZenTransactionStorage.size());
+        LOGGER.debug("Zen storage: {}", pushedPbZenTransactionStorage);
         pushedPbZenTransactionStorage.removeAll(toDelete);
         LOGGER.debug("Current size of PB storage: {}", pushedPbZenTransactionStorage);
     }

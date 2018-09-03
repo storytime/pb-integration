@@ -1,6 +1,7 @@
 package com.github.storytime.model;
 
 import com.github.storytime.model.zen.TransactionItem;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Objects;
 
@@ -45,5 +46,13 @@ public class ExpiredTransactionItem {
     @Override
     public int hashCode() {
         return Objects.hash(getZenTransactionItem());
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("etime = ", transactionItemTime)
+                .append("zti = ", zenTransactionItem)
+                .toString();
     }
 }
