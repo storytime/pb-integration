@@ -1,6 +1,7 @@
 package com.github.storytime.model.zen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Generated;
 import java.util.Objects;
@@ -346,14 +347,14 @@ public class TransactionItem {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append(" date: ").append(date)
-                .append(" income: ").append(income)
-                .append(" outcome: ").append(outcome)
-                .append(" opayee: ").append(originalPayee)
-                .append(" payee: ").append(payee)
-                .append(" cr: ").append(created)
-                .append(" com: ").append(comment)
+        return new ToStringBuilder(this)
+                .append("   date = ", date)
+                .append("   income = ", income)
+                .append("   outcome = ", outcome)
+                .append("   opayee = ", originalPayee)
+                .append("   payee = ", payee)
+                .append("   cr = ", created)
+                .append("   com = ", comment)
                 .toString();
     }
 

@@ -51,8 +51,11 @@ public class ExpiredTransactionItem {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("etime = ", transactionItemTime)
-                .append("zti = ", zenTransactionItem)
+                .append("\n")
+                .append(" etime = ", transactionItemTime)
+                .append("\n")
+                .append(zenTransactionItem)
+                .append("\n")
                 .toString();
     }
 }
