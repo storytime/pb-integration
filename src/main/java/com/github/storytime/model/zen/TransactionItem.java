@@ -1,10 +1,10 @@
 package com.github.storytime.model.zen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.annotation.Generated;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @Generated("com.robohorse.robopojogenerator")
 public class TransactionItem {
@@ -347,14 +347,14 @@ public class TransactionItem {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("   date = ", date)
-                .append("   income = ", income)
-                .append("   outcome = ", outcome)
-                .append("   opayee = ", originalPayee)
-                .append("   payee = ", payee)
-                .append("   cr = ", created)
-                .append("   com = ", comment)
+        return new StringJoiner(" ")
+                .add("date = " + date)
+                .add("income = " + income)
+                .add("outcome = " + outcome)
+                .add("opayee = " + originalPayee)
+                .add("payee = " + payee)
+                .add("cr = " + created)
+                .add("com = " + comment)
                 .toString();
     }
 

@@ -1,34 +1,85 @@
-version: '3'
+version: '3.7'
 services:
-    pb-24-integration:
-        container_name: pb-integration
-        image: bobobo/pb-integration:latest
-        env_file:
-          - ./variables.env
-        ports:
-            - 10080:8080
-        restart: on-failure
-        logging:
-            driver: json-file
-        volumes:
-            - ~/pb/logs/:/var/log/pb-integration/
-            - ~/pb/db/:/root/db/
+  watchtower:
+    container_name: watchtower-updater
+    image: v2tec/watchtower
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /root/.docker/config.json:/config.json
+    command: --cleanup --interval 30
+    restart: on-failure
 
-    watchtower:
-      container_name: watchtower-updater
-      image: v2tec/watchtower
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-        - /root/.docker/config.json:/config.json
-      command: --cleanup --interval 30
-      restart: on-failure
+  pb-integration:
+    container_name: pb-integration
+    image: bobobo/pb-integration:latest
+    env_file:
+    - ./variables.env
+    ports:
+    - 10080:8080
+    restart: on-failure
+    logging:
+      driver: json-file
+    volumes:
+    - pb-log-vol:/var/log/pb-integration
+    - pb-db-vol:/root/db
+    networks:
+    - backend
 
-    portainer:
-      container_name: portainer-web-ui
-      image: portainer/portainer
-      ports:
-      - 9000:9000
-      command: -H unix:///var/run/docker.sock
-      volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ~/pb/portainer_data:/data
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+    - ./mics/prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus-vol:/prometheus
+    depends_on:
+    - pb-integration
+    links:
+    - pb-integration
+    networks:
+    - backend
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    ports:
+    - 3000:3000
+    volumes:
+    - grafana-vol:/var/lib/grafana
+    depends_on:
+    - prometheus
+    links:
+    - prometheus
+    networks:
+    - backend
+
+networks:
+  backend:
+
+volumes:
+  prometheus-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: /app/prometheus
+      o: bind
+
+  grafana-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: /app/grafana
+      o: bind
+
+  pb-log-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: /app/logs
+      o: bind
+
+  pb-db-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: /app/db
+      o: bind

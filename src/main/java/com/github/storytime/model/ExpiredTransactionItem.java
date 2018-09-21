@@ -1,9 +1,9 @@
 package com.github.storytime.model;
 
 import com.github.storytime.model.zen.TransactionItem;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static java.time.Instant.now;
 
@@ -50,12 +50,10 @@ public class ExpiredTransactionItem {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("\n")
-                .append(" etime = ", transactionItemTime)
-                .append("\n")
-                .append(zenTransactionItem)
-                .append("\n")
+
+        return new StringJoiner(" ")
+                .add("transactionItemTime = " + transactionItemTime)
+                .add(zenTransactionItem.toString())
                 .toString();
     }
 }

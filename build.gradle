@@ -49,6 +49,10 @@ dependencies {
     compile("org.apache.commons:commons-lang3:$commonsVersion")
     compile("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
     compile("org.flywaydb:flyway-core:$flywayVersion")
+
+    compile('io.micrometer:micrometer-registry-prometheus:latest.release')
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile ("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
     testCompile("io.codearte.jfairy:jfairy:$jfairyVersion")
