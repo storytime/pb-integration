@@ -76,11 +76,11 @@ public class PbSyncService {
 
         supplyAsync(() -> zenDiffService.getZenDiffByUser(user))
                 .thenAccept(ozr -> ozr.ifPresent(zenDiff -> {
-                    final ZenDiffRequest request = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, user);
-                    zenDiffService.pushToZen(user, request).ifPresent(zr -> {
-                        merchantService.saveAll(merchants);
-                        userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
-                    });
+                            final ZenDiffRequest request = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, user);
+                            zenDiffService.pushToZen(user, request).ifPresent(zr -> {
+                                merchantService.saveAll(merchants);
+                                userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
+                            });
                         })
                 );
     }

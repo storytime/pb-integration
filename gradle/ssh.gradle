@@ -24,8 +24,8 @@ task uploadComposeFileToServer {
                 put from: "docker-compose.yml", into: "/tmp/docker-compose.yml"
                 put from: "variables.env", into: "/tmp/variables.env"
                 // need to avoid user name
-                execute("mv /tmp/docker-compose.yml ~/docker-compose.yml", pty: true)
-                execute("mv /tmp/variables.env  ~/variables.env", pty: true)
+                execute("mv /tmp/docker-compose.yml /app/docker-compose.yml", pty: true)
+                execute("mv /tmp/variables.env  /app/variables.env", pty: true)
             }
         }
     }
