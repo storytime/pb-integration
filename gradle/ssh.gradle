@@ -23,9 +23,11 @@ task uploadComposeFileToServer {
             session(remotes.devServer) {
                 put from: "docker-compose.yml", into: "/tmp/docker-compose.yml"
                 put from: "variables.env", into: "/tmp/variables.env"
+                put from: "./prometheus.yml", into: "/tmp/prometheus.yml"
                 // need to avoid user name
                 execute("mv /tmp/docker-compose.yml /app/docker-compose.yml", pty: true)
                 execute("mv /tmp/variables.env  /app/variables.env", pty: true)
+                execute("mv /tmp/prometheus.yml  /app/prometheus.yml", pty: true)
             }
         }
     }
