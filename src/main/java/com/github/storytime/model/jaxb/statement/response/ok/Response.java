@@ -148,7 +148,7 @@ public class Response {
                     @XmlAttribute(name = "card")
                     protected Long card;
                     @XmlAttribute(name = "appcode")
-                    protected Integer appcode;
+                    protected String appcode;
                     @XmlAttribute(name = "trandate")
                     @XmlSchemaType(name = "date")
                     protected XMLGregorianCalendar trandate;
@@ -194,11 +194,11 @@ public class Response {
                         this.card = value;
                     }
 
-                    public Integer getAppcode() {
+                    public String getAppcode() {
                         return appcode;
                     }
 
-                    public void setAppcode(Integer value) {
+                    public void setAppcode(String value) {
                         this.appcode = value;
                     }
 

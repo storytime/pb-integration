@@ -5,7 +5,8 @@ import org.springframework.stereotype.Component;
 import ru.lanwen.verbalregex.VerbalExpression;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.SPACE;
 
 @Component
 public class RegExpService {
@@ -35,11 +36,6 @@ public class RegExpService {
         this.internalTo = internalTo;
         this.internalTransferComment = internalTransferComment;
         this.internalTransfer = internalTransfer;
-    }
-
-    public String parseComment(String comment) {
-        final String parsed = commentRegexp.getText(comment, GROUP_1).trim();
-        return isEmpty(parsed) ? comment : parsed;
     }
 
     public boolean isCashWithdrawal(String comment) {

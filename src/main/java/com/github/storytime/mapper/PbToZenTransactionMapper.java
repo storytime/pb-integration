@@ -74,7 +74,6 @@ public class PbToZenTransactionMapper {
                     final String cardCurrency = substringAfter(s.getCardamount(), SPACE_SEPARATOR);
                     final String accountId = zenDiffService.findAccountIdByPbCard(zenDiff, s.getCard());
                     final Integer currency = zenDiffService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
-                    //final String payee = regExpService.parseComment(transactionDesc);
 
                     setAppCode(s, t, cardAmount);
 
@@ -181,12 +180,12 @@ public class PbToZenTransactionMapper {
     }
 
     private void setAppCode(Statement s, TransactionItem t, Float cardAmount) {
-        final Integer appCode = s.getAppcode();
+        final String appCode = s.getAppcode();
         if (appCode != null) {
             if (cardAmount > 0) {
-                t.setIncomeBankID(String.valueOf(appCode));
+                t.setIncomeBankID(appCode);
             } else {
-                t.setOutcomeBankID(String.valueOf(appCode));
+                t.setOutcomeBankID(appCode);
             }
         }
     }
