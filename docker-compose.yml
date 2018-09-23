@@ -37,6 +37,8 @@ services:
     - pb-integration
     networks:
     - backend
+    ports:
+    - 9090:9090
 
   grafana:
     container_name: grafana
