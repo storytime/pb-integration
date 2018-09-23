@@ -69,6 +69,7 @@ public class PbSyncService {
             final long amountOfNewData = newPbDataList.stream().mapToLong(List::size).sum(); // any new
             // TODO: fix in java 11
             final Map<String, Boolean> updateNeeded = new HashMap<>();
+            updateNeeded.put(IS_UPDATE_NEEDED, TRUE);
 
             if (amountOfNewData > 0) {
                 LOGGER.info("User: {} has  {} transactions sync period", user.getId(), amountOfNewData);
@@ -88,7 +89,6 @@ public class PbSyncService {
                                                         final List<List<Statement>> newPbData,
                                                         final Map<String, Boolean> updateNeeded) {
 
-        updateNeeded.put(IS_UPDATE_NEEDED, TRUE);
         supplyAsync(() -> zenDiffService.getZenDiffByUser(user))
                 .thenAccept(ozr -> {
                             if (ozr.isPresent()) {
