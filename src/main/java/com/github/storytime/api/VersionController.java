@@ -1,6 +1,7 @@
 package com.github.storytime.api;
 
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,17 +25,22 @@ public class VersionController {
 
     public final Timer testMetrics;
     public final Counter testCounter;
+    public final DistributionSummary testDistributionSummary;
 
     @Autowired
-    public VersionController(Timer testMetrics, Counter testCounter) {
+    public VersionController(Timer testMetrics,
+                             DistributionSummary testDistributionSummary,
+                             Counter testCounter) {
         this.testMetrics = testMetrics;
         this.testCounter = testCounter;
+        this.testDistributionSummary = testDistributionSummary;
     }
 
     @GetMapping(value = API_PREFIX + "/version", produces = TEXT_PLAIN_VALUE)
     public String getVersion() {
         testMetrics.record(10, TimeUnit.MILLISECONDS);
         testCounter.increment(1);
+        testDistributionSummary.record(1);
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream(VERSION_PROPERTIES)) {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             final String version = reader.lines().collect(joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR).trim();
