@@ -79,7 +79,7 @@ public class PbSyncService {
             }
 
             if (updateNeeded.get(IS_UPDATE_NEEDED)) {
-                merchantService.saveAll(merchants);
+      //          merchantService.saveAll(merchants);
             }
 
         });
@@ -94,11 +94,11 @@ public class PbSyncService {
                             if (ozr.isPresent()) {
                                 final ZenResponse zenDiff = ozr.get();
                                 final ZenDiffRequest request = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, user);
-                                if (zenDiffService.pushToZen(user, request).isPresent()) {
-                                    userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
-                                } else {
-                                    updateNeeded.put(IS_UPDATE_NEEDED, FALSE);
-                                }
+//                                if (zenDiffService.pushToZen(user, request).isPresent()) {
+//                                    userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
+//                                } else {
+//                                    updateNeeded.put(IS_UPDATE_NEEDED, FALSE);
+//                                }
                             } else {
                                 updateNeeded.put(IS_UPDATE_NEEDED, FALSE);
                             }

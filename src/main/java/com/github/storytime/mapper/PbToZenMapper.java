@@ -6,6 +6,7 @@ import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
+import io.micrometer.core.instrument.Counter;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,14 +25,17 @@ public class PbToZenMapper {
     private final PbToZenAccountMapper pbToZenAccountMapper;
     private final PbToZenTransactionMapper pbToZenTransactionMapper;
     private final Set<ExpiredTransactionItem> alreadyMappedPbZenTransaction;
+    private final Counter newTransactionsCounter;
 
     @Autowired
     public PbToZenMapper(final PbToZenAccountMapper pbToZenAccountMapper,
                          final Set<ExpiredTransactionItem> alreadyMappedPbZenTransaction,
+                         final Counter newTransactionsCounter,
                          final PbToZenTransactionMapper pbToZenTransactionMapper) {
         this.pbToZenAccountMapper = pbToZenAccountMapper;
         this.alreadyMappedPbZenTransaction = alreadyMappedPbZenTransaction;
         this.pbToZenTransactionMapper = pbToZenTransactionMapper;
+        this.newTransactionsCounter = newTransactionsCounter;
     }
 
     public ZenDiffRequest buildZenReqFromPbData(final List<List<Statement>> newPbTransaction,
@@ -58,9 +62,10 @@ public class PbToZenMapper {
         });
 
         if (notPushedTransactionsToZen.isEmpty()) {
-            LOGGER.warn("All Transaction for user: {} were already pushed", user.getId());
+            LOGGER.debug("All Transaction for user: {} were already pushed", user.getId());
         } else {
             notPushedTransactionsToZen.forEach(transactionItem -> LOGGER.debug("New transaction: {}", transactionItem));
+            newTransactionsCounter.increment(notPushedTransactionsToZen.size());
         }
 
         return new ZenDiffRequest()

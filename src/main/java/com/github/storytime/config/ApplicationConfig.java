@@ -5,10 +5,6 @@ import com.github.storytime.model.ExpiredTransactionItem;
 import com.github.storytime.model.db.CustomPayee;
 import com.github.storytime.other.RequestLoggerInterceptor;
 import com.github.storytime.repository.CustomPayeeRepository;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.Metrics;
-import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,21 +63,5 @@ public class ApplicationConfig {
     public Set<ExpiredTransactionItem> pushedPbZenTransactionStorage() {
         return new HashSet<>();
     }
-
-    @Bean
-    public Timer testMetrics() {
-        return Metrics.timer("my_test");
-    }
-
-    @Bean
-    public Counter testCounter() {
-        return Metrics.counter("my_counter");
-    }
-
-    @Bean
-    public DistributionSummary testDistributionSummary() {
-        return Metrics.summary("moo.doo");
-    }
-
 
 }

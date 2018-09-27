@@ -8,6 +8,7 @@ import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.db.User;
 import com.github.storytime.model.jaxb.statement.request.Request;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import io.micrometer.core.instrument.Counter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,18 +51,24 @@ public class PbStatementsService {
     private final StatementRequestBuilder statementRequestBuilder;
     private final PbStatementMapper pbStatementMapper;
     private final MerchantService merchantService;
+    private final Counter signatureErrorCounter;
+    private final Counter pbRequestTimeCounter;
 
     @Autowired
     public PbStatementsService(final RestTemplate restTemplate,
                                final CustomConfig customConfig,
                                final PbStatementMapper pbStatementMapper,
                                final MerchantService merchantService,
+                               final Counter signatureErrorCounter,
+                               final Counter pbRequestTimeCounter,
                                final StatementRequestBuilder statementRequestBuilder,
                                final AdditionalCommentService additionalCommentService,
                                final DateService dateService) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
         this.pbStatementMapper = pbStatementMapper;
+        this.signatureErrorCounter = signatureErrorCounter;
+        this.pbRequestTimeCounter = pbRequestTimeCounter;
         this.merchantService = merchantService;
         this.statementRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
@@ -124,6 +131,7 @@ public class PbStatementsService {
                     dateService.toIsoFormat(startDate),
                     dateService.toIsoFormat(rollBackStartDate, u));
             merchantService.save(m.setSyncStartDate(rollBackStartDate));
+            signatureErrorCounter.increment();
             return emptyList();
         }
     }
@@ -138,6 +146,7 @@ public class PbStatementsService {
             final Optional<ResponseEntity<String>> response = Optional.of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
             st.stop();
             LOGGER.debug("Receive bank response, execution time: {} sec", st.getTotalTimeSeconds());
+            pbRequestTimeCounter.increment(st.getTotalTimeSeconds());
             return response;
         } catch (Exception e) {
             LOGGER.error("Cannot do bank request: {}", e.getMessage());
