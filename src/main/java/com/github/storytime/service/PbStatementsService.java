@@ -9,6 +9,7 @@ import com.github.storytime.model.db.User;
 import com.github.storytime.model.jaxb.statement.request.Request;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
@@ -53,6 +55,7 @@ public class PbStatementsService {
     private final MerchantService merchantService;
     private final Counter signatureErrorCounter;
     private final Counter pbRequestTimeCounter;
+    private final Timer pbRequestTimeTimer;
 
     @Autowired
     public PbStatementsService(final RestTemplate restTemplate,
@@ -61,6 +64,7 @@ public class PbStatementsService {
                                final MerchantService merchantService,
                                final Counter signatureErrorCounter,
                                final Counter pbRequestTimeCounter,
+                               final Timer pbRequestTimeTimer,
                                final StatementRequestBuilder statementRequestBuilder,
                                final AdditionalCommentService additionalCommentService,
                                final DateService dateService) {
@@ -69,6 +73,7 @@ public class PbStatementsService {
         this.pbStatementMapper = pbStatementMapper;
         this.signatureErrorCounter = signatureErrorCounter;
         this.pbRequestTimeCounter = pbRequestTimeCounter;
+        this.pbRequestTimeTimer = pbRequestTimeTimer;
         this.merchantService = merchantService;
         this.statementRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
@@ -147,6 +152,7 @@ public class PbStatementsService {
             st.stop();
             LOGGER.debug("Receive bank response, execution time: {} sec", st.getTotalTimeSeconds());
             pbRequestTimeCounter.increment(st.getTotalTimeSeconds());
+            pbRequestTimeTimer.record(st.getTotalTimeMillis(), TimeUnit.MILLISECONDS);
             return response;
         } catch (Exception e) {
             LOGGER.error("Cannot do bank request: {}", e.getMessage());

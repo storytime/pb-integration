@@ -2,6 +2,7 @@ package com.github.storytime.config;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,6 +22,11 @@ public class MetricsConfig {
     @Bean
     public Counter pbRequestTimeCounter() {
         return Metrics.counter("pb_request_time");
+    }
+
+    @Bean
+    public Timer pbRequestTimeTimer() {
+        return Metrics.timer("pb_timeer");
     }
 
 }
