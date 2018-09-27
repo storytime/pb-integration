@@ -10,17 +10,17 @@ public class MetricsConfig {
 
     @Bean
     public Counter signatureErrorCounter() {
-        return Metrics.counter("signature_error_counter");
+        return Metrics.counter("pb_signature_error_counter");
     }
 
     @Bean
     public Counter newTransactionsCounter() {
-        return Metrics.counter("new_transactions_counter");
+        return Metrics.counter("new_pb_transactions_counter");
     }
 
     @Bean
     public Counter pbRequestTimeCounter() {
-        return Metrics.counter("new_transactions_counter");
+        return Metrics.counter("pb_request_time");
     }
 
 }
