@@ -148,7 +148,7 @@ public class PbStatementsService {
             LOGGER.debug("Going to call: {}", pbTransactionsUrl);
             final StopWatch st = new StopWatch();
             st.start();
-            final Optional<ResponseEntity<String>> response = Optional.of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
+            final Optional<ResponseEntity<String>> response = Optional.of(restTemplate.postForEntity("https://api.privatbank.ua/p24api/rest_fiz", requestToBank, String.class));
             st.stop();
             LOGGER.debug("Receive bank response, execution time: {} sec", st.getTotalTimeSeconds());
             pbRequestTimeCounter.increment(st.getTotalTimeSeconds());
