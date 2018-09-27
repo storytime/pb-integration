@@ -31,7 +31,7 @@ public class AccountItem {
     private boolean enableSMS;
 
     @JsonProperty("balance")
-    private int balance;
+    private double balance;
 
     @JsonProperty("payoffStep")
     private Object payoffStep;
@@ -154,11 +154,11 @@ public class AccountItem {
         return this;
     }
 
-    public int getBalance() {
+    public double getBalance() {
         return balance;
     }
 
-    public AccountItem setBalance(int balance) {
+    public AccountItem setBalance(double balance) {
         this.balance = balance;
         return this;
     }
