@@ -4,7 +4,10 @@ jobs:
     docker:
       - image: circleci/openjdk:8-jdk
     environment:
-      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx4G -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3200m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
     steps:
       - checkout
       - restore_cache:
@@ -15,7 +18,7 @@ jobs:
           command: chmod +x ./gradlew
       - run:
           name: Download dependencies
-          command: ./gradlew dependencies
+          command: ./gradlew -Dorg.gradle.jvmargs="-Xmx3200m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false dependencies
       - run:
           name: Build
           command: ./gradlew clean build
