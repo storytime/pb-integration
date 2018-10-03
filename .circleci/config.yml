@@ -4,10 +4,9 @@ jobs:
     docker:
       - image: circleci/openjdk:8-jdk-browsers
     environment:
-      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3200m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
-      JVM_OPTS: -Xmx3200m
       TERM: dumb
-
+      _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
       - checkout
       - restore_cache:
@@ -18,7 +17,7 @@ jobs:
           command: chmod +x ./gradlew
       - run:
           name: Download dependencies
-          command: ./gradlew -Dorg.gradle.jvmargs="-Xmx3200m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false dependencies
+          command: ./gradlew dependencies
       - run:
           name: Build
           command: ./gradlew clean build
@@ -36,7 +35,11 @@ jobs:
 
   build_prod_docker_image:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: circleci/openjdk:8-jdk-browsers
+    environment:
+      TERM: dumb
+      _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -69,8 +72,7 @@ jobs:
     environment:
       TERM: dumb
       _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
-
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
       - checkout
       - restore_cache:
