@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_prod_artifact:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: circleci/openjdk:8-jdk-browsers
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3200m -XX:+HeapDumpOnOutOfMemoryError" -Dorg.gradle.daemon=false'
       JVM_OPTS: -Xmx3200m
