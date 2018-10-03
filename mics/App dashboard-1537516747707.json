@@ -61,7 +61,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1538067924165,
+  "iteration": 1538551977682,
   "links": [],
   "panels": [
     {
@@ -114,7 +114,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(pb_timeer_seconds_sum[1m]) / rate(pb_timeer_seconds_count[1m])",
+          "expr": "rate(pb_request_time_timer_seconds_sum[1m]) / rate(pb_request_time_timer_seconds_count[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "60s",
@@ -123,7 +123,7 @@
           "refId": "B"
         },
         {
-          "expr": "rate(pb_timeer_seconds_sum[1m])",
+          "expr": "rate(pb_request_time_timer_seconds_sum[1m])",
           "format": "time_series",
           "interval": "60s",
           "intervalFactor": 1,
@@ -134,7 +134,7 @@
       "thresholds": [],
       "timeFrom": null,
       "timeShift": null,
-      "title": "",
+      "title": "App",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -5278,7 +5278,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -5309,5 +5309,5 @@
   "timezone": "browser",
   "title": "App dashboard",
   "uid": "6rb_UfTmk",
-  "version": 24
+  "version": 26
 }
