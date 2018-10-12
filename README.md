@@ -29,6 +29,21 @@ To build (gradle push docker-compose with all params to server):
 ## Docker
 On prod app is running in docker container check `docker-compose.yml`,  **watchtower** container is used for auto-updates for the main container.
 
+#### Docker swarm
+
+To avoid JVM **out of memory error**  in docker container app must be executed in swarm mode in order to set docker memory. Also it will be nice to have **swap** on the target system.
+
+[Very basis expiation of the OOM problem](https://medium.com/@yortuc/jvm-memory-allocation-in-docker-container-a26bbce3a3f2)
+
+Swarm commands: 
+
+- `docker stack rm sync`  - remove docker stack called *sync*
+
+- `docker service logs sync_pb-integration` - show logs for one the stack containers
+
+- `docker stack deploy -c docker-compose.yml sync` - run docker stack called *sync*
+
+
 ## Database
 **Docker:** DB configs can be found in `variables.env` file
 
