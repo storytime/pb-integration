@@ -1,22 +1,11 @@
 version: '3.7'
 services:
-  watchtower:
-    container_name: watchtower-updater
-    image: v2tec/watchtower
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /root/.docker/config.json:/config.json
-    command: --cleanup --interval 30
-    restart: on-failure
-
   pb-integration:
-    container_name: pb-integration
     image: bobobo/pb-integration:latest
     env_file:
     - ./variables.env
     ports:
     - 10080:8080
-    restart: on-failure
     logging:
       driver: json-file
     volumes:
@@ -24,24 +13,34 @@ services:
     - pb-db-vol:/root/db
     networks:
     - backend
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 350MB
+      restart_policy:
+        condition: on-failure
 
   prometheus:
-    container_name: prometheus
     image: prom/prometheus:latest
     volumes:
     - ./prometheus.yml:/etc/prometheus/prometheus.yml
     - prometheus-vol:/prometheus
     depends_on:
     - pb-integration
-    links:
-    - pb-integration
     networks:
     - backend
-#    ports:
-#    - 9090:9090
+    #    ports:
+    #    - 9090:9090
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 250MB
+      restart_policy:
+        condition: on-failure
 
   grafana:
-    container_name: grafana
     image: grafana/grafana:latest
     ports:
     - 3000:3000
@@ -49,33 +48,15 @@ services:
     - grafana-vol:/var/lib/grafana
     depends_on:
     - prometheus
-    links:
-    - prometheus
     networks:
     - backend
-
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: monitoring_node_exporter
-    restart: unless-stopped
-    expose:
-    - 9100
-    networks:
-    - backend
-
-  cadvisor:
-    image: google/cadvisor:latest
-    container_name: monitoring_cadvisor
-    restart: unless-stopped
-    volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-    expose:
-    - 8080
-    networks:
-    - backend
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 250MB
+      restart_policy:
+        condition: on-failure
 
 networks:
   backend:
