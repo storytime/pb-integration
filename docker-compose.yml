@@ -17,7 +17,7 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 350MB
+          memory: 256MB
       restart_policy:
         condition: on-failure
 
@@ -36,7 +36,7 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 250MB
+          memory: 200MB
       restart_policy:
         condition: on-failure
 
@@ -54,7 +54,7 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 250MB
+          memory: 200MB
       restart_policy:
         condition: on-failure
 

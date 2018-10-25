@@ -9,10 +9,3 @@ scrape_configs:
   - targets: ['pb-integration:8080'] # IP or service name from docker-compose
     labels:
       application: pb-integration
-
-- job_name: 'docker'
-  # Override the global default and scrape targets from this job every 5 seconds.
-  scrape_interval: 10s
-
-  static_configs:
-  - targets: ['localhost:9090','cadvisor:8080','node-exporter:9100', 'nginx-exporter:9113']

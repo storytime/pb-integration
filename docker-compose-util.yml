@@ -1,0 +1,46 @@
+version: '3.7'
+services:
+  portainer:
+    image: portainer/portainer
+    ports:
+    - "9000:9000"
+    command: -H unix:///var/run/docker.sock
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - portainer_data:/data
+    networks:
+    - util
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 50MB
+      restart_policy:
+        condition: on-failure
+  watchtower:
+    image: v2tec/watchtowera
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /root/.docker/config.json:/config.json
+    command: --interval 30
+    networks:
+    - util
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 25MB
+      restart_policy:
+        condition: on-failure
+
+networks:
+  util:
+
+volumes:
+  portainer_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /root/portainer_data
+      o: bind
+
