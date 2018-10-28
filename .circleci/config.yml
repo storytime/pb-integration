@@ -9,9 +9,9 @@ jobs:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
       - checkout
-      - restore_cache:
-          keys:
-          - build-cache-{{ checksum "build.gradle" }}
+    #      - restore_cache:
+    #          keys:
+    #          - build-cache-{{ checksum "build.gradle" }}
       - run:
           name: Chmod permissions
           command: chmod +x ./gradlew
@@ -27,8 +27,8 @@ jobs:
             - ~/.m2
           key: build-cache-{{ checksum "build.gradle" }}
       - store_artifacts:
-          path: build/libs/pb-24-integration.jar
-          destination: pb-24-integration.jar
+          path: build/libs/pb-integration.jar
+          destination: pb-integration.jar
       - store_artifacts:
           path: Dockerfile
           destination: Dockerfile
@@ -51,7 +51,7 @@ jobs:
           command: |
               <artifacts.txt xargs -P4 -I % wget %
               mkdir -p ~/project/build/libs/
-              mv pb-24-integration.jar ~/project/build/libs/
+            mv pb-integration.jar ~/project/build/libs/
       - run:
           name: Login to DockerHub
           command: docker login -u $DOCKER_USER -p $DOCKER_PASS
@@ -74,10 +74,10 @@ jobs:
       _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-          - build-cache-{{ checksum "build.gradle" }}
+    #      - checkout
+    #      - restore_cache:
+    #          keys:
+    #          - build-cache-{{ checksum "build.gradle" }}
       - run:
           name: Chmod permissions
           command: chmod +x ./gradlew
