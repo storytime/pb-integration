@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.access;
 
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.db.inner.SyncPriority;

@@ -8,6 +8,7 @@ import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.db.User;
 import com.github.storytime.model.jaxb.statement.request.Request;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.service.access.MerchantService;
 import io.micrometer.core.instrument.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

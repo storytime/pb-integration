@@ -6,6 +6,8 @@ import com.github.storytime.model.db.User;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
+import com.github.storytime.service.access.MerchantService;
+import com.github.storytime.service.access.UserService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -93,9 +96,14 @@ public class PbSyncService {
                 .thenAccept(ozr -> {
                             if (ozr.isPresent()) {
                                 final ZenResponse zenDiff = ozr.get();
-                                final ZenDiffRequest request = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, user);
-                                if (zenDiffService.pushToZen(user, request).isPresent()) {
-                                    userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
+                                //TODo: improve in java 11
+                                final Optional<ZenDiffRequest> maybeDiffRequest = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, user);
+                                if (maybeDiffRequest.isPresent()) {
+                                    if (zenDiffService.pushToZen(user, maybeDiffRequest.get()).isPresent()) {
+                                        userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
+                                    } else {
+                                        updateNeeded.put(IS_UPDATE_NEEDED, FALSE);
+                                    }
                                 } else {
                                     updateNeeded.put(IS_UPDATE_NEEDED, FALSE);
                                 }

@@ -13,7 +13,6 @@ public class RegExpService {
 
     private static final int GROUP_2 = 2;
     private static final int GROUP_1 = 1;
-    private final VerbalExpression commentRegexp;
     private final VerbalExpression cashWithdrawal;
     private final VerbalExpression internalTransfer;
     private final VerbalExpression internalTransferCard;
@@ -22,14 +21,12 @@ public class RegExpService {
     private final VerbalExpression internalTransferComment;
 
     @Autowired
-    public RegExpService(final VerbalExpression commentRegexp,
-                         final VerbalExpression internalTransfer,
+    public RegExpService(final VerbalExpression internalTransfer,
                          final VerbalExpression internalTransferCard,
                          final VerbalExpression internalFrom,
                          final VerbalExpression internalTo,
                          final VerbalExpression internalTransferComment,
                          final VerbalExpression cashWithdrawal) {
-        this.commentRegexp = commentRegexp;
         this.cashWithdrawal = cashWithdrawal;
         this.internalTransferCard = internalTransferCard;
         this.internalFrom = internalFrom;

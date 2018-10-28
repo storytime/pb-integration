@@ -53,7 +53,7 @@ public class ZenDiffService {
                     .postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
             st.stop();
             final Optional<ZenResponse> body = ofNullable(zenResponseResponseEntity.getBody());
-            LOGGER.info("Diff was pushed to zen for user id: {} time: {}", u.getId(), st.getTotalTimeSeconds());
+            LOGGER.info("Updated zen diff was pushed to zen for user id: {} time: {}", u.getId(), st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot push Diff to ZEN request: {}", e.getMessage());
@@ -79,10 +79,10 @@ public class ZenDiffService {
             st.start();
             final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Initial sync was completed for u: {} last zen diff time: {}, time: {}", u.getId(), zenSyncRequest.getServerTimestamp(), st.getTotalTimeSeconds());
+            LOGGER.debug("Zen diff was fetched for u: {} last zen diff time: {}, time: {}", u.getId(), zenSyncRequest.getServerTimestamp(), st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot do initial sync request for user: {} : {}", u.getId(), e.getMessage());
+            LOGGER.error("Cannot fetch zen diff for user: {} : {}", u.getId(), e.getMessage());
             return empty();
         }
     }

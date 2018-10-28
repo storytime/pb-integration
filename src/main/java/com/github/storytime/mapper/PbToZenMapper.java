@@ -14,6 +14,8 @@ import java.util.*;
 
 import static java.time.Instant.now;
 import static java.util.Comparator.comparingLong;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
@@ -34,9 +36,9 @@ public class PbToZenMapper {
         this.pbToZenTransactionMapper = pbToZenTransactionMapper;
     }
 
-    public ZenDiffRequest buildZenReqFromPbData(final List<List<Statement>> newPbTransaction,
-                                                final ZenResponse zenDiff,
-                                                final User user) {
+    public Optional<ZenDiffRequest> buildZenReqFromPbData(final List<List<Statement>> newPbTransaction,
+                                                          final ZenResponse zenDiff,
+                                                          final User user) {
 
         newPbTransaction.forEach(t -> pbToZenAccountMapper.mapPbAccountToZen(t, zenDiff));
 
@@ -49,6 +51,7 @@ public class PbToZenMapper {
                 .collect(toList());
 
         final List<TransactionItem> notPushedTransactionsToZen = new ArrayList<>(allTransactionsToZen.size());
+        //TODO: maybe its better to stored PB transaction, think case we dont need to do one more request to ZEN
         allTransactionsToZen.forEach(t -> {
             final ExpiredTransactionItem expiredTransactionItem = new ExpiredTransactionItem(t);
             if (!alreadyMappedPbZenTransaction.contains(expiredTransactionItem)) {
@@ -58,15 +61,16 @@ public class PbToZenMapper {
         });
 
         if (notPushedTransactionsToZen.isEmpty()) {
-            LOGGER.debug("All Transaction for user: {} were already pushed", user.getId());
+            LOGGER.debug("All Transaction for user: {} were already pushed. Nothing to push in current sync thread", user.getId());
+            return empty();
         } else {
             notPushedTransactionsToZen.forEach(transactionItem -> LOGGER.debug("New transaction: {}", transactionItem));
         }
 
-        return new ZenDiffRequest()
+        return of(new ZenDiffRequest()
                 .setCurrentClientTimestamp(now().getEpochSecond())
                 .setLastServerTimestamp(zenDiff.getServerTimestamp())
                 .setAccount(zenDiff.getAccount())
-                .setTransaction(notPushedTransactionsToZen);
+                .setTransaction(notPushedTransactionsToZen));
     }
 }

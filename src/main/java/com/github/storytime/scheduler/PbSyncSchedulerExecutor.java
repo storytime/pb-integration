@@ -1,7 +1,7 @@
 package com.github.storytime.scheduler;
 
-import com.github.storytime.service.MerchantService;
 import com.github.storytime.service.PbSyncService;
+import com.github.storytime.service.access.MerchantService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
