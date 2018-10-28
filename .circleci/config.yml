@@ -51,7 +51,7 @@ jobs:
           command: |
               <artifacts.txt xargs -P4 -I % wget %
               mkdir -p ~/project/build/libs/
-            mv pb-integration.jar ~/project/build/libs/
+              mv pb-integration.jar ~/project/build/libs/
       - run:
           name: Login to DockerHub
           command: docker login -u $DOCKER_USER -p $DOCKER_PASS
