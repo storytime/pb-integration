@@ -21,11 +21,11 @@ jobs:
       - run:
           name: Build
           command: ./gradlew clean build
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-          key: build-cache-{{ checksum "build.gradle" }}
+    #      - save_cache:
+    #          paths:
+    #            - ~/.gradle
+    #            - ~/.m2
+    #          key: build-cache-{{ checksum "build.gradle" }}
       - store_artifacts:
           path: build/libs/pb-integration.jar
           destination: pb-integration.jar
@@ -84,11 +84,11 @@ jobs:
       - run: ### Free sonar cloud can analyze only one branch
           name: Build and verify on sonar
           command: ./gradlew clean sonarqube -Dsonar.organization=$SONAR_ORG -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN build
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.m2
-          key: build-cache-{{ checksum "build.gradle" }}
+#      - save_cache:
+#          paths:
+#            - ~/.gradle
+#            - ~/.m2
+#          key: build-cache-{{ checksum "build.gradle" }}
 
 workflows:
   version: 2
