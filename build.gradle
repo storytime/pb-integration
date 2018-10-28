@@ -58,6 +58,11 @@ dependencies {
     testCompile("io.codearte.jfairy:jfairy:$jfairyVersion")
 }
 
+
+test {
+    maxHeapSize = '4G'
+}
+
 testlogger {
     theme 'standard' // pick a theme - mocha, standard or plain
     showExceptions true // set to false to disable detailed failure logs
