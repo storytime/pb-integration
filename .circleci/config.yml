@@ -74,7 +74,7 @@ jobs:
       _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
-    - checkout
+      - checkout
       - run:
           name: Chmod permissions
           command: chmod +x ./gradlew
