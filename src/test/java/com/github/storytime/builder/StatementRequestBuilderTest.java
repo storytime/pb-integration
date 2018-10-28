@@ -1,19 +1,15 @@
 package com.github.storytime.builder;
 
+import com.github.storytime.BaseTestConfig;
 import com.github.storytime.config.props.TextProperties;
 import com.github.storytime.model.jaxb.statement.request.Request;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static com.github.storytime.config.props.Constants.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class StatementRequestBuilderTest {
+public class StatementRequestBuilderTest extends BaseTestConfig {
 
     private static final String EXPECTED_NOT_NULL_MERCH = "Merchant be not null or empty";
     private static final String EXPECTED_NOT_NULL_CARD = "Card be not null or empty";
