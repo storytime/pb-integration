@@ -2,7 +2,7 @@ package com.github.storytime.mapper;
 
 import com.github.storytime.config.props.TextProperties;
 import com.github.storytime.exception.ZenUserNotFoundException;
-import com.github.storytime.model.db.User;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
@@ -60,7 +60,7 @@ public class PbToZenTransactionMapper {
 
     public List<TransactionItem> mapPbTransactionToZen(final List<Statement> statementList,
                                                        final ZenResponse zenDiff,
-                                                       final User u) {
+                                                       final AppUser u) {
         // TODO: cheat to sort transactions; java 9+ clock has nano time
         final AtomicInteger i = new AtomicInteger(0);
         return statementList

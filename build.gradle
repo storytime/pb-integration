@@ -1,8 +1,8 @@
 buildscript {
     ext {
         // libs versions
-        springBootVersion = '2.0.6.RELEASE'
-        h2Version = '1.4.197'
+        springBootVersion = '2.1.0.RELEASE'
+        postgresqlVersion = '42.2.5'
         commonsVersion = '3.8.1'
         verbalRexExpVersion = '1.6'
         flywayVersion = '5.2.1'
@@ -45,7 +45,8 @@ repositories {
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
-    compile("com.h2database:h2:$h2Version")
+    compile("org.postgresql:postgresql:$postgresqlVersion")
+
     compile("org.apache.commons:commons-lang3:$commonsVersion")
     compile("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
     compile("org.flywaydb:flyway-core:$flywayVersion")

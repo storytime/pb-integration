@@ -1,6 +1,6 @@
 package com.github.storytime.service;
 
-import com.github.storytime.model.db.User;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,16 +52,16 @@ public class DateService {
         return minfinDateTimeFormatter.format(zonedDateTime);
     }
 
-    public ZonedDateTime millisUserDate(Long millis, User u) {
+    public ZonedDateTime millisUserDate(Long millis, AppUser u) {
         final Instant instant = ofEpochMilli(millis);
         return ofInstant(instant, ZoneId.of(u.getTimeZone()));
     }
 
-    public String toPbFormat(Long millis, User u) {
+    public String toPbFormat(Long millis, AppUser u) {
         return pbDateTimeFormatter.format(millisUserDate(millis, u));
     }
 
-    public String toIsoFormat(Long millis, User u) {
+    public String toIsoFormat(Long millis, AppUser u) {
         return isoDateTimeFormatter.format(millisUserDate(millis, u));
     }
 

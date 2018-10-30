@@ -1,6 +1,6 @@
 package com.github.storytime.service;
 
-import com.github.storytime.model.db.User;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.repository.PbInternalTransferInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class PbInternalTransferInfoService {
         this.regExpService = regExpService;
     }
 
-    public String generateIdForFromTransfer(final User u, final Statement cardNum, final Float opAmount, final String comment) {
+    public String generateIdForFromTransfer(final AppUser u, final Statement cardNum, final Float opAmount, final String comment) {
         final String card = String.valueOf(cardNum.getCard());
         return u.getId() +
                 left(card, CARD_TWO_DIGITS) +
@@ -35,7 +35,7 @@ public class PbInternalTransferInfoService {
 
     }
 
-    public String generateIdForToTransfer(final User u, final Statement cardNum, final Float opAmount, final String comment) {
+    public String generateIdForToTransfer(final AppUser u, final Statement cardNum, final Float opAmount, final String comment) {
         final String card = String.valueOf(cardNum.getCard());
         return u.getId() +
                 regExpService.getCardFirstDigits(comment) +

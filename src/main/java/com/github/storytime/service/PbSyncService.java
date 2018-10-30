@@ -1,8 +1,8 @@
 package com.github.storytime.service;
 
 import com.github.storytime.mapper.PbToZenMapper;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.db.User;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
@@ -88,19 +88,19 @@ public class PbSyncService {
         });
     }
 
-    private Map<String, Boolean> doUpdateZenInfoRequest(final User user,
+    private Map<String, Boolean> doUpdateZenInfoRequest(final AppUser appUser,
                                                         final List<List<Statement>> newPbData,
                                                         final Map<String, Boolean> updateNeeded) {
 
-        supplyAsync(() -> zenDiffService.getZenDiffByUser(user))
+        supplyAsync(() -> zenDiffService.getZenDiffByUser(appUser))
                 .thenAccept(ozr -> {
                             if (ozr.isPresent()) {
                                 final ZenResponse zenDiff = ozr.get();
                                 //TODo: improve in java 11
-                                final Optional<ZenDiffRequest> maybeDiffRequest = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, user);
+                                final Optional<ZenDiffRequest> maybeDiffRequest = pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, appUser);
                                 if (maybeDiffRequest.isPresent()) {
-                                    if (zenDiffService.pushToZen(user, maybeDiffRequest.get()).isPresent()) {
-                                        userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
+                                    if (zenDiffService.pushToZen(appUser, maybeDiffRequest.get()).isPresent()) {
+                                        userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zenDiff.getServerTimestamp()));
                                     } else {
                                         updateNeeded.put(IS_UPDATE_NEEDED, FALSE);
                                     }

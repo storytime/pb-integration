@@ -1,7 +1,7 @@
 package com.github.storytime.mapper;
 
 import com.github.storytime.model.ExpiredTransactionItem;
-import com.github.storytime.model.db.User;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenDiffRequest;
@@ -38,13 +38,13 @@ public class PbToZenMapper {
 
     public Optional<ZenDiffRequest> buildZenReqFromPbData(final List<List<Statement>> newPbTransaction,
                                                           final ZenResponse zenDiff,
-                                                          final User user) {
+                                                          final AppUser appUser) {
 
         newPbTransaction.forEach(t -> pbToZenAccountMapper.mapPbAccountToZen(t, zenDiff));
 
         final List<TransactionItem> allTransactionsToZen = newPbTransaction
                 .stream()
-                .map(t -> new ArrayList<>(pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, user)))
+                .map(t -> new ArrayList<>(pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, appUser)))
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .sorted(comparingLong(TransactionItem::getCreated).reversed())
@@ -61,7 +61,7 @@ public class PbToZenMapper {
         });
 
         if (notPushedTransactionsToZen.isEmpty()) {
-            LOGGER.debug("All Transaction for user: {} were already pushed. Nothing to push in current sync thread", user.getId());
+            LOGGER.debug("All Transaction for user: {} were already pushed. Nothing to push in current sync thread", appUser.getId());
             return empty();
         } else {
             notPushedTransactionsToZen.forEach(transactionItem -> LOGGER.debug("New transaction: {}", transactionItem));

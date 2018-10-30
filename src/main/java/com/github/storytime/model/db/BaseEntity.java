@@ -10,7 +10,7 @@ public class BaseEntity {
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
+    @Column(name = "id", nullable = false)
     public Long id;
 
     public Long getId() {

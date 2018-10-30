@@ -2,7 +2,7 @@ package com.github.storytime.service;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.config.props.Constants;
-import com.github.storytime.model.db.User;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.zen.*;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class ZenDiffService {
         this.zenSyncForceFetchItems = zenSyncForceFetchItems;
     }
 
-    public Optional<ZenResponse> pushToZen(User u, ZenDiffRequest request) {
+    public Optional<ZenResponse> pushToZen(AppUser u, ZenDiffRequest request) {
         try {
             final HttpEntity<ZenDiffRequest> diffObject = new HttpEntity<>(request, createHeader(u.getZenAuthToken()));
             final StopWatch st = new StopWatch();
@@ -61,7 +61,7 @@ public class ZenDiffService {
         }
     }
 
-    public Optional<ZenResponse> getZenDiffByUser(final User u) {
+    public Optional<ZenResponse> getZenDiffByUser(final AppUser u) {
         try {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond());

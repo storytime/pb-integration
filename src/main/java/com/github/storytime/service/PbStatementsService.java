@@ -4,8 +4,8 @@ import com.github.storytime.builder.StatementRequestBuilder;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.exception.PbSignatureException;
 import com.github.storytime.mapper.PbStatementMapper;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.db.User;
 import com.github.storytime.model.jaxb.statement.request.Request;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.access.MerchantService;
@@ -75,7 +75,7 @@ public class PbStatementsService {
     }
 
 
-    public CompletableFuture<List<Statement>> getPbTransactions(final User u, final MerchantInfo m) {
+    public CompletableFuture<List<Statement>> getPbTransactions(final AppUser u, final MerchantInfo m) {
 
         final Duration period = ofMillis(m.getSyncPeriod());
         final ZonedDateTime startDate = dateService.millisUserDate(m.getSyncStartDate(), u);
@@ -101,7 +101,7 @@ public class PbStatementsService {
         return supplyAsync(pullAndHandlePbRequest(u, m, startDate, endDate, requestToBank));
     }
 
-    private Supplier<List<Statement>> pullAndHandlePbRequest(final User u,
+    private Supplier<List<Statement>> pullAndHandlePbRequest(final AppUser u,
                                                              final MerchantInfo m,
                                                              final ZonedDateTime startDate,
                                                              final ZonedDateTime endDate,
@@ -111,7 +111,7 @@ public class PbStatementsService {
                 .orElse(emptyList());
     }
 
-    private List<Statement> handleResponse(final User u,
+    private List<Statement> handleResponse(final AppUser u,
                                            final MerchantInfo m,
                                            final ZonedDateTime startDate,
                                            final ZonedDateTime endDate,
@@ -152,14 +152,14 @@ public class PbStatementsService {
         }
     }
 
-    public List<Statement> filterNewPbTransactions(ZonedDateTime start, ZonedDateTime end, List<Statement> pbStatements, User user) {
+    public List<Statement> filterNewPbTransactions(ZonedDateTime start, ZonedDateTime end, List<Statement> pbStatements, AppUser appUser) {
         final Comparator<ZonedDateTime> comparator = comparing(zdt -> zdt.truncatedTo(MILLIS));
         // sometimes new transactions can be available with delay, so we need to change start time of filtering
         final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
         return pbStatements
                 .stream()
                 .filter(t -> {
-                    final ZonedDateTime tTime = dateService.xmlDateTimeToZoned(t.getTrandate(), t.getTrantime(), user.getTimeZone());
+                    final ZonedDateTime tTime = dateService.xmlDateTimeToZoned(t.getTrandate(), t.getTrantime(), appUser.getTimeZone());
                     return comparator.compare(searchStartTime, tTime) <= 0 && comparator.compare(end, tTime) > 0;
                 }).collect(toList());
     }

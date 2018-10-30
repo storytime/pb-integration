@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
-public class User extends BaseEntity {
+public class AppUser extends BaseEntity {
 
     @NotNull
     private String zenAuthToken;
@@ -19,7 +19,7 @@ public class User extends BaseEntity {
         return zenAuthToken;
     }
 
-    public User setZenAuthToken(String zenAuthToken) {
+    public AppUser setZenAuthToken(String zenAuthToken) {
         this.zenAuthToken = zenAuthToken;
         return this;
     }
@@ -28,7 +28,7 @@ public class User extends BaseEntity {
         return timeZone;
     }
 
-    public User setTimeZone(String timeZone) {
+    public AppUser setTimeZone(String timeZone) {
         this.timeZone = timeZone;
         return this;
     }
@@ -37,7 +37,7 @@ public class User extends BaseEntity {
         return zenLastSyncTimestamp;
     }
 
-    public User setZenLastSyncTimestamp(Long zenLastSyncTimestamp) {
+    public AppUser setZenLastSyncTimestamp(Long zenLastSyncTimestamp) {
         this.zenLastSyncTimestamp = zenLastSyncTimestamp;
         return this;
     }

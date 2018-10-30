@@ -1,6 +1,6 @@
 package com.github.storytime.service.access;
 
-import com.github.storytime.model.db.User;
+import com.github.storytime.model.db.AppUser;
 import com.github.storytime.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,11 +17,11 @@ public class UserService {
         this.repository = repository;
     }
 
-    public List<User> findAll() {
+    public List<AppUser> findAll() {
         return repository.findAll();
     }
 
-    public void updateUserLastZenSyncTime(final User u) {
+    public void updateUserLastZenSyncTime(final AppUser u) {
         repository.save(u);
     }
 
