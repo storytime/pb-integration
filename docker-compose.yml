@@ -1,9 +1,47 @@
 version: '3.7'
 services:
+  postgres:
+    image: postgres:11-alpine
+    env_file:
+    - ./variables.env
+    ports:
+    - 5432:5432
+    volumes:
+    - db-vol:/var/lib/postgresql/data
+    networks:
+    - backend
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 25MB
+      restart_policy:
+        condition: on-failure
+
+  postgres-admin-web-ui:
+    image: dpage/pgadmin4
+    env_file:
+    - ./variables.env
+    volumes:
+    - pg-admin-vol:/var/lib/pgadmin
+    networks:
+    - backend
+    ports:
+    - 5050:80
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 100MB
+      restart_policy:
+        condition: on-failure
+
   pb-integration:
     image: bobobo/pb-integration:latest
     env_file:
     - ./variables.env
+    depends_on:
+    - postgres
     ports:
     - 10080:8080
     logging:
@@ -50,46 +88,6 @@ services:
     - prometheus
     networks:
     - backend
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 100MB
-      restart_policy:
-        condition: on-failure
-
-  postgres:
-    image: postgres:11-alpine
-    env_file:
-    - ./variables.env
-    ports:
-    - 5432:5432
-    volumes:
-    - db-vol:/var/lib/postgresql/data
-    depends_on:
-    - pb-integration
-    networks:
-    - backend
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 25MB
-      restart_policy:
-        condition: on-failure
-
-  postgres-admin-web-ui:
-    image: dpage/pgadmin4
-    env_file:
-    - ./variables.env
-    volumes:
-    - pg-admin-vol:/var/lib/pgadmin
-    depends_on:
-    - postgres
-    networks:
-    - backend
-    ports:
-    - 5050:80
     deploy:
       replicas: 1
       resources:
