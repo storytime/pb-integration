@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -256,6 +257,12 @@ public class Response {
 
                     public void setDescription(String value) {
                         this.description = value;
+                    }
+
+                    @Override
+                    public int hashCode() {
+                        return Objects.hash(getCard(), getAppcode(), getTrandate(), getTrantime(), getAmount(),
+                                getCardamount(), getRest(), getTerminal(), getDescription(), getCustomComment());
                     }
 
                     @Override

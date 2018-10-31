@@ -91,7 +91,7 @@ public class PbSyncService {
             if (maybePushed.isEmpty()) {
                 LOGGER.info("No new transaction for user: {} Nothing to push in current sync thread", user.getId());
             } else {
-                LOGGER.info("User: {} has  {} transactions sync period", user.getId(), maybePushed.size());
+                LOGGER.info("User: {} has {} transactions sync period", user.getId(), maybePushed.size());
                 doUpdateZenInfoRequest(user, newPbDataList, updateNeeded);
             }
 
