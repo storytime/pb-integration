@@ -261,17 +261,17 @@ public class Response {
                     @Override
                     public String toString() {
                         return new ToStringBuilder(this)
-                                .append("value", value)
-                                .append("card", card)
-                                .append("appcode", appcode)
-                                .append("trandate", trandate)
-                                .append("trantime", trantime)
-                                .append("amount", amount)
-                                .append("cardamount", cardamount)
-                                .append("rest", rest)
-                                .append("terminal", terminal)
-                                .append("description", description)
-                                .append("customComment", customComment)
+                                .append("value = ", value)
+                                .append("card = ", card)
+                                .append("appcode = ", appcode)
+                                .append("trandate = ", trandate)
+                                .append("trantime = ", trantime)
+                                .append("amount = ", amount)
+                                .append("cardamount = ", cardamount)
+                                .append("rest = ", rest)
+                                .append("terminal = ", terminal)
+                                .append("description = ", description)
+                                .append("customComment = ", customComment)
                                 .toString();
                     }
                 }

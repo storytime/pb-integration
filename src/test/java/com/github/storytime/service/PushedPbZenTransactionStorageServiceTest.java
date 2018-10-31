@@ -2,7 +2,7 @@ package com.github.storytime.service;
 
 import com.github.storytime.BaseTestConfig;
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.model.ExpiredTransactionItem;
+import com.github.storytime.model.ExpiredPbStatement;
 import com.github.storytime.model.zen.TransactionItem;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class PushedPbZenTransactionStorageServiceTest extends BaseTestConfig {
     private PushedPbZenTransactionStorageService pushedPbZenTransactionStorageService;
 
     @Autowired
-    private Set<ExpiredTransactionItem> pushedPbZenTransactionStorage;
+    private Set<ExpiredPbStatement> pushedPbZenTransactionStorage;
 
     @Autowired
     private CustomConfig customConfig;
@@ -31,11 +31,11 @@ public class PushedPbZenTransactionStorageServiceTest extends BaseTestConfig {
     @Before
     public void init() {
         pushedPbZenTransactionStorage
-                .add(new ExpiredTransactionItem(TRANSACTION_ITEM_TIME1, new TransactionItem().setIncome(100F)));
+                .add(new ExpiredPbStatement(TRANSACTION_ITEM_TIME1, new TransactionItem().setIncome(100F)));
         pushedPbZenTransactionStorage
-                .add(new ExpiredTransactionItem(TRANSACTION_ITEM_TIME, new TransactionItem().setIncome(50F)));
+                .add(new ExpiredPbStatement(TRANSACTION_ITEM_TIME, new TransactionItem().setIncome(50F)));
         pushedPbZenTransactionStorage
-                .add(new ExpiredTransactionItem(now().toEpochMilli(), new TransactionItem().setIncome(1000F)));
+                .add(new ExpiredPbStatement(now().toEpochMilli(), new TransactionItem().setIncome(1000F)));
     }
 
     @Test

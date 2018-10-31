@@ -1,6 +1,7 @@
 package com.github.storytime.service;
 
 import com.github.storytime.mapper.PbToZenMapper;
+import com.github.storytime.model.ExpiredPbStatement;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
@@ -13,12 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -37,16 +36,19 @@ public class PbSyncService {
     private final UserService userService;
     private final ZenDiffService zenDiffService;
     private final PbToZenMapper pbToZenMapper;
+    private final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction;
 
     @Autowired
     public PbSyncService(final MerchantService merchantService,
                          final PbStatementsService pbStatementsService,
                          final UserService userService,
+                         final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction,
                          final ZenDiffService zenDiffService,
                          final PbToZenMapper pbToZenMapper) {
         this.merchantService = merchantService;
         this.userService = userService;
         this.zenDiffService = zenDiffService;
+        this.alreadyMappedPbZenTransaction = alreadyMappedPbZenTransaction;
         this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
     }
@@ -69,20 +71,34 @@ public class PbSyncService {
                     .map(CompletableFuture::join) // get doUpdateZenInfoRequest result
                     .collect(toList());
 
-            final long amountOfNewData = newPbDataList.stream().mapToLong(List::size).sum(); // any new
-            // TODO: fix in java 11
+            final List<Statement> allNewPbData = newPbDataList
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+
+            final List<ExpiredPbStatement> maybePushed = new ArrayList<>();
+            allNewPbData.forEach(t -> {
+                final ExpiredPbStatement expiredPbStatement = new ExpiredPbStatement(t);
+                if (!alreadyMappedPbZenTransaction.contains(expiredPbStatement)) {
+                    maybePushed.add(expiredPbStatement);
+                }
+            });
+
+            // TODO: fix in java 11 can change value inside lambda
             final Map<String, Boolean> updateNeeded = new HashMap<>();
             updateNeeded.put(IS_UPDATE_NEEDED, TRUE);
 
-            if (amountOfNewData > 0) {
-                LOGGER.info("User: {} has  {} transactions sync period", user.getId(), amountOfNewData);
-                doUpdateZenInfoRequest(user, newPbDataList, updateNeeded);
+            if (maybePushed.isEmpty()) {
+                LOGGER.info("No new transaction for user: {} Nothing to push in current sync thread", user.getId());
             } else {
-                LOGGER.warn("User: {} has NO new transactions from bank", user.getId());
+                LOGGER.info("User: {} has  {} transactions sync period", user.getId(), maybePushed.size());
+                doUpdateZenInfoRequest(user, newPbDataList, updateNeeded);
             }
 
+            //commit that sync WAS OK
             if (updateNeeded.get(IS_UPDATE_NEEDED)) {
                 merchantService.saveAll(merchants);
+                alreadyMappedPbZenTransaction.addAll(maybePushed);
             }
 
         });

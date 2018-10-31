@@ -1,7 +1,7 @@
 package com.github.storytime.config;
 
 
-import com.github.storytime.model.ExpiredTransactionItem;
+import com.github.storytime.model.ExpiredPbStatement;
 import com.github.storytime.model.db.CustomPayee;
 import com.github.storytime.other.RequestLoggerInterceptor;
 import com.github.storytime.repository.CustomPayeeRepository;
@@ -60,7 +60,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public Set<ExpiredTransactionItem> pushedPbZenTransactionStorage() {
+    public Set<ExpiredPbStatement> pushedPbZenTransactionStorage() {
         return new HashSet<>();
     }
 

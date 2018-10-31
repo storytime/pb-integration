@@ -2,7 +2,7 @@ package com.github.storytime.service;
 
 
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.model.ExpiredTransactionItem;
+import com.github.storytime.model.ExpiredPbStatement;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,11 +18,11 @@ public class PushedPbZenTransactionStorageService {
 
     private static final Logger LOGGER = getLogger(PushedPbZenTransactionStorageService.class);
 
-    private Set<ExpiredTransactionItem> pushedPbZenTransactionStorage;
+    private Set<ExpiredPbStatement> pushedPbZenTransactionStorage;
     private CustomConfig customConfig;
 
     @Autowired
-    public PushedPbZenTransactionStorageService(final Set<ExpiredTransactionItem> pushedPbZenTransactionStorage,
+    public PushedPbZenTransactionStorageService(final Set<ExpiredPbStatement> pushedPbZenTransactionStorage,
                                                 final CustomConfig customConfig) {
         this.pushedPbZenTransactionStorage = pushedPbZenTransactionStorage;
         this.customConfig = customConfig;
@@ -31,7 +31,7 @@ public class PushedPbZenTransactionStorageService {
     public void cleanOldPbToZenTransactionStorage() {
         LOGGER.debug("Going to clean already mapped PB storage");
         final long currentTime = now().toEpochMilli();
-        final Set<ExpiredTransactionItem> toDelete = pushedPbZenTransactionStorage
+        final Set<ExpiredPbStatement> toDelete = pushedPbZenTransactionStorage
                 .stream()
                 .filter(eti -> currentTime - eti.getTransactionItemTime() > customConfig.getPushedPbZenTransactionStorageCleanOlderMillis())
                 .collect(toSet());

@@ -1,25 +1,25 @@
 package com.github.storytime.model;
 
-import com.github.storytime.model.zen.TransactionItem;
+import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
 import static java.time.Instant.now;
 
-public class ExpiredTransactionItem {
+public class ExpiredPbStatement {
 
     private long transactionItemTime;
 
-    private TransactionItem zenTransactionItem;
+    private Statement zenTransactionItem;
 
-    public ExpiredTransactionItem(TransactionItem zenTransactionItem) {
+    public ExpiredPbStatement(Statement zenTransactionItem) {
         this.zenTransactionItem = zenTransactionItem;
         this.transactionItemTime = now().toEpochMilli();
     }
 
-    public ExpiredTransactionItem(final long transactionItemTime,
-                                  final TransactionItem zenTransactionItem) {
+    public ExpiredPbStatement(final long transactionItemTime,
+                              final Statement zenTransactionItem) {
         this.transactionItemTime = transactionItemTime;
         this.zenTransactionItem = zenTransactionItem;
     }
@@ -28,7 +28,7 @@ public class ExpiredTransactionItem {
         return transactionItemTime;
     }
 
-    public TransactionItem getZenTransactionItem() {
+    public Statement getZenTransactionItem() {
         return zenTransactionItem;
     }
 
@@ -38,8 +38,8 @@ public class ExpiredTransactionItem {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ExpiredTransactionItem)) return false;
-        ExpiredTransactionItem that = (ExpiredTransactionItem) o;
+        if (!(o instanceof ExpiredPbStatement)) return false;
+        ExpiredPbStatement that = (ExpiredPbStatement) o;
         return Objects.equals(getZenTransactionItem(), that.getZenTransactionItem());
     }
 

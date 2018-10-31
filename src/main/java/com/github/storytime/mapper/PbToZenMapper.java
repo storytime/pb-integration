@@ -1,6 +1,6 @@
 package com.github.storytime.mapper;
 
-import com.github.storytime.model.ExpiredTransactionItem;
+import com.github.storytime.model.ExpiredPbStatement;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.TransactionItem;
@@ -14,7 +14,6 @@ import java.util.*;
 
 import static java.time.Instant.now;
 import static java.util.Comparator.comparingLong;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -25,14 +24,12 @@ public class PbToZenMapper {
     private static final Logger LOGGER = getLogger(PbToZenMapper.class);
     private final PbToZenAccountMapper pbToZenAccountMapper;
     private final PbToZenTransactionMapper pbToZenTransactionMapper;
-    private final Set<ExpiredTransactionItem> alreadyMappedPbZenTransaction;
 
     @Autowired
     public PbToZenMapper(final PbToZenAccountMapper pbToZenAccountMapper,
-                         final Set<ExpiredTransactionItem> alreadyMappedPbZenTransaction,
+                         final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction,
                          final PbToZenTransactionMapper pbToZenTransactionMapper) {
         this.pbToZenAccountMapper = pbToZenAccountMapper;
-        this.alreadyMappedPbZenTransaction = alreadyMappedPbZenTransaction;
         this.pbToZenTransactionMapper = pbToZenTransactionMapper;
     }
 
@@ -50,27 +47,10 @@ public class PbToZenMapper {
                 .sorted(comparingLong(TransactionItem::getCreated).reversed())
                 .collect(toList());
 
-        final List<TransactionItem> notPushedTransactionsToZen = new ArrayList<>(allTransactionsToZen.size());
-        //TODO: maybe its better to stored PB transaction, think case we dont need to do one more request to ZEN
-        allTransactionsToZen.forEach(t -> {
-            final ExpiredTransactionItem expiredTransactionItem = new ExpiredTransactionItem(t);
-            if (!alreadyMappedPbZenTransaction.contains(expiredTransactionItem)) {
-                alreadyMappedPbZenTransaction.add(expiredTransactionItem);
-                notPushedTransactionsToZen.add(t);
-            }
-        });
-
-        if (notPushedTransactionsToZen.isEmpty()) {
-            LOGGER.debug("All Transaction for user: {} were already pushed. Nothing to push in current sync thread", appUser.getId());
-            return empty();
-        } else {
-            notPushedTransactionsToZen.forEach(transactionItem -> LOGGER.debug("New transaction: {}", transactionItem));
-        }
-
         return of(new ZenDiffRequest()
                 .setCurrentClientTimestamp(now().getEpochSecond())
                 .setLastServerTimestamp(zenDiff.getServerTimestamp())
                 .setAccount(zenDiff.getAccount())
-                .setTransaction(notPushedTransactionsToZen));
+                .setTransaction(allTransactionsToZen));
     }
 }
