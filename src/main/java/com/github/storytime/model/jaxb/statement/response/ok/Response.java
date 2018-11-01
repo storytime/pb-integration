@@ -260,21 +260,21 @@ public class Response {
                     @Override
                     public int hashCode() {
                         return Objects.hash(getCard(), getAppcode(), getTrandate(), getTrantime(), getAmount(),
-                                getCardamount(), getRest(), getTerminal(), getDescription(), getCustomComment());
+                                getCardamount(), getRest(), getTerminal());
                     }
 
                     @Override
                     public String toString() {
-                        return ("card = " + card) +
-                                "appcode = " + appcode +
-                                "trandate = " + trandate +
-                                "trantime = " + trantime +
-                                "amount = " + amount +
-                                "cardamount = " + cardamount +
-                                "rest = " + rest +
-                                "terminal = " + terminal +
-                                "description = " + description +
-                                "customComment = " + customComment;
+                        return (" card = " + card) +
+                                " appcode = " + appcode +
+                                " trandate = " + trandate +
+                                " trantime = " + trantime +
+                                " amount = " + amount +
+                                " cardamount = " + cardamount +
+                                " rest = " + rest +
+                                " terminal = " + terminal +
+                                " description = " + description +
+                                " customComment = " + customComment;
                     }
                 }
             }
