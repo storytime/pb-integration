@@ -4,7 +4,6 @@ import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -257,24 +256,39 @@ public class Response {
                         this.description = value;
                     }
 
+
                     @Override
-                    public int hashCode() {
-                        return Objects.hash(getCard(), getAppcode(), getTrandate(), getTrantime(), getAmount(),
-                                getCardamount(), getRest(), getTerminal());
+                    public boolean equals(Object o) {
+                        if (this == o) return true;
+                        if (!(o instanceof Statement)) return false;
+
+                        Statement statement = (Statement) o;
+
+                        if (!getValue().equals(statement.getValue())) return false;
+                        if (!getCard().equals(statement.getCard())) return false;
+                        if (!getAppcode().equals(statement.getAppcode())) return false;
+                        if (!getTrandate().equals(statement.getTrandate())) return false;
+                        if (!getTrantime().equals(statement.getTrantime())) return false;
+                        if (!getAmount().equals(statement.getAmount())) return false;
+                        if (!getCardamount().equals(statement.getCardamount())) return false;
+                        if (!getRest().equals(statement.getRest())) return false;
+                        if (!getTerminal().equals(statement.getTerminal())) return false;
+                        return getDescription() != null ? getDescription().equals(statement.getDescription()) : statement.getDescription() == null;
                     }
 
                     @Override
-                    public String toString() {
-                        return (" card = " + card) +
-                                " appcode = " + appcode +
-                                " trandate = " + trandate +
-                                " trantime = " + trantime +
-                                " amount = " + amount +
-                                " cardamount = " + cardamount +
-                                " rest = " + rest +
-                                " terminal = " + terminal +
-                                " description = " + description +
-                                " customComment = " + customComment;
+                    public int hashCode() {
+                        int result = getValue().hashCode();
+                        result = 31 * result + getCard().hashCode();
+                        result = 31 * result + getAppcode().hashCode();
+                        result = 31 * result + getTrandate().hashCode();
+                        result = 31 * result + getTrantime().hashCode();
+                        result = 31 * result + getAmount().hashCode();
+                        result = 31 * result + getCardamount().hashCode();
+                        result = 31 * result + getRest().hashCode();
+                        result = 31 * result + getTerminal().hashCode();
+                        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
+                        return result;
                     }
                 }
             }
