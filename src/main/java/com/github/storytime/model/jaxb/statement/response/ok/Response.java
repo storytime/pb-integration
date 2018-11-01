@@ -1,7 +1,5 @@
 package com.github.storytime.model.jaxb.statement.response.ok;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.ArrayList;
@@ -267,19 +265,16 @@ public class Response {
 
                     @Override
                     public String toString() {
-                        return new ToStringBuilder(this)
-                                .append("value = ", value)
-                                .append("card = ", card)
-                                .append("appcode = ", appcode)
-                                .append("trandate = ", trandate)
-                                .append("trantime = ", trantime)
-                                .append("amount = ", amount)
-                                .append("cardamount = ", cardamount)
-                                .append("rest = ", rest)
-                                .append("terminal = ", terminal)
-                                .append("description = ", description)
-                                .append("customComment = ", customComment)
-                                .toString();
+                        return ("card = " + card) +
+                                "appcode = " + appcode +
+                                "trandate = " + trandate +
+                                "trantime = " + trantime +
+                                "amount = " + amount +
+                                "cardamount = " + cardamount +
+                                "rest = " + rest +
+                                "terminal = " + terminal +
+                                "description = " + description +
+                                "customComment = " + customComment;
                     }
                 }
             }

@@ -117,7 +117,9 @@ public class CurrencyService {
         return () -> {
             LOGGER.info("Pulling NBU currency form external service for date: {}", lastDay);
 
+            //todo what is fail?
             final Optional<MinfinResponse> minFinRates = pullMinfinRatesForDate(dateService.toMinfinFormat(lastDay));
+
             if (minFinRates.isPresent()) {
                 final Optional<String> maybeUsdRate = minFinRates.map(MinfinResponse::getUsd).map(Usd::getAsk);
                 if (maybeUsdRate.isPresent()) {
