@@ -96,6 +96,7 @@ services:
       restart_policy:
         condition: on-failure
 
+#PLEASE NOTE!  dirs for volumes must be created
 volumes:
   prometheus-vol:
     driver: local

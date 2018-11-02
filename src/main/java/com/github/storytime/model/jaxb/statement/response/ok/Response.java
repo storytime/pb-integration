@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -289,6 +290,23 @@ public class Response {
                         result = 31 * result + getTerminal().hashCode();
                         result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
                         return result;
+                    }
+
+
+                    @Override
+                    public String toString() {
+                        return new StringJoiner(", ", Statement.class.getSimpleName() + "[", "]")
+                                .add("value='" + value + "'")
+                                .add("card=" + card)
+                                .add("appcode='" + appcode + "'")
+                                .add("trandate=" + trandate)
+                                .add("trantime=" + trantime)
+                                .add("amount='" + amount + "'")
+                                .add("cardamount='" + cardamount + "'")
+                                .add("rest='" + rest + "'")
+                                .add("terminal='" + terminal + "'")
+                                .add("description='" + description + "'")
+                                .toString();
                     }
                 }
             }
