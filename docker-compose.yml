@@ -48,7 +48,6 @@ services:
       driver: json-file
     volumes:
     - pb-log-vol:/var/log/pb-integration
-    - pb-db-vol:/root/db
     networks:
     - backend
     deploy:
@@ -117,13 +116,6 @@ volumes:
     driver_opts:
       type: none
       device: /app/logs
-      o: bind
-
-  pb-db-vol:
-    driver: local
-    driver_opts:
-      type: none
-      device: /app/db
       o: bind
 
   db-vol:
