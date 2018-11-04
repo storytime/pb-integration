@@ -13,8 +13,10 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 @Configuration
@@ -62,6 +64,15 @@ public class ApplicationConfig {
     @Bean
     public Set<ExpiredPbStatement> pushedPbZenTransactionStorage() {
         return new HashSet<>();
+    }
+
+    @Bean
+    public List<String> configsToPrint() {
+        return asList(
+                "applicationConfig: [classpath:/application.properties]",
+                "class path resource [date.format.properties]",
+                "class path resource [custom.properties]"
+        );
     }
 
 }

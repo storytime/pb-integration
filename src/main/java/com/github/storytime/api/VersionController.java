@@ -1,33 +1,25 @@
 package com.github.storytime.api;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.github.storytime.service.VersionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import static com.github.storytime.config.props.Constants.*;
-import static java.util.stream.Collectors.joining;
+import static com.github.storytime.config.props.Constants.API_PREFIX;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @RestController
 public class VersionController {
 
-    private static final Logger LOGGER = LogManager.getLogger(VersionController.class);
+    private final VersionService versionService;
+
+    @Autowired
+    public VersionController(final VersionService versionService) {
+        this.versionService = versionService;
+    }
 
     @GetMapping(value = API_PREFIX + "/version", produces = TEXT_PLAIN_VALUE)
     public String getVersion() {
-        try (final InputStream is = getClass().getClassLoader().getResourceAsStream(VERSION_PROPERTIES)) {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            final String version = reader.lines().collect(joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR).trim();
-            LOGGER.info("Return version: {} ", version);
-            return version;
-        } catch (final Exception e) {
-            LOGGER.error("Cannot read version", e);
-            return N_A;
-        }
+        return versionService.readVersion();
     }
 }
