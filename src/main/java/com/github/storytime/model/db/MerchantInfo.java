@@ -4,6 +4,7 @@ package com.github.storytime.model.db;
 import com.github.storytime.model.db.inner.AdditionalComment;
 import com.github.storytime.model.db.inner.SyncPriority;
 
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -40,6 +41,9 @@ public class MerchantInfo extends BaseEntity {
 
     @Enumerated(STRING)
     private SyncPriority syncPriority;
+
+    @Column(length = 128)
+    private String shortDesc;
 
     public List<AdditionalComment> getAdditionalComment() {
         return additionalComment;
@@ -110,6 +114,15 @@ public class MerchantInfo extends BaseEntity {
 
     public MerchantInfo setSyncPriority(SyncPriority syncPriority) {
         this.syncPriority = syncPriority;
+        return this;
+    }
+
+    public String getShortDesc() {
+        return shortDesc;
+    }
+
+    public MerchantInfo setShortDesc(String shortDesc) {
+        this.shortDesc = shortDesc;
         return this;
     }
 }

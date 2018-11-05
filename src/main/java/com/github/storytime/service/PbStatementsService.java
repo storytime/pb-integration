@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
+import static com.github.storytime.config.props.Constants.EMPTY;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
@@ -36,6 +37,7 @@ import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.right;
@@ -82,8 +84,9 @@ public class PbStatementsService {
         final ZonedDateTime now = now().withZoneSameInstant(of(u.getTimeZone()));
         final ZonedDateTime endDate = between(startDate, now).toMillis() < m.getSyncPeriod() ? now : startDate.plus(period);
 
-        LOGGER.info("Syncing u: {} mId: {} mNumb: {} sd: {} lastSync: {} card: {}",
+        LOGGER.info("Syncing u: {} desc: {} mId: {} mNumb: {} sd: {} lastSync: {} card: {}",
                 u.getId(),
+                ofNullable(m.getShortDesc()).orElse(EMPTY),
                 m.getId(),
                 m.getMerchantId(),
                 dateService.toIsoFormat(startDate),
@@ -126,7 +129,8 @@ public class PbStatementsService {
         } catch (PbSignatureException e) {
             // roll back for one day
             final long rollBackStartDate = startDate.minusHours(ONE).toInstant().toEpochMilli();
-            LOGGER.error("Merch {}, card {} invalid signature, going to roll back from: {} to: {}",
+            LOGGER.error("Desc: {} merch: {}, card: {} invalid signature, going to roll back from: {} to: {}",
+                    ofNullable(m.getShortDesc()).orElse(EMPTY),
                     m.getMerchantId(),
                     m.getCardNumber(),
                     dateService.toIsoFormat(startDate),
