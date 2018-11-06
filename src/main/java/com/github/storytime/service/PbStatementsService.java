@@ -84,7 +84,7 @@ public class PbStatementsService {
         final ZonedDateTime now = now().withZoneSameInstant(of(u.getTimeZone()));
         final ZonedDateTime endDate = between(startDate, now).toMillis() < m.getSyncPeriod() ? now : startDate.plus(period);
 
-        LOGGER.info("Syncing u: {} desc: {} mId: {} mNumb: {} sd: {} lastSync: {} card: {}",
+        LOGGER.info("Syncing u: [{}] desc: [{}] mId: [{}] mNumb: [{}] sd: [{}] lastSync: [{}] card: [{}]",
                 u.getId(),
                 ofNullable(m.getShortDesc()).orElse(EMPTY),
                 m.getId(),
@@ -129,7 +129,7 @@ public class PbStatementsService {
         } catch (PbSignatureException e) {
             // roll back for one day
             final long rollBackStartDate = startDate.minusHours(ONE).toInstant().toEpochMilli();
-            LOGGER.error("Desc: {} merch: {}, card: {} invalid signature, going to roll back from: {} to: {}",
+            LOGGER.error("Desc: {} merch: {}, card: {} invalid signature, rollback from: {} to: {}",
                     ofNullable(m.getShortDesc()).orElse(EMPTY),
                     m.getMerchantId(),
                     m.getCardNumber(),
