@@ -129,7 +129,7 @@ public class PbStatementsService {
         } catch (PbSignatureException e) {
             // roll back for one day
             final long rollBackStartDate = startDate.minusHours(ONE).toInstant().toEpochMilli();
-            LOGGER.error("Desc: {} merch: {}, card: {} invalid signature, rollback from: {} to: {}",
+            LOGGER.error("Desc: [{}] merch: [{}], card: [{}] invalid signature, rollback from: [{}] to: [{}]",
                     ofNullable(m.getShortDesc()).orElse(EMPTY),
                     m.getMerchantId(),
                     m.getCardNumber(),

@@ -32,7 +32,7 @@ public class PrintAllConfigProperties {
     public void handleContextRefreshed(ContextRefreshedEvent event) {
         try {
             printActiveProperties((ConfigurableEnvironment) event.getApplicationContext().getEnvironment());
-            LOGGER.info("========== Build date {} ==========", versionService.readVersion());
+            LOGGER.debug("========== Build date {} ==========", versionService.readVersion());
         } catch (Exception e) {
             LOGGER.error("Cannot print properties {}", e.getMessage());
         }
@@ -40,7 +40,7 @@ public class PrintAllConfigProperties {
 
     private void printActiveProperties(ConfigurableEnvironment env) {
         configsToPrint.forEach(configName -> {
-            LOGGER.info("========== {} PROPERTIES ==========", configName);
+            LOGGER.debug("========== {} PROPERTIES ==========", configName);
             final List<MapPropertySource> propertySources = new ArrayList<>();
             env.getPropertySources().forEach(it -> {
                 if (it instanceof MapPropertySource && it.getName().contains(configName)) {
@@ -53,7 +53,7 @@ public class PrintAllConfigProperties {
                     .flatMap(Collection::stream)
                     .distinct()
                     .sorted()
-                    .forEach(key -> LOGGER.info("\t{}={}", key, env.getProperty(key)));
+                    .forEach(key -> LOGGER.debug("\t{}={}", key, env.getProperty(key)));
 
         });
     }

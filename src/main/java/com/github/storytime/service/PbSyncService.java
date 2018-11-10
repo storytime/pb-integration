@@ -95,7 +95,7 @@ public class PbSyncService {
                 doUpdateZenInfoRequest(user, newPbDataList, updateNeeded);
             }
 
-            //commit that sync WAS OK
+            //      commit that sync WAS OK
             if (updateNeeded.get(IS_UPDATE_NEEDED)) {
                 merchantService.saveAll(merchants);
                 alreadyMappedPbZenTransaction.addAll(maybePushed);

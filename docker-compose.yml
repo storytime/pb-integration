@@ -14,7 +14,7 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 50MB
+          memory: 100MB
       restart_policy:
         condition: on-failure
 
@@ -67,8 +67,8 @@ services:
     - pb-integration
     networks:
     - backend
-    #    ports:
-    #    - 9090:9090
+    ports:
+    - 9090:9090
     deploy:
       replicas: 1
       resources:

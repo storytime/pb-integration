@@ -8,6 +8,8 @@ buildscript {
         flywayVersion = '5.2.1'
         jUnitParamsVersion = '1.1.1'
         jfairyVersion = '0.5.9'
+        httpApacheClientVersion = '4.5.6'
+        logBookVersion = '1.11.1'
     }
     repositories {
         mavenCentral()
@@ -46,11 +48,11 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.postgresql:postgresql:$postgresqlVersion")
-
+    compile("org.zalando:logbook-spring-boot-starter:$logBookVersion")
+    compile("org.apache.httpcomponents:httpclient:$httpApacheClientVersion")
     compile("org.apache.commons:commons-lang3:$commonsVersion")
     compile("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
     compile("org.flywaydb:flyway-core:$flywayVersion")
-
     compile('io.micrometer:micrometer-registry-prometheus:latest.release')
     compile('org.springframework.boot:spring-boot-starter-actuator')
 
