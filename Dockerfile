@@ -2,7 +2,7 @@ FROM openjdk:8-jre-alpine
 RUN apk add tzdata
 RUN ls /usr/share/zoneinfo
 RUN cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime
-RUN echo "Europe/Kiev" >  /etc/timezone
+#RUN echo "Europe/Kiev" >  /etc/timezone
 RUN date
 COPY build/libs/pb-integration.jar /var/webapps/
 EXPOSE 10080
