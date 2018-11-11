@@ -129,10 +129,9 @@ public class PbStatementsService {
         } catch (PbSignatureException e) {
             // roll back for one day
             final long rollBackStartDate = startDate.minusHours(ONE).toInstant().toEpochMilli();
-            LOGGER.error("Desc: [{}] merch: [{}], card: [{}] invalid signature, rollback from: [{}] to: [{}]",
+            LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]",
                     ofNullable(m.getShortDesc()).orElse(EMPTY),
                     m.getMerchantId(),
-                    m.getCardNumber(),
                     dateService.toIsoFormat(startDate),
                     dateService.toIsoFormat(rollBackStartDate, u));
             merchantService.save(m.setSyncStartDate(rollBackStartDate));
@@ -144,16 +143,16 @@ public class PbStatementsService {
     public Optional<ResponseEntity<String>> pullPbTransactions(final Request requestToBank) {
         try {
             final String pbTransactionsUrl = customConfig.getPbTransactionsUrl();
-            LOGGER.debug("Going to call: {}", pbTransactionsUrl);
+            LOGGER.debug("Going to call:[{}]", pbTransactionsUrl);
             final StopWatch st = new StopWatch();
             st.start();
             final Optional<ResponseEntity<String>> response = Optional.of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
             st.stop();
-            LOGGER.debug("Receive bank response, execution time: {} sec", st.getTotalTimeSeconds());
+            LOGGER.debug("Receive bank response, execution time:[{}] sec", st.getTotalTimeSeconds());
             pbRequestTimeTimer.record(st.getTotalTimeMillis(), TimeUnit.MILLISECONDS);
             return response;
         } catch (Exception e) {
-            LOGGER.error("Cannot do bank request: {}", e.getMessage());
+            LOGGER.error("Cannot do bank request:[{}]", e.getMessage());
             return empty();
         }
     }

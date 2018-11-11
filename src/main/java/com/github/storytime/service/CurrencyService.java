@@ -115,7 +115,7 @@ public class CurrencyService {
 
     private Supplier<Optional<CurrencyRates>> getNbuCurrencyRates(ZonedDateTime lastDay) {
         return () -> {
-            LOGGER.info("Pulling NBU currency form external service for date: {}", lastDay);
+            LOGGER.info("Pulling NBU currency form external service for date:[{}]", lastDay);
 
             //todo what is fail?
             final Optional<MinfinResponse> minFinRates = pullMinfinRatesForDate(dateService.toMinfinFormat(lastDay));
@@ -168,7 +168,7 @@ public class CurrencyService {
         try {
             return ofNullable(restTemplate.getForEntity(customConfig.getMinExchangeUrl() + lastBusinessDay, MinfinResponse.class).getBody());
         } catch (Exception e) {
-            LOGGER.error("Cannot get NBU USD minfin rate for date: {}, reason: {}", lastBusinessDay, e.getMessage());
+            LOGGER.error("Cannot get NBU USD minfin rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
             return empty();
         }
     }
@@ -178,7 +178,7 @@ public class CurrencyService {
             final ResponseEntity<CashResponse[]> forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
             return ofNullable(Arrays.asList(forEntity.getBody()));
         } catch (Exception e) {
-            LOGGER.error("Cannot get pb cash rate reason: {}", e.getMessage());
+            LOGGER.error("Cannot get pb cash rate reason:[{}]", e.getMessage());
             return empty();
         }
     }
@@ -190,7 +190,7 @@ public class CurrencyService {
 
             return body.getExchangeRate().isEmpty() ? empty() : of(body);
         } catch (Exception e) {
-            LOGGER.error("Cannot get NBU USD PB rate for date: {}, reason: {}", lastBusinessDay, e.getMessage());
+            LOGGER.error("Cannot get NBU USD PB rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
             return empty();
         }
     }

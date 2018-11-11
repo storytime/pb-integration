@@ -128,7 +128,7 @@ public class PbToZenTransactionMapper {
                         if (regExpService.isInternalFrom(transactionDesc)) {
                             final String id = transferInfoService.generateIdForFromTransfer(u, s, opAmount, transactionDesc);
                             if (transferInfoService.isAlreadyHandled(id)) {
-                                LOGGER.info("FROM transfer id: {} that is already handled", id);
+                                LOGGER.info("FROM transfer id:[{}] that is already handled", id);
                                 return null;
                             }
 
@@ -139,10 +139,10 @@ public class PbToZenTransactionMapper {
                                 t.setOutcome(opAmount);
                                 t.setIncomeBankID(null);
                                 transferInfoService.save(id);
-                                LOGGER.info("FROM transfer storage id: {}, account id: {}", id, fromAcc.get());
+                                LOGGER.info("FROM transfer storage id:[{}], account id:[{}]", id, fromAcc.get());
 
                             } else {
-                                LOGGER.info("FROM transfer storage id: {}, without account", id);
+                                LOGGER.info("FROM transfer storage id:[{}], without account", id);
                                 t.setComment("Перевод <-- " + regExpService.getCardDigits(transactionDesc));
                                 transferInfoService.save(id);
                                 return t;
@@ -152,7 +152,7 @@ public class PbToZenTransactionMapper {
                         if (regExpService.isInternalTo(transactionDesc)) {
                             final String id = transferInfoService.generateIdForToTransfer(u, s, opAmount, transactionDesc);
                             if (transferInfoService.isAlreadyHandled(id)) {
-                                LOGGER.info("TO transfer id: {} that is already handled", id);
+                                LOGGER.info("TO transfer id:[{}] that is already handled", id);
                                 return null;
                             }
 
@@ -164,9 +164,9 @@ public class PbToZenTransactionMapper {
                                 t.setOutcomeBankID(null);
                                 t.setIncomeAccount(toAcc.get());
                                 transferInfoService.save(id);
-                                LOGGER.info("TO transfer storage id: {}, account id: {}", id, toAcc.get());
+                                LOGGER.info("TO transfer storage id:[{}], account id:[{}]", id, toAcc.get());
                             } else {
-                                LOGGER.info("TO transfer storage id: {}, without account", id);
+                                LOGGER.info("TO transfer storage id:[{}], without account", id);
                                 t.setComment("Перевод --> " + regExpService.getCardDigits(transactionDesc));
                                 transferInfoService.save(id);
                                 return t;

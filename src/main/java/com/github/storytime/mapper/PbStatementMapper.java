@@ -45,7 +45,7 @@ public class PbStatementMapper {
             if (!body.contains("signature")) { // is error response, wrong ip etc
                 final com.github.storytime.model.jaxb.statement.response.error.Response error =
                         (com.github.storytime.model.jaxb.statement.response.error.Response) jaxbStatementErrorUnmarshaller.unmarshal(new StringReader(body));
-                LOGGER.error("Bank return response with error: {}", error.getData().getError().getMessage());
+                LOGGER.error("Bank return response with error:[{}]", error.getData().getError().getMessage());
                 return emptyList();
             }
 
@@ -56,7 +56,7 @@ public class PbStatementMapper {
                     .map(Response.Data.Info.Statements::getStatement)
                     .orElse(emptyList());
         } catch (Exception e) {
-            LOGGER.error("Cannot parse bank response: {}", e.getMessage(), e);
+            LOGGER.error("Cannot parse bank response:[{}]", e.getMessage(), e);
             return emptyList();
         }
     }
