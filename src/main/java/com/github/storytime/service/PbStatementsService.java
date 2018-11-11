@@ -45,7 +45,6 @@ import static org.apache.commons.lang3.StringUtils.right;
 @Service
 public class PbStatementsService {
 
-    private static final int ONE = 1;
     private static final Logger LOGGER = LogManager.getLogger(PbStatementsService.class);
 
     private final RestTemplate restTemplate;
@@ -84,7 +83,7 @@ public class PbStatementsService {
         final ZonedDateTime now = now().withZoneSameInstant(of(u.getTimeZone()));
         final ZonedDateTime endDate = between(startDate, now).toMillis() < m.getSyncPeriod() ? now : startDate.plus(period);
 
-        LOGGER.info("Syncing u: [{}] desc: [{}] mId: [{}] mNumb: [{}] sd: [{}] lastSync: [{}] card: [{}]",
+        LOGGER.info("Syncing u:[{}] desc:[{}] mId:[{}] mNumb:[{}] sd:[{}] lastSync:[{}] card:[{}]",
                 u.getId(),
                 ofNullable(m.getShortDesc()).orElse(EMPTY),
                 m.getId(),
@@ -128,7 +127,7 @@ public class PbStatementsService {
             return onlyNewPbTransactions;
         } catch (PbSignatureException e) {
             // roll back for one day
-            final long rollBackStartDate = startDate.minusHours(ONE).toInstant().toEpochMilli();
+            final long rollBackStartDate = startDate.minusHours(customConfig.getPbRollBackPeriod()).toInstant().toEpochMilli();
             LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]",
                     ofNullable(m.getShortDesc()).orElse(EMPTY),
                     m.getMerchantId(),

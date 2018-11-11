@@ -60,6 +60,9 @@ public class CustomConfig {
     @Value("${pushed.pb.zen.transaction.storage.clean.older.millis}")
     private Integer pushedPbZenTransactionStorageCleanOlderMillis;
 
+    @Value("${pb.invalid.signature.rollback.period.hours}")
+    private Integer pbRollBackPeriod;
+
     public String getPbExchangeUrl() {
         return pbExchangeUrl;
     }
@@ -123,5 +126,9 @@ public class CustomConfig {
 
     public Integer getPushedPbZenTransactionStorageCleanOlderMillis() {
         return pushedPbZenTransactionStorageCleanOlderMillis;
+    }
+
+    public Integer getPbRollBackPeriod() {
+        return pbRollBackPeriod;
     }
 }
