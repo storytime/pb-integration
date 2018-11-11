@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static com.github.storytime.config.props.Constants.*;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.time.Instant.now;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
@@ -31,22 +33,23 @@ public class PbToZenAccountMapper {
         this.zenInstrumentsMapper = zenInstrumentsMapper;
     }
 
-    public void mapPbAccountToZen(final List<Statement> statementList, final ZenResponse zenDiff) {
+    public Boolean mapPbAccountToZen(final List<Statement> statementList, final ZenResponse zenDiff) {
         final List<AccountItem> zenAccounts = zenDiff.getAccount();
         // Get accounts from bank response
         final List<String> cardsFromBank = getCardsFromBank(statementList);
 
         if (cardsFromBank.isEmpty()) {
-            return;
+            return FALSE;
         }
 
         // check if current account exists in Zen
         final Optional<AccountItem> existingAccount = isPbAccountExistsInZen(zenAccounts, cardsFromBank);
 
         if (existingAccount.isPresent()) {
-            updateExistingAccount(cardsFromBank, existingAccount.get());
+            return updateExistingAccount(cardsFromBank, existingAccount.get());
         } else {
             zenAccounts.add(createNewZenAccount(statementList, zenDiff, cardsFromBank));
+            return TRUE;
         }
     }
 
@@ -92,16 +95,17 @@ public class PbToZenAccountMapper {
                 .setPayoffStep(null)
                 .setPayoffInterval(null);
 
-        LOGGER.info("Create new account: {} with cards: {}", newZenAccount.getId(), cardsFromBank);
+        LOGGER.info("Create new account:[{}] with cards:[{}]", newZenAccount.getId(), cardsFromBank);
         return newZenAccount;
     }
 
-    private void updateExistingAccount(List<String> cardsFromBank, AccountItem existingAccount) {
+    private Boolean updateExistingAccount(List<String> cardsFromBank, AccountItem existingAccount) {
         final List<String> zenCards = ofNullable(existingAccount.getSyncID()).orElseGet(Collections::emptyList);
 
         // if any new cards
         if (zenCards.containsAll(cardsFromBank)) {
-            LOGGER.debug("No new cards for account: {}", existingAccount.getId());
+            LOGGER.debug("No new cards for account:[{}]", existingAccount.getId());
+            return FALSE;
         } else {
             final List<String> uniqueCards = concat(zenCards.stream(), cardsFromBank.stream())
                     .distinct()
@@ -109,7 +113,8 @@ public class PbToZenAccountMapper {
             existingAccount.getSyncID().clear();
             existingAccount.setSyncID(uniqueCards);
             existingAccount.setChanged(now().toEpochMilli());
-            LOGGER.info("Update existing account {} with cards {}", existingAccount.getId(), uniqueCards);
+            LOGGER.info("Update existing account:[{}] with cards:[{}]", existingAccount.getId(), uniqueCards);
+            return TRUE;
         }
     }
 
