@@ -13,16 +13,16 @@ public class TransactionItem {
     private String date;
 
     @JsonProperty("income")
-    private Float income;
+    private Double income;
 
     @JsonProperty("opIncome")
-    private Float opIncome;
+    private Double opIncome;
 
     @JsonProperty("originalPayee")
     private String originalPayee;
 
     @JsonProperty("opOutcome")
-    private int opOutcome;
+    private Double opOutcome;
 
     @JsonProperty("latitude")
     private Object latitude;
@@ -49,7 +49,7 @@ public class TransactionItem {
     private String outcomeBankID;
 
     @JsonProperty("outcome")
-    private Float outcome;
+    private Double outcome;
 
     @JsonProperty("opOutcomeInstrument")
     private Object opOutcomeInstrument;
@@ -102,20 +102,20 @@ public class TransactionItem {
         return this;
     }
 
-    public Float getIncome() {
+    public Double getIncome() {
         return income;
     }
 
-    public TransactionItem setIncome(Float income) {
+    public TransactionItem setIncome(Double income) {
         this.income = income;
         return this;
     }
 
-    public Float getOpIncome() {
+    public Double getOpIncome() {
         return opIncome;
     }
 
-    public TransactionItem setOpIncome(Float opIncome) {
+    public TransactionItem setOpIncome(Double opIncome) {
         this.opIncome = opIncome;
         return this;
     }
@@ -129,11 +129,11 @@ public class TransactionItem {
         return this;
     }
 
-    public int getOpOutcome() {
+    public Double getOpOutcome() {
         return opOutcome;
     }
 
-    public TransactionItem setOpOutcome(int opOutcome) {
+    public TransactionItem setOpOutcome(Double opOutcome) {
         this.opOutcome = opOutcome;
         return this;
     }
@@ -210,11 +210,11 @@ public class TransactionItem {
         return this;
     }
 
-    public Float getOutcome() {
+    public Double getOutcome() {
         return outcome;
     }
 
-    public TransactionItem setOutcome(Float outcome) {
+    public TransactionItem setOutcome(Double outcome) {
         this.outcome = outcome;
         return this;
     }

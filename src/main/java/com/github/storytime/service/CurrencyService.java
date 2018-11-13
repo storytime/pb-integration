@@ -56,7 +56,7 @@ public class CurrencyService {
         this.currencyRepository = currencyRepository;
     }
 
-    public BigDecimal convertDivide(Float from, Float to) {
+    public BigDecimal convertDivide(Double from, Double to) {
         final BigDecimal cardSum = valueOf(abs(from));
         final BigDecimal operationSum = valueOf(to);
         return cardSum.divide(operationSum, ROUND_HALF_UP).setScale(CURRENCY_SCALE, ROUND_DOWN);

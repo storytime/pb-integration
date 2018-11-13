@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.storytime.config.props.Constants.RATE;
 import static com.github.storytime.config.props.Constants.SPACE_SEPARATOR;
-import static java.lang.Float.valueOf;
 import static java.lang.Math.abs;
 import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
@@ -68,9 +67,9 @@ public class PbToZenTransactionMapper {
                 .map((Statement s) -> {
                     final TransactionItem t = new TransactionItem();
                     final String transactionDesc = regExpService.normalizeDescription(s.getDescription());
-                    final Float opAmount = valueOf(substringBefore(s.getAmount(), SPACE_SEPARATOR));
+                    final Double opAmount = Double.valueOf(substringBefore(s.getAmount(), SPACE_SEPARATOR));
                     final String opCurrency = substringAfter(s.getAmount(), SPACE_SEPARATOR);
-                    final Float cardAmount = valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR));
+                    final Double cardAmount = Double.valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR));
                     final String cardCurrency = substringAfter(s.getCardamount(), SPACE_SEPARATOR);
                     final String accountId = zenDiffService.findAccountIdByPbCard(zenDiff, s.getCard());
                     final Integer currency = zenDiffService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
@@ -179,7 +178,7 @@ public class PbToZenTransactionMapper {
                 .collect(toList());
     }
 
-    private void setAppCode(Statement s, TransactionItem t, Float cardAmount) {
+    private void setAppCode(Statement s, TransactionItem t, Double cardAmount) {
         final String appCode = s.getAppcode();
         if (appCode != null) {
             if (cardAmount > 0) {

@@ -37,7 +37,7 @@ public class AccountItem {
     private Object payoffStep;
 
     @JsonProperty("creditLimit")
-    private int creditLimit;
+    private double creditLimit;
 
     @JsonProperty("company")
     private Integer company;
@@ -52,7 +52,7 @@ public class AccountItem {
     private Object savings;
 
     @JsonProperty("startBalance")
-    private int startBalance;
+    private double startBalance;
 
     @JsonProperty("inBalance")
     private boolean inBalance;
@@ -172,11 +172,11 @@ public class AccountItem {
         return this;
     }
 
-    public int getCreditLimit() {
+    public double getCreditLimit() {
         return creditLimit;
     }
 
-    public AccountItem setCreditLimit(int creditLimit) {
+    public AccountItem setCreditLimit(double creditLimit) {
         this.creditLimit = creditLimit;
         return this;
     }
@@ -217,11 +217,11 @@ public class AccountItem {
         return this;
     }
 
-    public int getStartBalance() {
+    public double getStartBalance() {
         return startBalance;
     }
 
-    public AccountItem setStartBalance(int startBalance) {
+    public AccountItem setStartBalance(double startBalance) {
         this.startBalance = startBalance;
         return this;
     }
