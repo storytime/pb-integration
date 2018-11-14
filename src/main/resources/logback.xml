@@ -10,9 +10,9 @@
     <property name="CONSOLE_LOG_PATTERN"
               value="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
     <property name="FILE_LOG_PATTERN"
-              value="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
     <property name="HTTP_WIRE_LOG_PATTERN"
-              value="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
     <property name="MAIN_LOG_FILE" value="/var/log/pb-integration/pb.integration.log"/>
     <property name="HTTP_WIRE_LOG_FILE" value="/var/log/pb-integration/http.wire.log"/>
 
