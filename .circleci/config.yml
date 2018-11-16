@@ -5,7 +5,7 @@ jobs:
     - image: circleci/openjdk:11.0.1-jdk
     environment:
       TERM: dumb
-      _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      _JAVA_OPTIONS: "-Xmx3072m"
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
     - checkout
@@ -38,7 +38,7 @@ jobs:
     - image: circleci/openjdk:11.0.1-jdk
     environment:
       TERM: dumb
-      _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      _JAVA_OPTIONS: "-Xmx3072m"
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
     - setup_remote_docker:
@@ -71,7 +71,7 @@ jobs:
     - image: circleci/openjdk:11.0.1-jdk
     environment:
       TERM: dumb
-      _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      _JAVA_OPTIONS: "-Xmx3072m"
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3072m"'
     steps:
     - checkout

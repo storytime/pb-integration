@@ -8,8 +8,6 @@ services:
     - 5432:5432
     volumes:
     - db-vol:/var/lib/postgresql/data
-    networks:
-    - backend
     deploy:
       replicas: 1
       resources:
@@ -24,8 +22,6 @@ services:
     - ./variables.env
     volumes:
     - pg-admin-vol:/var/lib/pgadmin
-    networks:
-    - backend
     ports:
     - 5050:80
     deploy:
@@ -43,13 +39,11 @@ services:
     depends_on:
     - postgres
     ports:
-    - 10080:8080
+    - "10080:8080"
     logging:
       driver: json-file
     volumes:
     - pb-log-vol:/var/log/pb-integration
-    networks:
-    - backend
     deploy:
       replicas: 1
       resources:
@@ -65,8 +59,6 @@ services:
     - prometheus-vol:/prometheus
     depends_on:
     - pb-integration
-    networks:
-    - backend
     ports:
     - 9090:9090
     deploy:
@@ -85,8 +77,6 @@ services:
     - grafana-vol:/var/lib/grafana
     depends_on:
     - prometheus
-    networks:
-    - backend
     deploy:
       replicas: 1
       resources:
@@ -131,6 +121,3 @@ volumes:
       type: none
       device: /app/pg-web-admin
       o: bind
-
-networks:
-  backend:
