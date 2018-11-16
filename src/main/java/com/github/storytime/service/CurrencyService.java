@@ -20,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -30,7 +29,10 @@ import static com.github.storytime.config.props.Constants.UAH;
 import static com.github.storytime.model.db.inner.CurrencySource.NBU;
 import static com.github.storytime.model.db.inner.CurrencySource.PB_CASH;
 import static java.lang.Math.abs;
-import static java.math.BigDecimal.*;
+import static java.math.BigDecimal.valueOf;
+import static java.math.RoundingMode.HALF_DOWN;
+import static java.math.RoundingMode.HALF_UP;
+import static java.util.Arrays.asList;
 import static java.util.Optional.*;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -59,13 +61,13 @@ public class CurrencyService {
     public BigDecimal convertDivide(Double from, Double to) {
         final BigDecimal cardSum = valueOf(abs(from));
         final BigDecimal operationSum = valueOf(to);
-        return cardSum.divide(operationSum, ROUND_HALF_UP).setScale(CURRENCY_SCALE, ROUND_DOWN);
+        return cardSum.divide(operationSum, HALF_UP).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
 
     public BigDecimal convertDivide(Float from, BigDecimal rate) {
         final BigDecimal cardSum = valueOf(abs(from));
-        return cardSum.divide(rate, CURRENCY_SCALE, ROUND_HALF_UP).setScale(CURRENCY_SCALE, ROUND_DOWN);
+        return cardSum.divide(rate, CURRENCY_SCALE, HALF_UP).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
     public Optional<CurrencyRates> nbuPrevMouthLastBusinessDayRate(Statement s, String timeZone) {
@@ -74,16 +76,14 @@ public class CurrencyService {
         final long date = lastDay.toInstant().toEpochMilli();
         return currencyRepository
                 .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(NBU, CurrencyType.USD, date)
-                .map(Optional::of)
-                .orElseGet(() -> supplyAsync(getNbuCurrencyRates(lastDay)).join());
+                .or(() -> supplyAsync(getNbuCurrencyRates(lastDay)).join());
     }
 
     public Optional<CurrencyRates> pbCashDayRates(Statement s, String timeZone) {
         final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
         return currencyRepository
                 .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, CurrencyType.USD, startDate.toInstant().toEpochMilli())
-                .map(Optional::of)
-                .orElseGet(() -> supplyAsync(getPbCashDayRates(startDate)).join());
+                .or(() -> supplyAsync(getPbCashDayRates(startDate)).join());
     }
 
     private Supplier<Optional<CurrencyRates>> getPbCashDayRates(ZonedDateTime now) {
@@ -176,7 +176,7 @@ public class CurrencyService {
     private Optional<List<CashResponse>> pullPbCashRate() {
         try {
             final ResponseEntity<CashResponse[]> forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
-            return ofNullable(Arrays.asList(forEntity.getBody()));
+            return of(asList(ofNullable(forEntity.getBody()).orElse(new CashResponse[]{})));
         } catch (Exception e) {
             LOGGER.error("Cannot get pb cash rate reason:[{}]", e.getMessage());
             return empty();
@@ -185,10 +185,7 @@ public class CurrencyService {
 
     private Optional<PbRatesResponse> pullPbRatesForDate(String lastBusinessDay) {
         try {
-            final PbRatesResponse body = restTemplate
-                    .getForEntity(customConfig.getPbExchangeUrl() + lastBusinessDay, PbRatesResponse.class).getBody();
-
-            return body.getExchangeRate().isEmpty() ? empty() : of(body);
+            return ofNullable(restTemplate.getForEntity(customConfig.getPbExchangeUrl() + lastBusinessDay, PbRatesResponse.class).getBody());
         } catch (Exception e) {
             LOGGER.error("Cannot get NBU USD PB rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
             return empty();

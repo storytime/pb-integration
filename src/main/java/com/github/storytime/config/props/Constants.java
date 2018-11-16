@@ -33,6 +33,10 @@ public class Constants {
     public static final int CURRENCY_SCALE = 2;
     public static final String UAH = "UAH";
     public static final String USD = "USD";
+    public static final int COMMENT_SIZE = 50;
+    public static final String NBU_LAST_DAY = "In: ";
+    public static final String USD_COMMENT = "$ ";
+    public static final String BANK_RATE = "BR: ";
 
     private Constants() {
     }

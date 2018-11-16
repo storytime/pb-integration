@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+
+import static java.util.Optional.of;
 
 @Service
 public class UserService {
@@ -21,8 +24,8 @@ public class UserService {
         return repository.findAll();
     }
 
-    public void updateUserLastZenSyncTime(final AppUser u) {
-        repository.save(u);
+    public Optional<AppUser> updateUserLastZenSyncTime(final AppUser u) {
+        return of(repository.save(u));
     }
 
 }

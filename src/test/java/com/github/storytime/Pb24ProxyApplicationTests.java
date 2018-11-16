@@ -42,7 +42,7 @@
 //
 //        final String s = Post("https://api.privatbank.ua/p24api/rest_fiz")
 //                .bodyString(xmlString1, ContentType.APPLICATION_FORM_URLENCODED)
-//                .execute().returnContent().asString(UTF_8);
+//                .generate().returnContent().asString(UTF_8);
 //
 //        System.out.println(s);
 //    }

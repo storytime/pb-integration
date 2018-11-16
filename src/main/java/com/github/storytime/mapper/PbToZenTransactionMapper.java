@@ -60,7 +60,7 @@ public class PbToZenTransactionMapper {
     public List<TransactionItem> mapPbTransactionToZen(final List<Statement> statementList,
                                                        final ZenResponse zenDiff,
                                                        final AppUser u) {
-        // TODO: cheat to sort transactions; java 9+ clock has nano time
+
         final AtomicInteger i = new AtomicInteger(0);
         return statementList
                 .stream()

@@ -35,9 +35,6 @@ public class PbToZenMapper {
                                                           final ZenResponse zenDiff,
                                                           final AppUser appUser) {
 
-        /*
-            ZM don't calculates balance correctly when TR and NOT UPDATED accounts are pushed
-         */
         final boolean isAccountsPushNeeded = newPbTransaction
                 .stream()
                 .map(t -> pbToZenAccountMapper.mapPbAccountToZen(t, zenDiff))
