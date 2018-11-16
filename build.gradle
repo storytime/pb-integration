@@ -10,6 +10,8 @@ buildscript {
         jfairyVersion = '0.5.9'
         httpApacheClientVersion = '4.5.6'
         logBookVersion = '1.11.1'
+        jaxbImplVersion = '2.3.1'
+        jaxbCoreVersion = '2.3.0.1'
     }
     repositories {
         mavenCentral()
@@ -55,6 +57,8 @@ dependencies {
     compile("org.flywaydb:flyway-core:$flywayVersion")
     compile('io.micrometer:micrometer-registry-prometheus:latest.release')
     compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile("com.sun.xml.bind:jaxb-impl:$jaxbImplVersion")
+    compile("com.sun.xml.bind:jaxb-core:$jaxbCoreVersion")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile ("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
