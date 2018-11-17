@@ -15,12 +15,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.storytime.config.props.Constants.RATE;
 import static com.github.storytime.config.props.Constants.SPACE_SEPARATOR;
 import static java.lang.Math.abs;
-import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
@@ -61,7 +59,6 @@ public class PbToZenTransactionMapper {
                                                        final ZenResponse zenDiff,
                                                        final AppUser u) {
 
-        final AtomicInteger i = new AtomicInteger(0);
         return statementList
                 .stream()
                 .map((Statement s) -> {
@@ -78,7 +75,7 @@ public class PbToZenTransactionMapper {
 
                     t.setId(randomUUID().toString());
                     t.setChanged(0);
-                    t.setCreated(now().toEpochMilli() + i.incrementAndGet());
+                    t.setCreated(dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().toEpochMilli());
                     t.setUser(zenDiff.getUser().stream().findFirst()
                             .orElseThrow(() -> new ZenUserNotFoundException(textProperties.getZenUserNotFound())).getId());
                     t.setDeleted(false);

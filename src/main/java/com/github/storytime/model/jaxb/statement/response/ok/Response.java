@@ -165,7 +165,7 @@ public class Response {
                     @XmlAttribute(name = "description")
                     protected String description;
 
-                    @XmlAttribute(name = "description", required = false)
+                    @XmlAttribute(name = "description")
                     protected String customComment;
 
                     public String getCustomComment() {
