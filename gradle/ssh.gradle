@@ -21,9 +21,9 @@ task uploadComposeFileToServer {
     doLast {
         ssh.run {
             session(remotes.devServer) {
-                put from: "docker-compose.yml", into: "/tmp/docker-compose.yml"
-                put from: "variables.env", into: "/tmp/variables.env"
-                put from: "./prometheus.yml", into: "/tmp/prometheus.yml"
+                put from: "D:\\pb-integration-tmp\\docker-compose.yml", into: "/tmp/docker-compose.yml"
+                put from: "D:\\pb-integration-tmp\\variables.env", into: "/tmp/variables.env"
+                put from: "D:\\pb-integration-tmp\\prometheus.yml", into: "/tmp/prometheus.yml"
                 // need to avoid user name
                 execute("mv /tmp/docker-compose.yml /app/docker-compose.yml", pty: true)
                 execute("mv /tmp/variables.env  /app/variables.env", pty: true)
