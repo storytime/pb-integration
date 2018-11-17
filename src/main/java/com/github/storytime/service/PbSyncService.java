@@ -96,9 +96,7 @@ public class PbSyncService {
         });
     }
 
-    private void doUpdateZenInfoRequest(final AppUser appUser,
-                                        final List<List<Statement>> newPbData,
-                                        final OnSuccess onSuccess) {
+    private void doUpdateZenInfoRequest(final AppUser appUser, final List<List<Statement>> newPbData, final OnSuccess onSuccess) {
         supplyAsync(() -> zenDiffService.getZenDiffByUser(appUser))
                 .thenAccept(zd -> zd
                         .ifPresent(zenDiff -> {
