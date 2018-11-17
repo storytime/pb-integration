@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:11.0.1-jre-slim-sid
 RUN ls /usr/share/zoneinfo
 RUN cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime
 RUN echo "Europe/Kiev" >  /etc/timezone
