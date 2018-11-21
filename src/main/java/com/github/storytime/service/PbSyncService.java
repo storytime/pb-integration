@@ -21,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -63,13 +64,16 @@ public class PbSyncService {
                 return;
             }
 
-            final List<List<Statement>> newPbDataList = merchants
+            final List<CompletableFuture<List<Statement>>> cfList = merchants
                     .stream()
                     .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo))
-                    .collect(toList())
-                    .stream()
-                    .map(CompletableFuture::join) // get doUpdateZenInfoRequest result
-                    .collect(toList());
+                    .collect(Collectors.toList());
+
+            // wait and get all data from completed futures
+            final List<List<Statement>> newPbDataList = CompletableFuture
+                    .allOf(cfList.toArray(new CompletableFuture[merchants.size()]))
+                    .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toList()))
+                    .getNow(emptyList());
 
             final List<Statement> allNewPbData = newPbDataList
                     .stream()
