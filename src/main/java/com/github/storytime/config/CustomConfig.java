@@ -42,6 +42,12 @@ public class CustomConfig {
     @Value("${async.executor.thread.prefix}")
     private String asyncThreadPrefix;
 
+    @Value("${scheduler.executor.core.pool.size}")
+    private Integer schedulerCorePoolSize;
+
+    @Value("${scheduler.executor.thread.prefix}")
+    private String schedulerThreadPrefix;
+
     @Value("${verbal.regexp.pb.comment.separator}")
     private String pbCommentSeparator;
 
@@ -130,5 +136,13 @@ public class CustomConfig {
 
     public Integer getPbRollBackPeriod() {
         return pbRollBackPeriod;
+    }
+
+    public Integer getSchedulerCorePoolSize() {
+        return schedulerCorePoolSize;
+    }
+
+    public String getSchedulerThreadPrefix() {
+        return schedulerThreadPrefix;
     }
 }
