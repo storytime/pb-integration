@@ -21,7 +21,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -73,9 +72,9 @@ public class PbSyncService {
 
             // wait and get all data from completed futures
             final List<List<Statement>> newPbDataList = CompletableFuture
-                    .allOf(cfList.toArray(new CompletableFuture[merchants.size()]))
-                    .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toList()))
-                    .getNow(emptyList());
+                    .allOf(cfList.toArray(new CompletableFuture[merchants.size()])) // wait for cf completion
+                    .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toList())) // collect results from all cf
+                    .join();
 
             final List<Statement> allNewPbData = newPbDataList
                     .stream()
