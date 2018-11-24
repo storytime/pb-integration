@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_prod_artifact:
     docker:
-    - image: circleci/openjdk:11.0.1-jdk
+    - image: circleci/11.0.1-jdk-oraclelinux7
     environment:
       TERM: dumb
       _JAVA_OPTIONS: "-Xmx3072m"
@@ -35,7 +35,7 @@ jobs:
 
   build_prod_docker_image:
     docker:
-    - image: circleci/openjdk:11.0.1-jdk
+    - image: circleci/11.0.1-jdk-oraclelinux7
     environment:
       TERM: dumb
       _JAVA_OPTIONS: "-Xmx3072m"
@@ -68,7 +68,7 @@ jobs:
   ### DEVELOP (clean build and do sonar tests)
   build_and_verify_on_sonar:
     docker:
-    - image: circleci/openjdk:11.0.1-jdk
+    - image: circleci/11.0.1-jdk-oraclelinux7
     environment:
       TERM: dumb
       _JAVA_OPTIONS: "-Xmx3072m"
