@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +22,7 @@ import java.util.function.Function;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
@@ -61,7 +61,7 @@ public class PbSyncService {
             final List<MerchantInfo> merchants = selectFunction.apply(merchantService);
 
             if (merchants.isEmpty()) {
-                LOGGER.warn("There are no merchants to sync");
+                LOGGER.debug("There are no merchants to sync");
                 return;
             }
 
@@ -70,36 +70,34 @@ public class PbSyncService {
                     .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo))
                     .collect(toList());
 
-            // wait and get all data from completed futures
-            final List<List<Statement>> newPbDataList = CompletableFuture
+            CompletableFuture // wait and get all data from completed futures
                     .allOf(cfList.toArray(new CompletableFuture[merchants.size()])) // wait for cf completion
                     .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toList())) // collect results from all cf
-                    .join();
-
-            final List<Statement> allNewPbData = newPbDataList
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .collect(toList());
-
-            final List<ExpiredPbStatement> maybePushed = new ArrayList<>();
-            allNewPbData.forEach(t -> {
-                final ExpiredPbStatement expiredPbStatement = new ExpiredPbStatement(t);
-                if (!alreadyMappedPbZenTransaction.contains(expiredPbStatement)) {
-                    maybePushed.add(expiredPbStatement);
-                }
-            });
-
-            if (maybePushed.isEmpty()) {
-                LOGGER.info("No new transaction for user:[{}] Nothing to push in current sync thread", user.getId());
-                merchantService.saveAll(merchants);
-            } else {
-                LOGGER.info("User:[{}] has:[{}] transactions sync period", user.getId(), maybePushed.size());
-                doUpdateZenInfoRequest(user, newPbDataList, () -> {
-                    merchantService.saveAll(merchants);
-                    alreadyMappedPbZenTransaction.addAll(maybePushed);
-                });
-            }
+                    .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchants, newPbDataList)); // proceed data
         });
+    }
+
+    public void handlePbCfRequestData(final AppUser user,
+                                      final List<MerchantInfo> merchants,
+                                      final List<List<Statement>> newPbDataList) {
+
+        final List<ExpiredPbStatement> maybeNotPushed = newPbDataList
+                .stream()
+                .flatMap(Collection::stream)
+                .map(ExpiredPbStatement::new)
+                .filter(es -> !alreadyMappedPbZenTransaction.contains(es))
+                .collect(toUnmodifiableList());
+
+        if (maybeNotPushed.isEmpty()) {
+            LOGGER.info("No new transaction for user:[{}] Nothing to push in current sync thread", user.getId());
+            merchantService.saveAll(merchants);
+        } else {
+            LOGGER.info("User:[{}] has:[{}] transactions sync period", user.getId(), maybeNotPushed.size());
+            doUpdateZenInfoRequest(user, newPbDataList, () -> {
+                merchantService.saveAll(merchants);
+                alreadyMappedPbZenTransaction.addAll(maybeNotPushed);
+            });
+        }
     }
 
     private void doUpdateZenInfoRequest(final AppUser appUser, final List<List<Statement>> newPbData, final OnSuccess onSuccess) {
