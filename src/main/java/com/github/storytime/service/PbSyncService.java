@@ -18,8 +18,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -30,13 +30,13 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class PbSyncService {
 
     private static final Logger LOGGER = getLogger(PbSyncService.class);
-    private static final String IS_UPDATE_NEEDED = "isUpdateNeeded";
 
     private final MerchantService merchantService;
     private final PbStatementsService pbStatementsService;
     private final UserService userService;
     private final ZenDiffService zenDiffService;
     private final PbToZenMapper pbToZenMapper;
+    private final Executor cfThreadPool;
     private final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction;
 
     @Autowired
@@ -45,10 +45,12 @@ public class PbSyncService {
                          final UserService userService,
                          final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction,
                          final ZenDiffService zenDiffService,
+                         final Executor cfThreadPool,
                          final PbToZenMapper pbToZenMapper) {
         this.merchantService = merchantService;
         this.userService = userService;
         this.zenDiffService = zenDiffService;
+        this.cfThreadPool = cfThreadPool;
         this.alreadyMappedPbZenTransaction = alreadyMappedPbZenTransaction;
         this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
@@ -67,7 +69,7 @@ public class PbSyncService {
             final List<CompletableFuture<List<Statement>>> cfList = merchants
                     .stream()
                     .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo))
-                    .collect(Collectors.toList());
+                    .collect(toList());
 
             // wait and get all data from completed futures
             final List<List<Statement>> newPbDataList = CompletableFuture
@@ -78,7 +80,7 @@ public class PbSyncService {
             final List<Statement> allNewPbData = newPbDataList
                     .stream()
                     .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
+                    .collect(toList());
 
             final List<ExpiredPbStatement> maybePushed = new ArrayList<>();
             allNewPbData.forEach(t -> {
@@ -102,7 +104,7 @@ public class PbSyncService {
     }
 
     private void doUpdateZenInfoRequest(final AppUser appUser, final List<List<Statement>> newPbData, final OnSuccess onSuccess) {
-        supplyAsync(() -> zenDiffService.getZenDiffByUser(appUser))
+        supplyAsync(() -> zenDiffService.getZenDiffByUser(appUser), cfThreadPool)
                 .thenAccept(zd -> zd
                         .ifPresent(zenDiff -> {
                             pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, appUser)

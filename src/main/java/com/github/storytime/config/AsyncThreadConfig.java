@@ -35,14 +35,23 @@ public class AsyncThreadConfig implements AsyncConfigurer, SchedulingConfigurer 
         return executor;
     }
 
-
     @Bean
     public ThreadPoolTaskScheduler scheduledTaskExecutor() {
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(customConfig.getSchedulerCorePoolSize());
         scheduler.setThreadNamePrefix(customConfig.getSchedulerThreadPrefix());
         scheduler.initialize();
         return scheduler;
+    }
+
+    @Bean
+    public Executor cfThreadPool() {
+        final ThreadPoolTaskExecutor cfExecutor = new ThreadPoolTaskExecutor();
+        cfExecutor.setCorePoolSize(customConfig.getCfCorePoolSize());
+        cfExecutor.setMaxPoolSize(customConfig.getCfMaxPoolSize());
+        cfExecutor.setThreadNamePrefix(customConfig.getCfThreadPrefix());
+        cfExecutor.initialize();
+        return cfExecutor;
     }
 
     @Override

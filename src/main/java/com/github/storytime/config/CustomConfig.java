@@ -69,6 +69,15 @@ public class CustomConfig {
     @Value("${pb.invalid.signature.rollback.period.hours}")
     private Integer pbRollBackPeriod;
 
+    @Value("${cf.executor.core.pool.size}")
+    private Integer cfCorePoolSize;
+
+    @Value("${cf.executor.max.pool.size}")
+    private Integer cfMaxPoolSize;
+
+    @Value("${cf.executor.thread.prefix}")
+    private String cfThreadPrefix;
+
     public String getPbExchangeUrl() {
         return pbExchangeUrl;
     }
@@ -104,7 +113,6 @@ public class CustomConfig {
     public String getAsyncThreadPrefix() {
         return asyncThreadPrefix;
     }
-
 
     public String getPbCommentSeparator() {
         return pbCommentSeparator.trim();
@@ -144,5 +152,18 @@ public class CustomConfig {
 
     public String getSchedulerThreadPrefix() {
         return schedulerThreadPrefix;
+    }
+
+    public Integer getCfCorePoolSize() {
+        return cfCorePoolSize;
+    }
+
+    public Integer getCfMaxPoolSize() {
+        return cfMaxPoolSize;
+    }
+
+
+    public String getCfThreadPrefix() {
+        return cfThreadPrefix;
     }
 }

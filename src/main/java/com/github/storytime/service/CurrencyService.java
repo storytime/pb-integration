@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.CURRENCY_SCALE;
@@ -45,16 +46,19 @@ public class CurrencyService {
     private final CurrencyRepository currencyRepository;
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
+    private final Executor cfThreadPool;
 
     @Autowired
     public CurrencyService(final DateService dateService,
                            final RestTemplate restTemplate,
                            final CustomConfig customConfig,
+                           final Executor cfThreadPool,
                            final CurrencyRepository currencyRepository) {
 
         this.dateService = dateService;
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
+        this.cfThreadPool = cfThreadPool;
         this.currencyRepository = currencyRepository;
     }
 
@@ -76,14 +80,14 @@ public class CurrencyService {
         final long date = lastDay.toInstant().toEpochMilli();
         return currencyRepository
                 .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(NBU, CurrencyType.USD, date)
-                .or(() -> supplyAsync(getNbuCurrencyRates(lastDay)).join());
+                .or(() -> supplyAsync(getNbuCurrencyRates(lastDay), cfThreadPool).join());
     }
 
     public Optional<CurrencyRates> pbCashDayRates(Statement s, String timeZone) {
         final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
         return currencyRepository
                 .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, CurrencyType.USD, startDate.toInstant().toEpochMilli())
-                .or(() -> supplyAsync(getPbCashDayRates(startDate)).join());
+                .or(() -> supplyAsync(getPbCashDayRates(startDate), cfThreadPool).join());
     }
 
     private Supplier<Optional<CurrencyRates>> getPbCashDayRates(ZonedDateTime now) {

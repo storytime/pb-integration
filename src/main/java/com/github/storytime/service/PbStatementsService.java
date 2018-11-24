@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -55,6 +56,7 @@ public class PbStatementsService {
     private final PbStatementMapper pbStatementMapper;
     private final MerchantService merchantService;
     private final Timer pbRequestTimeTimer;
+    private final Executor cfThreadPool;
 
     @Autowired
     public PbStatementsService(final RestTemplate restTemplate,
@@ -62,6 +64,7 @@ public class PbStatementsService {
                                final PbStatementMapper pbStatementMapper,
                                final MerchantService merchantService,
                                final Timer pbRequestTimeTimer,
+                               final Executor cfThreadPool,
                                final StatementRequestBuilder statementRequestBuilder,
                                final AdditionalCommentService additionalCommentService,
                                final DateService dateService) {
@@ -70,6 +73,7 @@ public class PbStatementsService {
         this.pbStatementMapper = pbStatementMapper;
         this.pbRequestTimeTimer = pbRequestTimeTimer;
         this.merchantService = merchantService;
+        this.cfThreadPool = cfThreadPool;
         this.statementRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
         this.dateService = dateService;
@@ -100,7 +104,7 @@ public class PbStatementsService {
                 m.getCardNumber()
         );
 
-        return supplyAsync(pullAndHandlePbRequest(u, m, startDate, endDate, requestToBank));
+        return supplyAsync(pullAndHandlePbRequest(u, m, startDate, endDate, requestToBank), cfThreadPool);
     }
 
     private Supplier<List<Statement>> pullAndHandlePbRequest(final AppUser u,
