@@ -13,8 +13,12 @@
               value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
     <property name="HTTP_WIRE_LOG_PATTERN"
               value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
+
     <property name="MAIN_LOG_FILE" value="/var/log/pb-integration/pb.integration.log"/>
     <property name="HTTP_WIRE_LOG_FILE" value="/var/log/pb-integration/http.wire.log"/>
+    <property name="MAX_LOG_SIZE" value="512MB"/>
+    <property name="TOTAL_CAP_SIZE" value="1GB"/>
+    <property name="MAX_HISTORY_SIZE" value="12"/>
 
 
     <!-- appenders -->
@@ -31,9 +35,9 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${MAIN_LOG_FILE}-%d{yyyy-MM}.%i.gz</fileNamePattern>
-            <maxFileSize>512MB</maxFileSize>
-            <totalSizeCap>1GB</totalSizeCap>
-            <maxHistory>12</maxHistory>
+            <maxFileSize>${MAX_LOG_SIZE}</maxFileSize>
+            <totalSizeCap>${TOTAL_CAP_SIZE}</totalSizeCap>
+            <maxHistory>${MAX_HISTORY_SIZE}</maxHistory>
         </rollingPolicy>
     </appender>
 
@@ -44,9 +48,9 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${HTTP_WIRE_LOG_FILE}-%d{yyyy-MM}.%i.gz</fileNamePattern>
-            <maxFileSize>512MB</maxFileSize>
-            <totalSizeCap>1GB</totalSizeCap>
-            <maxHistory>12</maxHistory>
+            <maxFileSize>${MAX_LOG_SIZE}</maxFileSize>
+            <totalSizeCap>${TOTAL_CAP_SIZE}</totalSizeCap>
+            <maxHistory>${MAX_HISTORY_SIZE}</maxHistory>
         </rollingPolicy>
     </appender>
 

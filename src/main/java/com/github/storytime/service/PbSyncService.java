@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
+import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -70,8 +71,8 @@ public class PbSyncService {
                     .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo))
                     .collect(toList());
 
-            CompletableFuture // wait and get all data from completed futures
-                    .allOf(cfList.toArray(new CompletableFuture[merchants.size()])) // wait for cf completion
+            // wait and get all data from completed futures
+            allOf(cfList.toArray(new CompletableFuture[merchants.size()])) // wait for cf completion
                     .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toList())) // collect results from all cf
                     .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchants, newPbDataList)); // proceed data
         });
@@ -101,6 +102,7 @@ public class PbSyncService {
     }
 
     private void doUpdateZenInfoRequest(final AppUser appUser, final List<List<Statement>> newPbData, final OnSuccess onSuccess) {
+        // step by step in one thread
         supplyAsync(() -> zenDiffService.getZenDiffByUser(appUser), cfThreadPool)
                 .thenAccept(zd -> zd
                         .ifPresent(zenDiff -> {

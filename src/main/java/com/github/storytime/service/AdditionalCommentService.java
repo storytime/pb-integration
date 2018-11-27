@@ -30,13 +30,10 @@ public class AdditionalCommentService {
         };
     }
 
-    public void handle(final List<Statement> onlyNewPbTransactions,
-                       final MerchantInfo merchantInfo,
-                       final String timeZone) {
-
+    public void handle(final List<Statement> onlyNewPbTransactions, final MerchantInfo merchantInfo, final String timeZone) {
 
         onlyNewPbTransactions.forEach(s -> merchantInfo.getAdditionalComment().forEach(ac -> {
-            StringBuilder comment = new StringBuilder(COMMENT_SIZE);
+            final StringBuilder comment = new StringBuilder(COMMENT_SIZE);
             switch (ac) {
                 case NBU_PREV_MOUTH_LAST_BUSINESS_DAY:
                     currencyService
