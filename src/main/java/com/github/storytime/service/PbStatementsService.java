@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
@@ -38,9 +39,10 @@ import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.right;
 
 @Service
@@ -131,7 +133,7 @@ public class PbStatementsService {
             return onlyNewPbTransactions;
         } catch (PbSignatureException e) {
             // roll back for one day
-            final long rollBackStartDate = startDate.minusHours(customConfig.getPbRollBackPeriod()).toInstant().toEpochMilli();
+            final var rollBackStartDate = startDate.minusHours(customConfig.getPbRollBackPeriod()).toInstant().toEpochMilli();
             LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]",
                     ofNullable(m.getShortDesc()).orElse(EMPTY),
                     m.getMerchantId(),
@@ -149,7 +151,7 @@ public class PbStatementsService {
             LOGGER.debug("Going to call:[{}]", pbTransactionsUrl);
             final StopWatch st = new StopWatch();
             st.start();
-            final Optional<ResponseEntity<String>> response = Optional.of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
+            final Optional<ResponseEntity<String>> response = of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
             st.stop();
             LOGGER.debug("Receive bank response, execution time:[{}] sec", st.getTotalTimeSeconds());
             pbRequestTimeTimer.record(st.getTotalTimeMillis(), TimeUnit.MILLISECONDS);
@@ -160,16 +162,27 @@ public class PbStatementsService {
         }
     }
 
-    public List<Statement> filterNewPbTransactions(ZonedDateTime start, ZonedDateTime end, List<Statement> pbStatements, AppUser appUser) {
+    public List<Statement> filterNewPbTransactions(final ZonedDateTime start,
+                                                   final ZonedDateTime end,
+                                                   final List<Statement> pbStatements,
+                                                   final AppUser appUser) {
         final Comparator<ZonedDateTime> comparator = comparing(zdt -> zdt.truncatedTo(MILLIS));
         // sometimes new transactions can be available with delay, so we need to change start time of filtering
         final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
         return pbStatements
                 .stream()
-                .filter(t -> {
-                    final ZonedDateTime tTime = dateService.xmlDateTimeToZoned(t.getTrandate(), t.getTrantime(), appUser.getTimeZone());
-                    return comparator.compare(searchStartTime, tTime) <= 0 && comparator.compare(end, tTime) > 0;
-                }).collect(toList());
+                .filter(getStatementComparatorPredicate(end, appUser, comparator, searchStartTime))
+                .collect(toUnmodifiableList());
+    }
+
+    public Predicate<Statement> getStatementComparatorPredicate(final ZonedDateTime end,
+                                                                final AppUser appUser,
+                                                                final Comparator<ZonedDateTime> comparator,
+                                                                final ZonedDateTime searchStartTime) {
+        return t -> {
+            final ZonedDateTime tTime = dateService.xmlDateTimeToZoned(t.getTrandate(), t.getTrantime(), appUser.getTimeZone());
+            return comparator.compare(searchStartTime, tTime) <= 0 && comparator.compare(end, tTime) > 0;
+        };
     }
 
 }

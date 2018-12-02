@@ -8,15 +8,21 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.TreeSet;
 
 import static com.github.storytime.config.props.Constants.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.time.Instant.now;
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.lang3.StringUtils.join;
@@ -35,22 +41,13 @@ public class PbToZenAccountMapper {
 
     public Boolean mapPbAccountToZen(final List<Statement> statementList, final ZenResponse zenDiff) {
         final List<AccountItem> zenAccounts = zenDiff.getAccount();
-        // Get accounts from bank response
-        final List<String> cardsFromBank = getCardsFromBank(statementList);
-
-        if (cardsFromBank.isEmpty()) {
-            return FALSE;
-        }
+        final List<String> cardsFromBank = getCardsFromBank(statementList); // Get accounts from bank response
 
         // check if current account exists in Zen
-        final Optional<AccountItem> existingAccount = isPbAccountExistsInZen(zenAccounts, cardsFromBank);
-
-        if (existingAccount.isPresent()) {
-            return updateExistingAccount(cardsFromBank, existingAccount.get());
-        } else {
-            zenAccounts.add(createNewZenAccount(statementList, zenDiff, cardsFromBank));
-            return TRUE;
-        }
+        return isPbAccountExistsInZen(zenAccounts, cardsFromBank)
+                .flatMap(accountItem -> of(updateExistingAccount(cardsFromBank, accountItem)))
+                .or(() -> of(zenAccounts.add(createNewZenAccount(statementList, zenDiff, cardsFromBank))))
+                .orElse(FALSE);
     }
 
 
@@ -100,7 +97,7 @@ public class PbToZenAccountMapper {
     }
 
     private Boolean updateExistingAccount(List<String> cardsFromBank, AccountItem existingAccount) {
-        final List<String> zenCards = ofNullable(existingAccount.getSyncID()).orElseGet(Collections::emptyList);
+        final var zenCards = ofNullable(existingAccount.getSyncID()).orElse(emptyList());
 
         // if any new cards
         if (zenCards.containsAll(cardsFromBank)) {
@@ -109,7 +106,7 @@ public class PbToZenAccountMapper {
         } else {
             final List<String> uniqueCards = concat(zenCards.stream(), cardsFromBank.stream())
                     .distinct()
-                    .collect(toList());
+                    .collect(toUnmodifiableList());
             existingAccount.getSyncID().clear();
             existingAccount.setSyncID(uniqueCards);
             existingAccount.setChanged(now().toEpochMilli());
@@ -121,13 +118,13 @@ public class PbToZenAccountMapper {
     private Optional<AccountItem> isPbAccountExistsInZen(List<AccountItem> zenAccounts, List<String> cardsFromBank) {
         return zenAccounts
                 .stream()
-                .filter(za -> !isAccountEmpty(cardsFromBank, za))
+                .filter(not(za -> isAccountEmpty(cardsFromBank, za)))
                 .findFirst();
     }
 
     private boolean isAccountEmpty(List<String> cardsFromBank, AccountItem za) {
         return ofNullable(za.getSyncID())
-                .orElseGet(Collections::emptyList)
+                .orElse(emptyList())
                 .stream()
                 .filter(cardsFromBank::contains)
                 .collect(toList())
@@ -141,7 +138,7 @@ public class PbToZenAccountMapper {
                         new TreeSet<>(comparing(Statement::getCard))), ArrayList::new))
                 .stream()
                 .map(s -> right(String.valueOf(s.getCard()), CARD_LAST_DIGITS))
-                .collect(toList());
+                .collect(toUnmodifiableList());
     }
 
 

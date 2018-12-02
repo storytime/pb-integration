@@ -13,6 +13,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.util.List;
 
+import static com.github.storytime.config.props.Constants.EMPTY;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -36,7 +37,7 @@ public class PbStatementMapper {
 
     public List<Statement> mapRequestBody(ResponseEntity<String> responseEntity) {
 
-        final String body = ofNullable(responseEntity.getBody()).orElse("");
+        final var body = ofNullable(responseEntity.getBody()).orElse(EMPTY);
         if (body.contains(customConfig.getPbBankSignature())) {
             throw new PbSignatureException("Invalid signature");
         }

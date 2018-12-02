@@ -31,12 +31,14 @@ public class Constants {
     public static final String RATE = " Rate: ";
     public static final String CASH = "cash";
     public static final int CURRENCY_SCALE = 2;
-    public static final String UAH = "UAH";
-    public static final String USD = "USD";
+    public static final String UAH_STR = "UAH";
+    public static final String USD_STR = "USD";
     public static final int COMMENT_SIZE = 50;
     public static final String NBU_LAST_DAY = "In: ";
     public static final String USD_COMMENT = "$ ";
     public static final String BANK_RATE = "BR: ";
+    public static final int EMPTY_AMOUNT = 0;
+    public static final int NOT_CHANGED = 0;
 
     private Constants() {
     }

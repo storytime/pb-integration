@@ -1,7 +1,6 @@
 package com.github.storytime.service;
 
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.config.props.Constants;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.zen.*;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +21,7 @@ import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
 import static org.apache.commons.lang3.StringUtils.right;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
@@ -53,7 +53,7 @@ public class ZenDiffService {
                     .postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
             st.stop();
             final Optional<ZenResponse> body = ofNullable(zenResponseResponseEntity.getBody());
-            LOGGER.info("Updated zen diff was pushed to zen for user id:[{}] time:[{}]", u.getId(), st.getTotalTimeSeconds());
+            LOGGER.info("Finish! Updated zen diff was pushed to zen for user id:[{}] time:[{}]", u.getId(), st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getMessage());
@@ -111,7 +111,7 @@ public class ZenDiffService {
         final Integer id = findCurrencyIdByShortLetter(zenDiff, shortLetter);
         return zenDiff.getAccount()
                 .stream()
-                .filter(a -> a.getType().equalsIgnoreCase(Constants.CASH) && a.getInstrument() == id)
+                .filter(a -> a.getType().equalsIgnoreCase(CASH) && a.getInstrument() == id)
                 .findFirst();
     }
 
@@ -123,9 +123,13 @@ public class ZenDiffService {
         final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
         return zenDiff.getAccount()
                 .stream()
-                .filter(a -> !ofNullable(a.getSyncID()).orElse(emptyList()).contains(carLastDigits))
-                .filter(a -> ofNullable(a.getSyncID()).orElse(emptyList())
-                        .stream().anyMatch(s -> right(valueOf(s), CARD_TWO_DIGITS).equalsIgnoreCase(lastTwoDigits)))
+                .filter(not(a -> ofNullable(a.getSyncID())
+                        .orElse(emptyList())
+                        .contains(carLastDigits)))
+                .filter(a -> ofNullable(a.getSyncID())
+                        .orElse(emptyList())
+                        .stream()
+                        .anyMatch(s -> right(valueOf(s), CARD_TWO_DIGITS).equalsIgnoreCase(lastTwoDigits)))
                 .findFirst()
                 .map(AccountItem::getId);
     }

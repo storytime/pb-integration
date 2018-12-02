@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MerchantService {
@@ -18,11 +19,11 @@ public class MerchantService {
         this.repository = repository;
     }
 
-    public List<MerchantInfo> getAllEnabledMerchantsBySyncPriority(final SyncPriority syncPriority) {
+    public Optional<List<MerchantInfo>> getAllEnabledMerchantsBySyncPriority(final SyncPriority syncPriority) {
         return repository.findAllByEnabledIsTrueAndSyncPriority(syncPriority);
     }
 
-    public List<MerchantInfo> getAllEnabledMerchantsWithPriority() {
+    public Optional<List<MerchantInfo>> getAllEnabledMerchantsWithPriority() {
         return repository.findAllByEnabledIsTrueAndSyncPriorityIsNull();
     }
 

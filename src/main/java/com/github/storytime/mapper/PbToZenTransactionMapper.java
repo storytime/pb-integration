@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
-import static com.github.storytime.config.props.Constants.RATE;
-import static com.github.storytime.config.props.Constants.SPACE_SEPARATOR;
+import static com.github.storytime.config.props.Constants.*;
 import static java.lang.Math.abs;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
@@ -62,11 +62,11 @@ public class PbToZenTransactionMapper {
         return statementList
                 .stream()
                 .map((Statement s) -> {
-                    final TransactionItem t = new TransactionItem();
-                    final String transactionDesc = regExpService.normalizeDescription(s.getDescription());
-                    final Double opAmount = Double.valueOf(substringBefore(s.getAmount(), SPACE_SEPARATOR));
+                    final var t = new TransactionItem();
+                    final var transactionDesc = regExpService.normalizeDescription(s.getDescription());
+                    final var opAmount = Double.valueOf(substringBefore(s.getAmount(), SPACE_SEPARATOR));
                     final String opCurrency = substringAfter(s.getAmount(), SPACE_SEPARATOR);
-                    final Double cardAmount = Double.valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR));
+                    final var cardAmount = Double.valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR));
                     final String cardCurrency = substringAfter(s.getCardamount(), SPACE_SEPARATOR);
                     final String accountId = zenDiffService.findAccountIdByPbCard(zenDiff, s.getCard());
                     final Integer currency = zenDiffService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
@@ -74,9 +74,12 @@ public class PbToZenTransactionMapper {
                     setAppCode(s, t, cardAmount);
 
                     t.setId(randomUUID().toString());
-                    t.setChanged(0);
+                    t.setChanged(NOT_CHANGED);
                     t.setCreated(dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().toEpochMilli());
-                    t.setUser(zenDiff.getUser().stream().findFirst()
+                    t.setUser(zenDiff
+                            .getUser()
+                            .stream()
+                            .findFirst()
                             .orElseThrow(() -> new ZenUserNotFoundException(textProperties.getZenUserNotFound())).getId());
                     t.setDeleted(false);
                     t.setPayee(customPayeeService.getNicePayee(transactionDesc));
@@ -84,15 +87,15 @@ public class PbToZenTransactionMapper {
                     t.setComment(s.getCustomComment());
                     t.setDate(dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone()));
                     t.setIncomeAccount(accountId);
-                    t.setIncome(cardAmount > 0 ? cardAmount : 0);
+                    t.setIncome(cardAmount > EMPTY_AMOUNT ? cardAmount : EMPTY_AMOUNT);
                     t.setOutcomeAccount(accountId);
-                    t.setOutcome(cardAmount < 0 ? -cardAmount : 0);
+                    t.setOutcome(cardAmount < EMPTY_AMOUNT ? -cardAmount : EMPTY_AMOUNT);
                     t.setIncomeInstrument(currency);
                     t.setOutcomeInstrument(currency);
 
                     // transaction in different currency
-                    if (opAmount != 0 && !opCurrency.equalsIgnoreCase(cardCurrency)) {
-                        if (opAmount > 0) {
+                    if (opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency)) {
+                        if (opAmount > EMPTY_AMOUNT) {
                             t.setOpIncome(abs(opAmount));
                             t.setOpIncomeInstrument(zenDiffService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
                         } else {
@@ -106,11 +109,8 @@ public class PbToZenTransactionMapper {
 
                     // cash withdrawal
                     if (regExpService.isCashWithdrawal(transactionDesc)) {
-                        final Optional<AccountItem> account = zenDiffService.isCashAccountInCurrencyExists(zenDiff, opCurrency);
-                        account.ifPresent(a -> {
-                            t.setIncome(opAmount);
-                            t.setIncomeAccount(a.getId());
-                        });
+                        zenDiffService.isCashAccountInCurrencyExists(zenDiff, opCurrency)
+                                .ifPresent(updateIncomeIfCashWithdrawal(t, opAmount));
                         //todo improve comment and separate bank tax
                         LOGGER.info("Cash withdrawal transaction");
                         return t;
@@ -172,13 +172,20 @@ public class PbToZenTransactionMapper {
 
                     return t;
                 })
-                .collect(toList());
+                .collect(toUnmodifiableList());
     }
 
-    private void setAppCode(Statement s, TransactionItem t, Double cardAmount) {
+    public Consumer<AccountItem> updateIncomeIfCashWithdrawal(final TransactionItem t, final Double opAmount) {
+        return a -> {
+            t.setIncome(opAmount);
+            t.setIncomeAccount(a.getId());
+        };
+    }
+
+    private void setAppCode(final Statement s, final TransactionItem t, final Double cardAmount) {
         final String appCode = s.getAppcode();
         if (appCode != null) {
-            if (cardAmount > 0) {
+            if (cardAmount > EMPTY_AMOUNT) {
                 t.setIncomeBankID(appCode);
             } else {
                 t.setOutcomeBankID(appCode);

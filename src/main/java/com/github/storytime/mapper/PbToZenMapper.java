@@ -15,8 +15,8 @@ import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingLong;
 import static java.util.Optional.of;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Component
 public class PbToZenMapper {
@@ -27,6 +27,7 @@ public class PbToZenMapper {
     @Autowired
     public PbToZenMapper(final PbToZenAccountMapper pbToZenAccountMapper,
                          final PbToZenTransactionMapper pbToZenTransactionMapper) {
+
         this.pbToZenAccountMapper = pbToZenAccountMapper;
         this.pbToZenTransactionMapper = pbToZenTransactionMapper;
     }
@@ -48,7 +49,7 @@ public class PbToZenMapper {
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .sorted(comparingLong(TransactionItem::getCreated).reversed())
-                .collect(toList());
+                .collect(toUnmodifiableList());
 
         return of(new ZenDiffRequest()
                 .setCurrentClientTimestamp(now().getEpochSecond())
