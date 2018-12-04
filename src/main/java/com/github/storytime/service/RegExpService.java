@@ -1,14 +1,14 @@
 package com.github.storytime.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.lanwen.verbalregex.VerbalExpression;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 
-@Component
+@Service
 public class RegExpService {
 
     private static final int GROUP_2 = 2;

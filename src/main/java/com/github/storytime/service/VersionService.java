@@ -3,7 +3,7 @@ package com.github.storytime.service;
 import com.github.storytime.api.VersionController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 import static com.github.storytime.config.props.Constants.*;
 import static java.util.stream.Collectors.joining;
 
-@Component
+@Service
 public class VersionService {
 
     private static final Logger LOGGER = LogManager.getLogger(VersionController.class);

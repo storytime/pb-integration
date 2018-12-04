@@ -11,10 +11,8 @@ import javax.validation.constraints.NotNull;
 })
 public class CustomPayee extends BaseEntity {
 
-    @NotNull
     private String payee;
 
-    @NotNull
     private String containsValue;
 
     public CustomPayee(@NotNull String payee, @NotNull String containsValue) {

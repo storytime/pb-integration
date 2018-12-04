@@ -34,10 +34,10 @@ public class DateService {
     private final DateTimeFormatter zenDateTimeFormatter;
 
     @Autowired
-    public DateService(DateTimeFormatter minfinDateTimeFormatter,
-                       DateTimeFormatter isoDateTimeFormatter,
-                       DateTimeFormatter zenDateTimeFormatter,
-                       DateTimeFormatter pbDateTimeFormatter) {
+    public DateService(final DateTimeFormatter minfinDateTimeFormatter,
+                       final DateTimeFormatter isoDateTimeFormatter,
+                       final DateTimeFormatter zenDateTimeFormatter,
+                       final DateTimeFormatter pbDateTimeFormatter) {
         this.minfinDateTimeFormatter = minfinDateTimeFormatter;
         this.isoDateTimeFormatter = isoDateTimeFormatter;
         this.pbDateTimeFormatter = pbDateTimeFormatter;
