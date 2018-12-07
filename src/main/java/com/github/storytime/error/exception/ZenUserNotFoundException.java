@@ -1,4 +1,4 @@
-package com.github.storytime.exception;
+package com.github.storytime.error.exception;
 
 public class ZenUserNotFoundException extends RuntimeException {
 

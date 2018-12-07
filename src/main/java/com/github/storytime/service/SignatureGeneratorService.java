@@ -1,6 +1,6 @@
 package com.github.storytime.service;
 
-import com.github.storytime.exception.PbSignatureException;
+import com.github.storytime.error.exception.PbSignatureException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.github.storytime.exception;
+package com.github.storytime.error.exception;
 
 /**
  * Sometime in case of RIGHT signature, bank return "invalid signature" response.

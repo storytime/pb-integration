@@ -2,7 +2,7 @@ package com.github.storytime.service;
 
 import com.github.storytime.builder.StatementRequestBuilder;
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.exception.PbSignatureException;
+import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.mapper.PbStatementMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
 import static com.github.storytime.config.props.Constants.EMPTY;
+import static com.github.storytime.error.AsyncErrorHandlerUtil.getPbServiceAsyncHandler;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
@@ -99,25 +100,19 @@ public class PbStatementsService {
                 right(m.getCardNumber(), CARD_LAST_DIGITS)
         );
 
-        final Request requestToBank = statementRequestBuilder.buildStatementRequest(m.getMerchantId(),
-                m.getPassword(),
-                dateService.toPbFormat(startDate),
-                dateService.toPbFormat(endDate),
-                m.getCardNumber()
-        );
-
-        return supplyAsync(pullAndHandlePbRequest(u, m, startDate, endDate, requestToBank), cfThreadPool);
-    }
-
-    private Supplier<List<Statement>> pullAndHandlePbRequest(final AppUser u,
-                                                             final MerchantInfo m,
-                                                             final ZonedDateTime startDate,
-                                                             final ZonedDateTime endDate,
-                                                             final Request requestToBank) {
-        return () -> pullPbTransactions(requestToBank)
+        final Request requestToBank = statementRequestBuilder.buildStatementRequest(m, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
+        final Supplier<List<Statement>> pullPbTransactionsSupplier = () -> pullPbTransactions(requestToBank)
                 .map(b -> handleResponse(u, m, startDate, endDate, b))
                 .orElse(emptyList());
+
+        return supplyAsync(pullPbTransactionsSupplier, cfThreadPool)
+                .thenApply(sList -> sList
+                        .stream()
+                        .peek(s -> additionalCommentService.handle(s, m, u.getTimeZone()))
+                        .collect(toUnmodifiableList()))
+                .handle(getPbServiceAsyncHandler());
     }
+
 
     private List<Statement> handleResponse(final AppUser u,
                                            final MerchantInfo m,
@@ -127,8 +122,6 @@ public class PbStatementsService {
         try {
             final List<Statement> allPbTransactions = pbStatementMapper.mapRequestBody(body);
             final List<Statement> onlyNewPbTransactions = filterNewPbTransactions(startDate, endDate, allPbTransactions, u);
-
-            additionalCommentService.handle(onlyNewPbTransactions, m, u.getTimeZone());
             m.setSyncStartDate(endDate.toInstant().toEpochMilli()); // later will do save to update last sync time
             return onlyNewPbTransactions;
         } catch (PbSignatureException e) {

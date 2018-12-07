@@ -1,7 +1,6 @@
 package com.github.storytime.mapper;
 
-import com.github.storytime.config.props.TextProperties;
-import com.github.storytime.exception.ZenUserNotFoundException;
+import com.github.storytime.error.exception.ZenUserNotFoundException;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
@@ -34,7 +33,6 @@ public class PbToZenTransactionMapper {
     private final CurrencyService currencyService;
     private final RegExpService regExpService;
     private final PbInternalTransferInfoService transferInfoService;
-    private final TextProperties textProperties;
     private final CustomPayeeService customPayeeService;
 
     @Autowired
@@ -42,14 +40,12 @@ public class PbToZenTransactionMapper {
                                     final DateService dateService,
                                     final CurrencyService currencyService,
                                     final RegExpService regExpService,
-                                    final TextProperties textProperties,
                                     final CustomPayeeService customPayeeService,
                                     final ZenDiffService zenDiffService) {
         this.dateService = dateService;
         this.transferInfoService = pbInternalTransferInfoService;
         this.currencyService = currencyService;
         this.regExpService = regExpService;
-        this.textProperties = textProperties;
         this.zenDiffService = zenDiffService;
         this.customPayeeService = customPayeeService;
     }
@@ -80,7 +76,7 @@ public class PbToZenTransactionMapper {
                             .getUser()
                             .stream()
                             .findFirst()
-                            .orElseThrow(() -> new ZenUserNotFoundException(textProperties.getZenUserNotFound())).getId());
+                            .orElseThrow(() -> new ZenUserNotFoundException("Zen User not found")).getId());
                     t.setDeleted(false);
                     t.setPayee(customPayeeService.getNicePayee(transactionDesc));
                     t.setOriginalPayee(transactionDesc);

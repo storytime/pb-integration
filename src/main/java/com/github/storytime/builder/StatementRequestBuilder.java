@@ -1,6 +1,6 @@
 package com.github.storytime.builder;
 
-import com.github.storytime.config.props.TextProperties;
+import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.jaxb.statement.request.Request;
 import com.github.storytime.service.SignatureGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,20 +9,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.github.storytime.config.props.Constants.*;
-import static java.util.regex.Pattern.compile;
-import static org.springframework.util.Assert.*;
 
 @Service
 public class StatementRequestBuilder {
 
     private final SignatureGeneratorService signatureGeneratorService;
-    private final TextProperties textProperties;
 
     @Autowired
-    public StatementRequestBuilder(final SignatureGeneratorService signatureGeneratorService,
-                                   final TextProperties textProperties) {
+    public StatementRequestBuilder(final SignatureGeneratorService signatureGeneratorService) {
         this.signatureGeneratorService = signatureGeneratorService;
-        this.textProperties = textProperties;
     }
 
     private void buildDataPaymentProperties(final List<Request.Data.Payment.Prop> prop,
@@ -74,18 +69,12 @@ public class StatementRequestBuilder {
         return request;
     }
 
-    public Request buildStatementRequest(final Integer merchantId, final String password, final String startDate,
-                                         final String endDate, final String card) {
-        notNull(merchantId, textProperties.getMerchIdNull());
-        isTrue(merchantId > 0, textProperties.getMerchIdFormat());
-        hasLength(password, textProperties.getPasswordNull());
-        isTrue(password.length() == PASSWORD_LENGTH, textProperties.getPasswordLength());
-        hasLength(startDate, textProperties.getStartDateNull());
-        isTrue(compile(DATE_REG_EXP).matcher(startDate).find(), textProperties.getStartDateFormat());
-        hasLength(endDate, textProperties.getEndDateNull());
-        isTrue(compile(DATE_REG_EXP).matcher(endDate).find(), textProperties.getStartDateFormat());
-        hasLength(card, textProperties.getCardNull());
-        isTrue(compile(CARD_REG_EXP).matcher(card).find(), textProperties.getCardFormat());
+    public Request buildStatementRequest(final MerchantInfo m,
+                                         final String startDate,
+                                         final String endDate) {
+        final Integer merchantId = m.getMerchantId();
+        final String password = m.getPassword();
+        final String card = m.getCardNumber();
 
         final Request.Data.Payment payment = buildDataPayment();
         buildDataPaymentProperties(payment.getProp(), startDate, endDate, card);

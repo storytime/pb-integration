@@ -1,7 +1,7 @@
 package com.github.storytime.mapper;
 
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.exception.PbSignatureException;
+import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.model.jaxb.statement.response.ok.Response;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import org.apache.logging.log4j.Logger;

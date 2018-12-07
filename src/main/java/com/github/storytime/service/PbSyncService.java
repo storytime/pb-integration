@@ -21,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
+import static com.github.storytime.error.AsyncErrorHandlerUtil.getZenDiffUpdateHandler;
 import static com.github.storytime.function.FunctionUtils.logAndGetEmptyForSync;
 import static java.util.Optional.of;
 import static java.util.concurrent.CompletableFuture.allOf;
@@ -118,7 +119,8 @@ public class PbSyncService {
                         .flatMap(zr -> zenDiffService.pushToZen(appUser, zr)))
                 .thenApply(zenResponse -> zenResponse
                         .flatMap(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp()))))
-                .thenAccept(au -> onSuccess.commit());
+                .thenAccept(au -> onSuccess.commit())
+                .handle(getZenDiffUpdateHandler());
 
     }
 }

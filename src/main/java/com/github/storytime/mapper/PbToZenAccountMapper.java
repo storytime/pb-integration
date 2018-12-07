@@ -127,7 +127,7 @@ public class PbToZenAccountMapper {
                 .orElse(emptyList())
                 .stream()
                 .filter(cardsFromBank::contains)
-                .collect(toList())
+                .collect(toUnmodifiableList())
                 .isEmpty();
     }
 
