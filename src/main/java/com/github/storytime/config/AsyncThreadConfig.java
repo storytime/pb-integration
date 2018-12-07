@@ -1,7 +1,7 @@
 package com.github.storytime.config;
 
 import com.github.storytime.error.handler.SpringAsyncExceptionHandler;
-import com.github.storytime.error.handler.SpringSchduledExceptionHandler;
+import com.github.storytime.error.handler.SpringScheduledExceptionHandler;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +41,7 @@ public class AsyncThreadConfig implements AsyncConfigurer, SchedulingConfigurer 
         final ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(customConfig.getSchedulerCorePoolSize());
         scheduler.setThreadNamePrefix(customConfig.getSchedulerThreadPrefix());
-        scheduler.setErrorHandler(new SpringSchduledExceptionHandler());
+        scheduler.setErrorHandler(new SpringScheduledExceptionHandler());
         scheduler.initialize();
         return scheduler;
     }
