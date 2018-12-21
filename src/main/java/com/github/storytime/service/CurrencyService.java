@@ -61,18 +61,18 @@ public class CurrencyService {
         this.currencyRepository = currencyRepository;
     }
 
-    public BigDecimal convertDivide(Double from, Double to) {
+    public BigDecimal convertDivide(final Double from, final Double to) {
         final var cardSum = valueOf(abs(from));
         final var operationSum = valueOf(to);
         return cardSum.divide(operationSum, HALF_UP).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
-    public BigDecimal convertDivide(Float from, BigDecimal rate) {
+    public BigDecimal convertDivide(final Float from, final BigDecimal rate) {
         final var cardSum = valueOf(abs(from));
         return cardSum.divide(rate, CURRENCY_SCALE, HALF_UP).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
-    public Optional<CurrencyRates> nbuPrevMouthLastBusinessDayRate(Statement s, String timeZone) {
+    public Optional<CurrencyRates> nbuPrevMouthLastBusinessDayRate(final Statement s, final String timeZone) {
         final ZonedDateTime lastDay = dateService.getPrevMouthLastBusiness(s, timeZone);
         final var date = lastDay.toInstant().toEpochMilli();
         return currencyRepository
@@ -80,7 +80,7 @@ public class CurrencyService {
                 .or(() -> supplyAsync(getNbuCurrencyRates(lastDay), cfThreadPool).join());
     }
 
-    public Optional<CurrencyRates> pbCashDayRates(Statement s, String timeZone) {
+    public Optional<CurrencyRates> pbCashDayRates(final Statement s, final String timeZone) {
         final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
         return currencyRepository
                 .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, USD, startDate.toInstant().toEpochMilli())
@@ -89,13 +89,17 @@ public class CurrencyService {
 
     private Supplier<Optional<CurrencyRates>> getPbCashDayRates(final ZonedDateTime now) {
         return () -> pullPbCashRate()
-                .flatMap(response -> response.stream()
-                        .filter(cr -> cr.getBaseCcy().equalsIgnoreCase(UAH_STR) && cr.getCcy().equalsIgnoreCase(USD_STR))
-                        .findFirst()
-                        .map(CashResponse::getBuy)
-                        .map(rate -> buildNbuRate(PB_CASH, now, new BigDecimal(rate)))
-                        .map(currencyRepository::save))
+                .flatMap(response -> mapPbCashCurrencyRates(now, response))
                 .or(logAndGetEmpty(LOGGER, ERROR, "No info about PB cash rate at all!"));
+    }
+
+    private Optional<CurrencyRates> mapPbCashCurrencyRates(final ZonedDateTime now, final List<CashResponse> response) {
+        return response.stream()
+                .filter(cr -> cr.getBaseCcy().equalsIgnoreCase(UAH_STR) && cr.getCcy().equalsIgnoreCase(USD_STR))
+                .findFirst()
+                .map(CashResponse::getBuy)
+                .map(rate -> buildNbuRate(PB_CASH, now, new BigDecimal(rate)))
+                .map(currencyRepository::save);
     }
 
     private Supplier<Optional<CurrencyRates>> getNbuCurrencyRates(final ZonedDateTime lastDay) {
@@ -103,18 +107,20 @@ public class CurrencyService {
                 .flatMap(response -> of(currencyRepository.save(buildNbuRate(NBU, lastDay, new BigDecimal(response.getUsd().getAsk())))))
                 .or(() -> pullPbRatesForDate(dateService.toPbFormat(lastDay)) // try second source
                         .map(PbRatesResponse::getExchangeRate)
-                        .flatMap(rates -> rates
-                                .stream()
-                                .filter(cr -> cr.getBaseCurrency().equalsIgnoreCase(UAH_STR) && cr.getCurrency().equalsIgnoreCase(USD_STR))
-                                .findFirst()
-                                .map(ExchangeRateItem::getPurchaseRateNB)
-                                .map(rate -> buildNbuRate(NBU, lastDay, valueOf(rate)))
-                                .map(currencyRepository::save)))
+                        .flatMap(rates -> mapNbuCurrencyRates(lastDay, rates)))
                 .or(logAndGetEmpty(LOGGER, ERROR, "No info about NBU prev mouth last business day rate at all!"));
-
     }
 
-    private CurrencyRates buildNbuRate(CurrencySource cs, ZonedDateTime date, BigDecimal rate) {
+    private Optional<CurrencyRates> mapNbuCurrencyRates(final ZonedDateTime lastDay, final List<ExchangeRateItem> rates) {
+        return rates.stream()
+                .filter(cr -> cr.getBaseCurrency().equalsIgnoreCase(UAH_STR) && cr.getCurrency().equalsIgnoreCase(USD_STR))
+                .findFirst()
+                .map(ExchangeRateItem::getPurchaseRateNB)
+                .map(rate -> buildNbuRate(NBU, lastDay, valueOf(rate)))
+                .map(currencyRepository::save);
+    }
+
+    private CurrencyRates buildNbuRate(final CurrencySource cs, final ZonedDateTime date, final BigDecimal rate) {
         return new CurrencyRates()
                 .setCurrencySource(cs)
                 .setCurrencyType(USD)

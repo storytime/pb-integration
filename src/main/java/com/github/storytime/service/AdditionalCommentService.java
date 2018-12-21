@@ -30,7 +30,8 @@ public class AdditionalCommentService {
     }
 
     public void handle(final Statement s, final MerchantInfo merchantInfo, final String timeZone) {
-        merchantInfo.getAdditionalComment()
+        merchantInfo
+                .getAdditionalComment()
                 .forEach(ac -> {
                     final StringBuilder comment = new StringBuilder(COMMENT_SIZE);
                     switch (ac) {

@@ -34,7 +34,6 @@ public class ZenDiffService {
     private final CustomConfig customConfig;
     private final Set<String> zenSyncForceFetchItems;
 
-
     @Autowired
     public ZenDiffService(final RestTemplate restTemplate,
                           final Set<String> zenSyncForceFetchItems,
@@ -44,7 +43,7 @@ public class ZenDiffService {
         this.zenSyncForceFetchItems = zenSyncForceFetchItems;
     }
 
-    public Optional<ZenResponse> pushToZen(AppUser u, ZenDiffRequest request) {
+    public Optional<ZenResponse> pushToZen(final AppUser u, final ZenDiffRequest request) {
         try {
             final HttpEntity<ZenDiffRequest> diffObject = new HttpEntity<>(request, createHeader(u.getZenAuthToken()));
             final StopWatch st = new StopWatch();
@@ -63,10 +62,10 @@ public class ZenDiffService {
 
     public Optional<ZenResponse> getZenDiffByUser(final AppUser u) {
         try {
-            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
-                    .setCurrentClientTimestamp(now().getEpochSecond());
+            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(now().getEpochSecond());
 
             if (u.getZenLastSyncTimestamp() == null || u.getZenLastSyncTimestamp() == INITIAL_TIMESTAMP) {
+                //fetch all data
                 zenSyncRequest.setForceFetch(null);
                 zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
             } else {
@@ -87,7 +86,7 @@ public class ZenDiffService {
         }
     }
 
-    public String findAccountIdByPbCard(ZenResponse zenDiff, Long card) {
+    public String findAccountIdByPbCard(final ZenResponse zenDiff, final Long card) {
         final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
         return zenDiff.getAccount()
                 .stream()
@@ -97,7 +96,7 @@ public class ZenDiffService {
                 .orElse(EMPTY);
     }
 
-    public Integer findCurrencyIdByShortLetter(ZenResponse zenDiff, String shortLetter) {
+    public Integer findCurrencyIdByShortLetter(final ZenResponse zenDiff, final String shortLetter) {
         return zenDiff.getInstrument()
                 .stream()
                 .filter(i -> i.getShortTitle().equalsIgnoreCase(shortLetter))
@@ -106,15 +105,13 @@ public class ZenDiffService {
                 .orElse(DEFAULT_CURRENCY_ZEN);
     }
 
-
-    public Optional<AccountItem> isCashAccountInCurrencyExists(ZenResponse zenDiff, String shortLetter) {
+    public Optional<AccountItem> isCashAccountInCurrencyExists(final ZenResponse zenDiff, final String shortLetter) {
         final Integer id = findCurrencyIdByShortLetter(zenDiff, shortLetter);
         return zenDiff.getAccount()
                 .stream()
                 .filter(a -> a.getType().equalsIgnoreCase(CASH) && a.getInstrument() == id)
                 .findFirst();
     }
-
 
     public Optional<String> findAccountIdByTwoCardDigits(final ZenResponse zenDiff,
                                                          final String lastTwoDigits,

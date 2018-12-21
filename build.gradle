@@ -1,11 +1,11 @@
 buildscript {
     ext {
         // libs versions
-        springBootVersion = '2.1.0.RELEASE'
+        springBootVersion = '2.1.1.RELEASE'
         postgresqlVersion = '42.2.5'
         commonsVersion = '3.8.1'
         verbalRexExpVersion = '1.6'
-        flywayVersion = '5.2.1'
+        flywayVersion = '5.2.3'
         jUnitParamsVersion = '1.1.1'
         jfairyVersion = '0.5.9'
         httpApacheClientVersion = '4.5.6'
@@ -61,7 +61,7 @@ dependencies {
     compile("com.sun.xml.bind:jaxb-core:$jaxbCoreVersion")
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile ("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
+    testCompile("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
     testCompile("io.codearte.jfairy:jfairy:$jfairyVersion")
 }
 

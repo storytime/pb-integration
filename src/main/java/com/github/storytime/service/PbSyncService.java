@@ -63,15 +63,16 @@ public class PbSyncService {
 
     @Async
     public void sync(final Function<MerchantService, Optional<List<MerchantInfo>>> selectFunction) {
-        userService.findAll().forEach(user -> selectFunction.apply(merchantService)
-                .map(merchantLists -> of(merchantLists
-                        .stream()
-                        .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo)) // create async requests
-                        .collect(toUnmodifiableList()))
-                        .flatMap(cfList -> of(allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
-                                .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
-                                .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList))))) // process all data
-                .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync")));
+        userService.findAll()
+                .forEach(user -> selectFunction.apply(merchantService)
+                        .map(merchantLists -> of(merchantLists
+                                .stream()
+                                .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo)) // create async requests
+                                .collect(toUnmodifiableList()))
+                                .flatMap(cfList -> of(allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
+                                        .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
+                                        .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList))))) // process all data
+                        .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync")));
     }
 
     public void handlePbCfRequestData(final AppUser user,
@@ -88,24 +89,18 @@ public class PbSyncService {
         if (maybePushed.isEmpty()) {
             ifNotExists(user, merchants);
         } else {
-            doZenRequests(user, merchants, newPbDataList, maybePushed);
+            LOGGER.info("User:[{}] has:[{}] transactions sync period", user.getId(), maybePushed.size());
+            final OnSuccess onSuccess = () -> {
+                alreadyMappedPbZenTransaction.addAll(maybePushed);
+                merchantService.saveAll(merchants);
+            };
+            doUpdateZenInfoRequest(user, newPbDataList, onSuccess);
         }
     }
 
     public void ifNotExists(final AppUser user, final List<MerchantInfo> merchants) {
         LOGGER.info("No new transaction for user:[{}] Nothing to push in current sync thread", user.getId());
         merchantService.saveAll(merchants);
-    }
-
-    public void doZenRequests(final AppUser user,
-                              final List<MerchantInfo> merchants,
-                              final List<List<Statement>> newPbDataList,
-                              final List<ExpiredPbStatement> maybeNotPushed) {
-        LOGGER.info("User:[{}] has:[{}] transactions sync period", user.getId(), maybeNotPushed.size());
-        doUpdateZenInfoRequest(user, newPbDataList, () -> {
-            alreadyMappedPbZenTransaction.addAll(maybeNotPushed);
-            merchantService.saveAll(merchants);
-        });
     }
 
     private void doUpdateZenInfoRequest(final AppUser appUser,

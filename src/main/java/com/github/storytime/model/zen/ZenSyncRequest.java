@@ -13,7 +13,6 @@ public class ZenSyncRequest {
 
     private Long serverTimestamp;
 
-
     private Set<String> forceFetch;
 
     public Long getCurrentClientTimestamp() {

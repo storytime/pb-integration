@@ -71,7 +71,7 @@ public class PbToZenTransactionMapper {
 
                     t.setId(randomUUID().toString());
                     t.setChanged(NOT_CHANGED);
-                    t.setCreated(dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().toEpochMilli());
+                    t.setCreated(dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond());
                     t.setUser(zenDiff
                             .getUser()
                             .stream()

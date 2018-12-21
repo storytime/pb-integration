@@ -27,11 +27,11 @@ public class MerchantService {
         return repository.findAllByEnabledIsTrueAndSyncPriorityIsNull();
     }
 
-    public void saveAll(List<MerchantInfo> all) {
+    public void saveAll(final List<MerchantInfo> all) {
         repository.saveAll(all);
     }
 
-    public void save(MerchantInfo obj) {
+    public void save(final MerchantInfo obj) {
         repository.save(obj);
     }
 
