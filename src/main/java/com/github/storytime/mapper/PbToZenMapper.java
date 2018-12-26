@@ -8,7 +8,9 @@ import com.github.storytime.model.zen.ZenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
 import static java.time.Instant.now;
@@ -45,9 +47,8 @@ public class PbToZenMapper {
 
         final List<TransactionItem> allTransactionsToZen = newPbTransaction
                 .stream()
-                .map(t -> new ArrayList<>(pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, appUser)))
+                .map(t -> pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, appUser))
                 .flatMap(Collection::stream)
-                .filter(Objects::nonNull)
                 .sorted(comparingLong(TransactionItem::getCreated).reversed())
                 .collect(toUnmodifiableList());
 

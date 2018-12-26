@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Arrays.asList;
+import static java.util.List.of;
 
 @Configuration
 public class ApplicationConfig {
@@ -42,7 +42,7 @@ public class ApplicationConfig {
 
     @Bean
     public List<String> configsToPrint() {
-        return asList(
+        return of(
                 "applicationConfig: [classpath:/application.properties]",
                 "class path resource [date.format.properties]",
                 "class path resource [custom.properties]"

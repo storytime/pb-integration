@@ -31,8 +31,8 @@ import static java.lang.Math.abs;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.math.RoundingMode.HALF_UP;
-import static java.util.Arrays.asList;
-import static java.util.Optional.*;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.apache.logging.log4j.Level.ERROR;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -104,7 +104,7 @@ public class CurrencyService {
 
     private Supplier<Optional<CurrencyRates>> getNbuCurrencyRates(final ZonedDateTime lastDay) {
         return () -> pullMinfinRatesForDate(dateService.toMinfinFormat(lastDay)) // todo what is fail?
-                .flatMap(response -> of(currencyRepository.save(buildNbuRate(NBU, lastDay, new BigDecimal(response.getUsd().getAsk())))))
+                .flatMap(response -> Optional.of(currencyRepository.save(buildNbuRate(NBU, lastDay, new BigDecimal(response.getUsd().getAsk())))))
                 .or(() -> pullPbRatesForDate(dateService.toPbFormat(lastDay)) // try second source
                         .map(PbRatesResponse::getExchangeRate)
                         .flatMap(rates -> mapNbuCurrencyRates(lastDay, rates)))
@@ -153,7 +153,7 @@ public class CurrencyService {
         try {
             LOGGER.info("Pulling PB Cash currency");
             final ResponseEntity<CashResponse[]> forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
-            return of(asList(ofNullable(forEntity.getBody()).orElse(new CashResponse[]{})));
+            return Optional.of(List.of(ofNullable(forEntity.getBody()).orElse(new CashResponse[]{})));
         } catch (Exception e) {
             LOGGER.error("Cannot get PB cash rate reason:[{}]", e.getMessage());
             return empty();

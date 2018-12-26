@@ -22,7 +22,7 @@ import static java.time.LocalDateTime.of;
 import static java.time.ZonedDateTime.ofInstant;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.firstDayOfNextMonth;
-import static java.util.EnumSet.of;
+import static java.util.Set.of;
 
 @Component
 public class DateService {

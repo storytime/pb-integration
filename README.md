@@ -14,7 +14,7 @@ Supported banks:
 - [Private bank (not for business)](https://www.privat24.ua/)
 
 ## Requirements 
-- Java 1.8 or more
+- Java 11
 - Gradle 4 or more
 - Docker 18.06.0+ and Docker-compose(3.7) 1.21+ 
 
