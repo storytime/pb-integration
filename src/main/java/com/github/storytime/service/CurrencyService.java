@@ -73,18 +73,28 @@ public class CurrencyService {
     }
 
     public Optional<CurrencyRates> nbuPrevMouthLastBusinessDayRate(final Statement s, final String timeZone) {
-        final ZonedDateTime lastDay = dateService.getPrevMouthLastBusiness(s, timeZone);
-        final var date = lastDay.toInstant().toEpochMilli();
-        return currencyRepository
-                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(NBU, USD, date)
-                .or(() -> supplyAsync(getNbuCurrencyRates(lastDay), cfThreadPool).join());
+        try {
+            final ZonedDateTime lastDay = dateService.getPrevMouthLastBusiness(s, timeZone);
+            final var date = lastDay.toInstant().toEpochMilli();
+            return currencyRepository
+                    .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(NBU, USD, date)
+                    .or(() -> supplyAsync(getNbuCurrencyRates(lastDay), cfThreadPool).join());
+        } catch (Exception e) {
+            LOGGER.error("Cannot get NBU rate due to unknown error");
+            return empty();
+        }
     }
 
     public Optional<CurrencyRates> pbCashDayRates(final Statement s, final String timeZone) {
-        final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
-        return currencyRepository
-                .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, USD, startDate.toInstant().toEpochMilli())
-                .or(() -> supplyAsync(getPbCashDayRates(startDate), cfThreadPool).join());
+        try {
+            final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
+            return currencyRepository
+                    .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, USD, startDate.toInstant().toEpochMilli())
+                    .or(() -> supplyAsync(getPbCashDayRates(startDate), cfThreadPool).join());
+        } catch (Exception e) {
+            LOGGER.error("Cannot get PB Cash rate due to unknown error");
+            return empty();
+        }
     }
 
     private Supplier<Optional<CurrencyRates>> getPbCashDayRates(final ZonedDateTime now) {
@@ -95,7 +105,8 @@ public class CurrencyService {
 
     private Optional<CurrencyRates> mapPbCashCurrencyRates(final ZonedDateTime now, final List<CashResponse> response) {
         return response.stream()
-                .filter(cr -> cr.getBaseCcy().equalsIgnoreCase(UAH_STR) && cr.getCcy().equalsIgnoreCase(USD_STR))
+                .filter(cr -> ofNullable(cr.getBaseCcy()).orElse(EMPTY).equalsIgnoreCase(UAH_STR) &&
+                        ofNullable(cr.getCcy()).orElse(EMPTY).equalsIgnoreCase(USD_STR))
                 .findFirst()
                 .map(CashResponse::getBuy)
                 .map(rate -> buildNbuRate(PB_CASH, now, new BigDecimal(rate)))
@@ -113,7 +124,9 @@ public class CurrencyService {
 
     private Optional<CurrencyRates> mapNbuCurrencyRates(final ZonedDateTime lastDay, final List<ExchangeRateItem> rates) {
         return rates.stream()
-                .filter(cr -> cr.getBaseCurrency().equalsIgnoreCase(UAH_STR) && cr.getCurrency().equalsIgnoreCase(USD_STR))
+                .filter(cr ->
+                        ofNullable(cr.getBaseCurrency()).orElse(EMPTY).equalsIgnoreCase(UAH_STR) &&
+                                ofNullable(cr.getCurrency()).orElse(EMPTY).equalsIgnoreCase(USD_STR))
                 .findFirst()
                 .map(ExchangeRateItem::getPurchaseRateNB)
                 .map(rate -> buildNbuRate(NBU, lastDay, valueOf(rate)))
