@@ -16,6 +16,7 @@
 
     <property name="MAIN_LOG_FILE" value="/var/log/pb-integration/pb.integration.log"/>
     <property name="HTTP_WIRE_LOG_FILE" value="/var/log/pb-integration/http.wire.log"/>
+    <property name="ERROR_LOG_FILE" value="/var/log/pb-integration/error.log"/>
     <property name="MAX_LOG_SIZE" value="512MB"/>
     <property name="TOTAL_CAP_SIZE" value="1GB"/>
     <property name="MAX_HISTORY_SIZE" value="12"/>
@@ -35,6 +36,19 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${MAIN_LOG_FILE}-%d{yyyy-MM}.%i.gz</fileNamePattern>
+            <maxFileSize>${MAX_LOG_SIZE}</maxFileSize>
+            <totalSizeCap>${TOTAL_CAP_SIZE}</totalSizeCap>
+            <maxHistory>${MAX_HISTORY_SIZE}</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="AppError" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ERROR_LOG_FILE}</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${ERROR_LOG_FILE}-%d{yyyy-MM}.%i.gz</fileNamePattern>
             <maxFileSize>${MAX_LOG_SIZE}</maxFileSize>
             <totalSizeCap>${TOTAL_CAP_SIZE}</totalSizeCap>
             <maxHistory>${MAX_HISTORY_SIZE}</maxHistory>
@@ -92,6 +106,10 @@
     <logger additivity="false" name="com.github.storytime" level="DEBUG">
         <appender-ref ref="Console"/>
         <appender-ref ref="Main"/>
+    </logger>
+
+    <logger additivity="false" name="com.github.storytime" level="ERROR">
+        <appender-ref ref="AppError"/>
     </logger>
 
     <logger additivity="false" name="http.wire-log" level="TRACE">
