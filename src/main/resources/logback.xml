@@ -103,7 +103,7 @@
         <appender-ref ref="Main"/>
     </logger>
 
-    <logger additivity="false" name="com.github.storytime" level="DEBUG">
+    <logger name="com.github.storytime" level="DEBUG">
         <appender-ref ref="Console"/>
         <appender-ref ref="Main"/>
     </logger>
