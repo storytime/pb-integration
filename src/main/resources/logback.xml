@@ -103,12 +103,12 @@
         <appender-ref ref="Main"/>
     </logger>
 
-    <logger name="com.github.storytime" level="DEBUG">
+    <logger name="com.github.storytime" additivity="true" level="DEBUG">
         <appender-ref ref="Console"/>
         <appender-ref ref="Main"/>
     </logger>
 
-    <logger name="com.github.storytime" level="ERROR">
+    <logger name="com.github.storytime" additivity="true" level="ERROR">
         <appender-ref ref="AppError"/>
     </logger>
 
