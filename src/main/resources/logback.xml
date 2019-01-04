@@ -53,6 +53,11 @@
             <totalSizeCap>${TOTAL_CAP_SIZE}</totalSizeCap>
             <maxHistory>${MAX_HISTORY_SIZE}</maxHistory>
         </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
 
     <appender name="HttpWireLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -106,7 +111,7 @@
     <logger additivity="false" name="com.github.storytime" level="DEBUG">
         <appender-ref ref="Console"/>
         <appender-ref ref="Main"/>
-        <appender-ref ref="AppError" level="ERROR"/>
+        <appender-ref ref="AppError"/>
     </logger>
 
     <logger additivity="false" name="http.wire-log" level="TRACE">
