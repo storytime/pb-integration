@@ -108,7 +108,7 @@
         <appender-ref ref="Main"/>
     </logger>
 
-    <logger additivity="false" name="com.github.storytime" level="ERROR">
+    <logger name="com.github.storytime" level="ERROR">
         <appender-ref ref="AppError"/>
     </logger>
 
