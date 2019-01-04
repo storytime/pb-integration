@@ -103,13 +103,10 @@
         <appender-ref ref="Main"/>
     </logger>
 
-    <logger name="com.github.storytime" additivity="true" level="DEBUG">
+    <logger name="com.github.storytime" level="DEBUG">
         <appender-ref ref="Console"/>
         <appender-ref ref="Main"/>
-    </logger>
-
-    <logger name="com.github.storytime" additivity="true" level="ERROR">
-        <appender-ref ref="AppError"/>
+        <appender-ref ref="AppError" level="ERROR"/>
     </logger>
 
     <logger additivity="false" name="http.wire-log" level="TRACE">
