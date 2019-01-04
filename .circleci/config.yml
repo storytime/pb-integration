@@ -64,11 +64,6 @@ jobs:
     - run:
         name: Push docker image
         command: docker push bobobo/pb-integration:latest && docker push bobobo/pb-integration:$(( $CIRCLE_BUILD_NUM - 1 ))
-    - run:
-        name: Call deployment webhook
-        command: |
-          set -x
-          curl -X POST $(( WEB_HOOK ))'
 
   ### DEVELOP (clean build and do sonar tests)
   build_and_verify_on_sonar:
