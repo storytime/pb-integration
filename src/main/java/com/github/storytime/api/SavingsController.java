@@ -3,7 +3,7 @@ package com.github.storytime.api;
 import com.github.storytime.service.SavingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.github.storytime.config.props.Constants.API_PREFIX;
@@ -20,7 +20,7 @@ public class SavingsController {
     }
 
     @GetMapping(value = API_PREFIX + "/savings/{userId}/info", produces = TEXT_PLAIN_VALUE)
-    public String getVersion(@RequestParam("userId") long userId) {
+    public String getVersion(@PathVariable("userId") long userId) {
         return savingsService.getAllSavingsInfo(userId);
     }
 }
