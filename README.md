@@ -7,7 +7,7 @@
 [![](https://images.microbadger.com/badges/version/bobobo/pb-integration.svg)](https://microbadger.com/images/bobobo/pb-integration "MASTER The latest container build version")
 
 ## Overview
-Simple integration service that collects data by schedule form bank and pushes it to [ZenMoney](https://zenmoney.ru/) with some customizations like currency rate.
+Simple integration service that collects data by schedule form bank and pushes it to [ZenMoney](https://zenmoney.ru/) with some customizations like currencySymbol rate.
 
 Supported banks:
 

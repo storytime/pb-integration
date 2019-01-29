@@ -7,6 +7,7 @@ import com.github.storytime.model.currency.pb.archive.PbRatesResponse;
 import com.github.storytime.model.currency.pb.cash.CashResponse;
 import com.github.storytime.model.db.CurrencyRates;
 import com.github.storytime.model.db.inner.CurrencySource;
+import com.github.storytime.model.db.inner.CurrencyType;
 import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.repository.CurrencyRepository;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -75,47 +77,51 @@ public class CurrencyService {
     public Optional<CurrencyRates> nbuPrevMouthLastBusinessDayRate(final Statement s, final String timeZone) {
         try {
             final ZonedDateTime lastDay = dateService.getPrevMouthLastBusiness(s, timeZone);
-            final var date = lastDay.toInstant().toEpochMilli();
+            final var date = lastDay.with(LocalTime.MIN).toInstant().toEpochMilli();
             return currencyRepository
                     .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(NBU, USD, date)
                     .or(() -> supplyAsync(getNbuCurrencyRates(lastDay), cfThreadPool).join());
         } catch (Exception e) {
-            LOGGER.error("Cannot get NBU rate due to unknown error");
+            LOGGER.error("Cannot getZenCurrencySymbol NBU rate due to unknown error");
             return empty();
         }
     }
 
-    public Optional<CurrencyRates> pbCashDayRates(final Statement s, final String timeZone) {
+    public Optional<CurrencyRates> pbUsdCashDayRates(final ZonedDateTime startDate, final CurrencyType currencyType) {
         try {
-            final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
+            final long beggingOfTheDay = startDate.with(LocalTime.MIN).toInstant().toEpochMilli();
             return currencyRepository
-                    .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, USD, startDate.toInstant().toEpochMilli())
-                    .or(() -> supplyAsync(getPbCashDayRates(startDate), cfThreadPool).join());
+                    .findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, currencyType, beggingOfTheDay)
+                    .or(() -> supplyAsync(getPbCashDayRates(startDate, currencyType), cfThreadPool).join());
         } catch (Exception e) {
-            LOGGER.error("Cannot get PB Cash rate due to unknown error");
+            LOGGER.error("Cannot getZenCurrencySymbol PB Cash rate due to unknown error");
             return empty();
         }
     }
 
-    private Supplier<Optional<CurrencyRates>> getPbCashDayRates(final ZonedDateTime now) {
+    private Supplier<Optional<CurrencyRates>> getPbCashDayRates(final ZonedDateTime now, final CurrencyType currencyType) {
         return () -> pullPbCashRate()
-                .flatMap(response -> mapPbCashCurrencyRates(now, response))
+                .flatMap(response -> mapPbCashCurrencyRates(now, currencyType, response))
                 .or(logAndGetEmpty(LOGGER, ERROR, "No info about PB cash rate at all!"));
     }
 
-    private Optional<CurrencyRates> mapPbCashCurrencyRates(final ZonedDateTime now, final List<CashResponse> response) {
+    private Optional<CurrencyRates> mapPbCashCurrencyRates(final ZonedDateTime now,
+                                                           final CurrencyType currencyType,
+                                                           final List<CashResponse> response) {
         return response.stream()
                 .filter(cr -> ofNullable(cr.getBaseCcy()).orElse(EMPTY).equalsIgnoreCase(UAH_STR) &&
-                        ofNullable(cr.getCcy()).orElse(EMPTY).equalsIgnoreCase(USD_STR))
+                        ofNullable(cr.getCcy()).orElse(EMPTY).equalsIgnoreCase(currencyType.toString()))
                 .findFirst()
-                .map(CashResponse::getBuy)
-                .map(rate -> buildNbuRate(PB_CASH, now, new BigDecimal(rate)))
+                .map(cr -> buildRate(PB_CASH, now, currencyType, new BigDecimal(cr.getBuy()), new BigDecimal(cr.getSale())))
                 .map(currencyRepository::save);
     }
 
     private Supplier<Optional<CurrencyRates>> getNbuCurrencyRates(final ZonedDateTime lastDay) {
         return () -> pullMinfinRatesForDate(dateService.toMinfinFormat(lastDay)) // todo what is fail?
-                .flatMap(response -> Optional.of(currencyRepository.save(buildNbuRate(NBU, lastDay, new BigDecimal(response.getUsd().getAsk())))))
+                .flatMap(response -> {
+                    final BigDecimal rate = new BigDecimal(response.getUsd().getAsk());
+                    return Optional.of(currencyRepository.save(buildRate(NBU, lastDay, USD, rate, rate)));
+                })
                 .or(() -> pullPbRatesForDate(dateService.toPbFormat(lastDay)) // try second source
                         .map(PbRatesResponse::getExchangeRate)
                         .flatMap(rates -> mapNbuCurrencyRates(lastDay, rates)))
@@ -129,17 +135,21 @@ public class CurrencyService {
                                 ofNullable(cr.getCurrency()).orElse(EMPTY).equalsIgnoreCase(USD_STR))
                 .findFirst()
                 .map(ExchangeRateItem::getPurchaseRateNB)
-                .map(rate -> buildNbuRate(NBU, lastDay, valueOf(rate)))
+                .map(rate -> buildRate(NBU, lastDay, USD, valueOf(rate), valueOf(rate)))
                 .map(currencyRepository::save);
     }
 
-    private CurrencyRates buildNbuRate(final CurrencySource cs, final ZonedDateTime date, final BigDecimal rate) {
+    private CurrencyRates buildRate(final CurrencySource cs,
+                                    final ZonedDateTime date,
+                                    final CurrencyType currencyType,
+                                    final BigDecimal sellPrate,
+                                    final BigDecimal buyPrate) {
         return new CurrencyRates()
                 .setCurrencySource(cs)
-                .setCurrencyType(USD)
+                .setCurrencyType(currencyType)
                 .setDate(date.toInstant().toEpochMilli())
-                .setBuyRate(rate)
-                .setSellRate(rate);
+                .setBuyRate(buyPrate)
+                .setSellRate(sellPrate);
     }
 
     private Optional<MinfinResponse> pullMinfinRatesForDate(final String lastBusinessDay) {
@@ -147,7 +157,7 @@ public class CurrencyService {
             LOGGER.info("Pulling NBU currency form external service for date:[{}]", lastBusinessDay);
             return ofNullable(restTemplate.getForEntity(customConfig.getMinExchangeUrl() + lastBusinessDay, MinfinResponse.class).getBody());
         } catch (Exception e) {
-            LOGGER.error("Cannot get NBU USD minfin rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
+            LOGGER.error("Cannot getZenCurrencySymbol NBU USD minfin rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
             return empty();
         }
     }
@@ -157,7 +167,7 @@ public class CurrencyService {
             LOGGER.info("Pulling NBU currency form external service for date:[{}]", lastBusinessDay);
             return ofNullable(restTemplate.getForEntity(customConfig.getPbExchangeUrl() + lastBusinessDay, PbRatesResponse.class).getBody());
         } catch (Exception e) {
-            LOGGER.error("Cannot get NBU USD PB rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
+            LOGGER.error("Cannot getZenCurrencySymbol NBU USD PB rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
             return empty();
         }
     }
@@ -168,7 +178,7 @@ public class CurrencyService {
             final ResponseEntity<CashResponse[]> forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
             return Optional.of(List.of(ofNullable(forEntity.getBody()).orElse(new CashResponse[]{})));
         } catch (Exception e) {
-            LOGGER.error("Cannot get PB cash rate reason:[{}]", e.getMessage());
+            LOGGER.error("Cannot getZenCurrencySymbol PB cash rate reason:[{}]", e.getMessage());
             return empty();
         }
     }

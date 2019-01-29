@@ -16,13 +16,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static com.github.storytime.config.props.Constants.EMPTY;
 import static com.github.storytime.config.props.Constants.*;
 import static java.lang.Double.valueOf;
 import static java.lang.Math.abs;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
@@ -67,10 +67,10 @@ public class PbToZenTransactionMapper {
     public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser u, final Statement s) {
         final var t = new TransactionItem();
         final var transactionDesc = regExpService.normalizeDescription(s.getDescription());
-        final var opAmount = valueOf(substringBefore(s.getAmount(), SPACE_SEPARATOR));
-        final String opCurrency = substringAfter(s.getAmount(), SPACE_SEPARATOR);
-        final var cardAmount = valueOf(substringBefore(s.getCardamount(), SPACE_SEPARATOR));
-        final String cardCurrency = substringAfter(s.getCardamount(), SPACE_SEPARATOR);
+        final var opAmount = valueOf(substringBefore(s.getAmount(), SPACE));
+        final String opCurrency = substringAfter(s.getAmount(), SPACE);
+        final var cardAmount = valueOf(substringBefore(s.getCardamount(), SPACE));
+        final String cardCurrency = substringAfter(s.getCardamount(), SPACE);
         final String accountId = zenDiffService.findAccountIdByPbCard(zenDiff, s.getCard());
         final Integer currency = zenDiffService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
 
@@ -179,8 +179,8 @@ public class PbToZenTransactionMapper {
                 t.setOutcome(abs(opAmount));
                 t.setOpOutcomeInstrument(zenDiffService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
             }
-            final String exchangeInfo = opAmount + SPACE_SEPARATOR + opCurrency + RATE
-                    + currencyService.convertDivide(cardAmount, opAmount) + SPACE_SEPARATOR;
+            final String exchangeInfo = opAmount + SPACE + opCurrency + RATE
+                    + currencyService.convertDivide(cardAmount, opAmount) + SPACE;
             t.setComment(exchangeInfo + t.getComment());
         }
     }

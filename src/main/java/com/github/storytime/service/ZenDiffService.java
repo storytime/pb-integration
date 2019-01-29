@@ -2,7 +2,10 @@ package com.github.storytime.service;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.db.AppUser;
-import com.github.storytime.model.zen.*;
+import com.github.storytime.model.zen.AccountItem;
+import com.github.storytime.model.zen.InstrumentItem;
+import com.github.storytime.model.zen.ZenDiffRequest;
+import com.github.storytime.model.zen.ZenResponse;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -12,12 +15,11 @@ import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
-import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.other.Utils.createHeader;
 import static java.lang.String.valueOf;
-import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -28,19 +30,17 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 @Service
 public class ZenDiffService {
 
-    private static final long INITIAL_TIMESTAMP = 0L;
     private static final Logger LOGGER = getLogger(ZenDiffService.class);
+
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
-    private final Set<String> zenSyncForceFetchItems;
+
 
     @Autowired
     public ZenDiffService(final RestTemplate restTemplate,
-                          final Set<String> zenSyncForceFetchItems,
                           final CustomConfig customConfig) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
-        this.zenSyncForceFetchItems = zenSyncForceFetchItems;
     }
 
     public Optional<ZenResponse> pushToZen(final AppUser u, final ZenDiffRequest request) {
@@ -60,28 +60,17 @@ public class ZenDiffService {
         }
     }
 
-    public Optional<ZenResponse> getZenDiffByUser(final AppUser u) {
+    public Optional<ZenResponse> getZenDiffByUser(final Supplier<HttpEntity> function) {
         try {
-            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(now().getEpochSecond());
-
-            if (u.getZenLastSyncTimestamp() == null || u.getZenLastSyncTimestamp() == INITIAL_TIMESTAMP) {
-                //fetch all data
-                zenSyncRequest.setForceFetch(null);
-                zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
-            } else {
-                zenSyncRequest.setForceFetch(zenSyncForceFetchItems);
-                zenSyncRequest.setServerTimestamp(u.getZenLastSyncTimestamp());
-            }
-
-            final HttpEntity<ZenSyncRequest> request = new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
+            final HttpEntity httpEntity = function.get();
             final StopWatch st = new StopWatch();
             st.start();
-            final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), request, ZenResponse.class).getBody());
+            final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), httpEntity, ZenResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Zen diff was fetched for u:[{}] last zen diff time:[{}], time:[{}]", u.getId(), zenSyncRequest.getServerTimestamp(), st.getTotalTimeSeconds());
+            LOGGER.debug("Zen diff was fetched time:[{}]", st.getTotalTimeMillis());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch zen diff for user:[{}] :[{}]", u.getId(), e.getMessage());
+            LOGGER.error("Cannot fetch zen diff, error:[{}]", e.getMessage());
             return empty();
         }
     }

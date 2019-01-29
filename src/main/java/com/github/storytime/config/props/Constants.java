@@ -22,9 +22,7 @@ public class Constants {
     public static final String ACCOUNT_TITLE_PREFIX = "Счет ";
     public static final String TITLE_CARD_SEPARATOR = "-";
     public static final Integer DEFAULT_CURRENCY_ZEN = 4;
-    public static final String SPACE_SEPARATOR = " ";
     public static final String VERSION_PROPERTIES = "version.properties";
-    public static final String END_LINE_SEPARATOR = "\n";
     public static final String AUTHORIZATION_HEADER_NAME = "Authorization";
     public static final int PB_ZEN_ID = 12574;
     public static final String ZEN_ACCOUNT_TYPE = "checking";
@@ -39,6 +37,14 @@ public class Constants {
     public static final String BANK_RATE = "BR: ";
     public static final int EMPTY_AMOUNT = 0;
     public static final int NOT_CHANGED = 0;
+    public static final int ONE_HUNDRED = 100;
+    public static final int ZERO_SCALE = 0;
+    public static final int SAVINGS_STRING_SIZE = 15;
+    public static final int SAVINGS_PERCENT_SIZE = 7;
+    public static final String UAH = "грн";
+    public static final String TOTAL = "Total ~ ";
+    public static final String DOTS = ":";
+    public static final String PERCENT = "%";
 
     private Constants() {
     }

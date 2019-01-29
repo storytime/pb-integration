@@ -9,8 +9,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static com.github.storytime.config.props.Constants.*;
+import static com.github.storytime.config.props.Constants.N_A;
+import static com.github.storytime.config.props.Constants.VERSION_PROPERTIES;
 import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.LF;
 
 @Component
 public class VersionService {
@@ -20,7 +22,7 @@ public class VersionService {
     public String readVersion() {
         try (final InputStream is = getClass().getClassLoader().getResourceAsStream(VERSION_PROPERTIES)) {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            return reader.lines().collect(joining(END_LINE_SEPARATOR)).concat(END_LINE_SEPARATOR).trim();
+            return reader.lines().collect(joining(LF)).concat(LF).trim();
         } catch (final Exception e) {
             LOGGER.error("Cannot read version", e);
             return N_A;

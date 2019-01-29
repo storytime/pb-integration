@@ -17,7 +17,7 @@ public class PbSyncServiceTest extends BaseTestConfig {
     public void test() {
 
 //            final URL pbXml = getClass().getClassLoader().getResource("pb.xml");
-//            final Path pbXmlPath = Paths.get(pbXml.toURI());
+//            final Path pbXmlPath = Paths.getZenCurrencySymbol(pbXml.toURI());
 //            final String pbXmlBody = new String(readAllBytes(pbXmlPath));
 //            ResponseEntity<String> pbResponseMock = spy(new ResponseEntity(pbXmlBody, OK));
 //

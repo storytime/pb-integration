@@ -49,7 +49,7 @@ public class AccountItem {
     private String id;
 
     @JsonProperty("savings")
-    private Object savings;
+    private Boolean savings;
 
     @JsonProperty("startBalance")
     private double startBalance;
@@ -208,11 +208,11 @@ public class AccountItem {
         return this;
     }
 
-    public Object getSavings() {
+    public Boolean getSavings() {
         return savings;
     }
 
-    public AccountItem setSavings(Object savings) {
+    public AccountItem setSavings(Boolean savings) {
         this.savings = savings;
         return this;
     }

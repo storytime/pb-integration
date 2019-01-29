@@ -24,6 +24,10 @@ public class UserService {
         return repository.findAll();
     }
 
+    public Optional<AppUser> findUserById(final long userId) {
+        return repository.findById(userId);
+    }
+
     public Optional<AppUser> updateUserLastZenSyncTime(final AppUser u) {
         return of(repository.save(u));
     }

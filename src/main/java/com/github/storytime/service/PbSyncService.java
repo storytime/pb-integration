@@ -1,6 +1,7 @@
 package com.github.storytime.service;
 
 import com.github.storytime.function.OnSuccess;
+import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.ExpiredPbStatement;
 import com.github.storytime.model.db.AppUser;
@@ -43,6 +44,7 @@ public class PbSyncService {
     private final PbToZenMapper pbToZenMapper;
     private final Executor cfThreadPool;
     private final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction;
+    private final ZenDiffLambdaHolder zenDiffLambdaHolder;
 
     @Autowired
     public PbSyncService(final MerchantService merchantService,
@@ -51,11 +53,13 @@ public class PbSyncService {
                          final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction,
                          final ZenDiffService zenDiffService,
                          final Executor cfThreadPool,
+                         final ZenDiffLambdaHolder zenDiffLambdaHolder,
                          final PbToZenMapper pbToZenMapper) {
         this.merchantService = merchantService;
         this.userService = userService;
         this.zenDiffService = zenDiffService;
         this.cfThreadPool = cfThreadPool;
+        this.zenDiffLambdaHolder = zenDiffLambdaHolder;
         this.alreadyMappedPbZenTransaction = alreadyMappedPbZenTransaction;
         this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
@@ -107,7 +111,7 @@ public class PbSyncService {
                                         final List<List<Statement>> newPbData,
                                         final OnSuccess onSuccess) {
         // step by step in one thread
-        supplyAsync(() -> zenDiffService.getZenDiffByUser(appUser), cfThreadPool)
+        supplyAsync(() -> zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getInitialFunction(appUser)), cfThreadPool)
                 .thenApply(zenDiffResponse -> zenDiffResponse
                         .flatMap(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, appUser)))
                 .thenApply(zenDiffRequest -> zenDiffRequest
