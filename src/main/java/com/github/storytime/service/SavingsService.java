@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.db.inner.CurrencyType.EUR;
 import static com.github.storytime.model.db.inner.CurrencyType.USD;
-import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
@@ -99,7 +98,7 @@ public class SavingsService {
                         .append(rightPad(si.getInUah() + SPACE + UAH + SLASH_SEPARATOR, SAVINGS_STRING_SIZE))
                         .append(rightPad(si.getPercent() + SPACE + PERCENT, SAVINGS_PERCENT_SIZE))
                         .append(LF));
-        response.append(TOTAL).append(format(THOUSAND_SEPARATOR, totalAmountInUah.toBigInteger())).append(SPACE).append(UAH);
+        response.append(TOTAL).append(totalAmountInUah).append(SPACE).append(UAH);
         return response.toString();
     }
 

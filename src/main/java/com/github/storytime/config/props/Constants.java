@@ -46,7 +46,6 @@ public class Constants {
     public static final String DOTS = ":";
     public static final String PERCENT = "%";
     public static final String SLASH_SEPARATOR = " / ";
-    public static final String THOUSAND_SEPARATOR = "%, d";
 
     private Constants() {
     }

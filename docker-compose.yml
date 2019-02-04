@@ -43,9 +43,7 @@ services:
     depends_on:
     - postgres
     ports:
-    - target: 10080
-      published: 8080
-      mode: host
+      - 10080:8080
     logging:
       driver: json-file
     volumes:
