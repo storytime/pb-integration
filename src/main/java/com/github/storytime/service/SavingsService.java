@@ -16,11 +16,14 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.db.inner.CurrencyType.EUR;
 import static com.github.storytime.model.db.inner.CurrencyType.USD;
+import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
@@ -79,20 +82,24 @@ public class SavingsService {
                     })
                     .orElse(EMPTY);
         } catch (Exception e) {
-            LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getMessage());
+            LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getCause());
             return EMPTY;
         }
     }
 
     public String getNiceText(final List<SavingsInfo> savingsInfoList, final BigDecimal totalAmountInUah) {
         final var response = new StringBuilder();
-        savingsInfoList.forEach(si -> response
-                .append(rightPad(si.getTitle() + DOTS, SAVINGS_STRING_SIZE))
-                .append(rightPad(si.getBalance() + SPACE + si.getCurrencySymbol(), SAVINGS_STRING_SIZE))
-                .append(rightPad(si.getInUah() + SPACE + UAH, SAVINGS_STRING_SIZE))
-                .append(rightPad(si.getPercent() + SPACE + PERCENT, SAVINGS_PERCENT_SIZE))
-                .append(LF));
-        response.append(TOTAL).append(totalAmountInUah).append(SPACE).append(UAH);
+        savingsInfoList
+                .stream()
+                .sorted(Comparator.comparing(SavingsInfo::getPercent))
+                .collect(Collectors.toUnmodifiableList())
+                .forEach(si -> response
+                        .append(rightPad(si.getTitle() + DOTS + SPACE, SAVINGS_STRING_SIZE))
+                        .append(rightPad(si.getBalance() + SPACE + si.getCurrencySymbol() + SLASH_SEPARATOR, SAVINGS_STRING_SIZE))
+                        .append(rightPad(si.getInUah() + SPACE + UAH + SLASH_SEPARATOR, SAVINGS_STRING_SIZE))
+                        .append(rightPad(si.getPercent() + SPACE + PERCENT, SAVINGS_PERCENT_SIZE))
+                        .append(LF));
+        response.append(TOTAL).append(format(THOUSAND_SEPARATOR, totalAmountInUah.toBigInteger())).append(SPACE).append(UAH);
         return response.toString();
     }
 

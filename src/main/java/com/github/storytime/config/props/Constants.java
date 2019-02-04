@@ -39,12 +39,14 @@ public class Constants {
     public static final int NOT_CHANGED = 0;
     public static final int ONE_HUNDRED = 100;
     public static final int ZERO_SCALE = 0;
-    public static final int SAVINGS_STRING_SIZE = 15;
+    public static final int SAVINGS_STRING_SIZE = 10;
     public static final int SAVINGS_PERCENT_SIZE = 7;
-    public static final String UAH = "грн";
-    public static final String TOTAL = "Total ~ ";
+    public static final String UAH = "₴";
+    public static final String TOTAL = "Всего ~";
     public static final String DOTS = ":";
     public static final String PERCENT = "%";
+    public static final String SLASH_SEPARATOR = " / ";
+    public static final String THOUSAND_SEPARATOR = "%, d";
 
     private Constants() {
     }
