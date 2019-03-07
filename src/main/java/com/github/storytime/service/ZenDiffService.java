@@ -52,7 +52,7 @@ public class ZenDiffService {
                     .postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
             st.stop();
             final Optional<ZenResponse> body = ofNullable(zenResponseResponseEntity.getBody());
-            LOGGER.info("Finish! Updated zen diff was pushed to zen for user id:[{}] time:[{}]", u.getId(), st.getTotalTimeSeconds());
+            LOGGER.info("Finish! Updated zen diff with [{}] was pushed to zen for user id:[{}] time:[{}]", request.getTransaction(), u.getId(), st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getMessage());

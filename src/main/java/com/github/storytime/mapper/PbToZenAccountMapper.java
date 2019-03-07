@@ -43,6 +43,9 @@ public class PbToZenAccountMapper {
         final List<AccountItem> zenAccounts = zenDiff.getAccount();
         final List<String> cardsFromBank = getCardsFromBank(statementList); // Get accounts from bank response
 
+        if (cardsFromBank.isEmpty())
+            return FALSE;
+
         // check if current account exists in Zen
         return isPbAccountExistsInZen(zenAccounts, cardsFromBank)
                 .flatMap(accountItem -> of(updateExistingAccount(cardsFromBank, accountItem)))
