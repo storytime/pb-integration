@@ -3,7 +3,6 @@ RUN cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime
 RUN echo "Europe/Kiev" >  /etc/timezone
 EXPOSE 10080
 RUN groupadd -g 1500 appuser &&  useradd -m -d /home/appuser -r -u 1500 -g appuser appuser
-RUN sudo appuser
 USER appuser
 WORKDIR /home/appuser
 COPY build/libs/pb-integration.jar /home/appuser/
