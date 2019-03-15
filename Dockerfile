@@ -1,10 +1,11 @@
 FROM openjdk:11-jre-slim
-RUN ls /usr/share/zoneinfo
 RUN cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime
 RUN echo "Europe/Kiev" >  /etc/timezone
-RUN date
-COPY build/libs/pb-integration.jar /var/webapps/
+RUN groupadd -g 1500 appuser &&  useradd -m -d /home/appuser -r -u 1500 -g appuser appuser
+USER appuser
+COPY build/libs/pb-integration.jar /home/appuser
 EXPOSE 10080
-WORKDIR /var/webapps/
+WORKDIR /home/appuser
 CMD /usr/bin/java -version
-CMD /usr/bin/java $JAVA_OPTIONS -Dserver.port=8080 -jar pb-integration.jar
+CMD mkdir /home/appuser/logs
+CMD /usr/bin/java $JAVA_OPTIONS -jar pb-integration.jar

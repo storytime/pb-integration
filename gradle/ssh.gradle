@@ -13,6 +13,7 @@ remotes {
          */
         host = project.hasProperty('pb.ssh.host') ? project.property('pb.ssh.host') : ""
         user = project.hasProperty('pb.ssh.user') ? project.property('pb.ssh.user') : ""
+        port = project.hasProperty('pb.ssh.port') ? project.property('pb.ssh.port') as Integer : 22
         identity = file(System.getProperty("user.home") + '/.ssh/id_rsa')
     }
 }

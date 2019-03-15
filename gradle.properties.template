@@ -1,2 +1,3 @@
 pb.ssh.host=SET_ME
 pb.ssh.user=SET_ME
+pb.ssh.port=22
