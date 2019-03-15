@@ -101,35 +101,35 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /app/prometheus
+      device: /home/appuser/pb-integration/prometheus
       o: bind
 
   grafana-vol:
     driver: local
     driver_opts:
       type: none
-      device: /app/grafana
+      device: /home/appuser/pb-integration/grafana
       o: bind
 
   pb-log-vol:
     driver: local
     driver_opts:
       type: none
-      device: /app/logs
+      device: /home/appuser/pb-integration/logs
       o: bind
 
   db-vol:
     driver: local
     driver_opts:
       type: none
-      device: /app/database
+      device: /home/appuser/pb-integration/database
       o: bind
 
   pg-admin-vol:
     driver: local
     driver_opts:
       type: none
-      device: /app/pg-web-admin
+      device: /home/appuser/pb-integration/pg-web-admin
       o: bind
 
 networks:

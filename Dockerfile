@@ -2,12 +2,13 @@ FROM openjdk:11-jre-slim
 RUN cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime
 RUN echo "Europe/Kiev" >  /etc/timezone
 EXPOSE 10080
-CMD apt-get install coreutils procps  -y
-RUN groupadd -r app &&  useradd -r -g app -d /home/app app
-WORKDIR /home/app
-COPY build/libs/pb-integration.jar /home/app
-CMD mkdir -p /home/app/logs
-RUN chown -R app:app /home/app
-USER app
+ENV aUser app
+ENV id 1525
+RUN groupadd -g ${id} -r ${aUser} && useradd -u ${id} -r -g ${aUser} -d /home/${aUser} ${aUser}
+WORKDIR /home/${aUser}
+COPY build/libs/pb-integration.jar /home/${aUser}
+CMD mkdir -p /home/${aUser}/logs
+RUN chown -R ${aUser}:${aUser} /home/${aUser}
+USER ${aUser}:${aUser}
 CMD /usr/bin/java -version
-CMD /usr/bin/java  -Dserver.port=8080 $JAVA_OPTIONS -jar pb-integration.jar
+CMD /usr/bin/java -Dserver.port=8080 $JAVA_OPTIONS -jar pb-integration.jar
