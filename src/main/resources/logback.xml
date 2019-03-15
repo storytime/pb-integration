@@ -14,9 +14,9 @@
     <property name="HTTP_WIRE_LOG_PATTERN"
               value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr(%-24.24logger{25}){cyan} %clr(-){faint} %m%n%wEx"/>
 
-    <property name="MAIN_LOG_FILE" value="/home/appuser/logs/pb.integration.log"/>
-    <property name="HTTP_WIRE_LOG_FILE" value="/home/appuser/logs/http.wire.log"/>
-    <property name="ERROR_LOG_FILE" value="/home/appuser/logs/error.log"/>
+    <property name="MAIN_LOG_FILE" value="/home/app/logs/pb.integration.log"/>
+    <property name="HTTP_WIRE_LOG_FILE" value="/home/app/logs/http.wire.log"/>
+    <property name="ERROR_LOG_FILE" value="/home/app/logs/error.log"/>
     <property name="MAX_LOG_SIZE" value="512MB"/>
     <property name="TOTAL_CAP_SIZE" value="1GB"/>
     <property name="MAX_HISTORY_SIZE" value="12"/>

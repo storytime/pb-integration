@@ -47,7 +47,7 @@ services:
     logging:
       driver: json-file
     volumes:
-      - pb-log-vol:/home/appuser/logs
+      - pb-log-vol:/home/app/logs
     networks:
     - backend
     deploy:
