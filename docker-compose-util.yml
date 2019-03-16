@@ -18,7 +18,7 @@ services:
       restart_policy:
         condition: on-failure
   watchtower:
-    image: v2tec/watchtowera
+    image: v2tec/watchtower
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - /root/.docker/config.json:/config.json
@@ -41,6 +41,5 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /root/portainer_data
+      device: /home/appuser/docker-utils
       o: bind
-
