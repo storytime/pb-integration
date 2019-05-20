@@ -46,6 +46,8 @@ public class Constants {
     public static final String DOTS = ":";
     public static final String PERCENT = "%";
     public static final String SLASH_SEPARATOR = " / ";
+    public static final String PROJECT_TAG = "#";
+    public static final int YNAB_AMOUNT_CONST = 1000;
 
     private Constants() {
     }

@@ -3,6 +3,7 @@ package com.github.storytime.model.zen;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Generated;
+import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -43,7 +44,7 @@ public class TransactionItem {
     private String id;
 
     @JsonProperty("tag")
-    private Object tag;
+    private List<String> tag;
 
     @JsonProperty("outcomeBankID")
     private String outcomeBankID;
@@ -192,11 +193,11 @@ public class TransactionItem {
         return this;
     }
 
-    public Object getTag() {
+    public List<String> getTag() {
         return tag;
     }
 
-    public TransactionItem setTag(Object tag) {
+    public TransactionItem setTag(List<String> tag) {
         this.tag = tag;
         return this;
     }
@@ -237,7 +238,7 @@ public class TransactionItem {
         return this;
     }
 
-    public Object getOutcomeAccount() {
+    public String getOutcomeAccount() {
         return outcomeAccount;
     }
 

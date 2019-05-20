@@ -78,6 +78,9 @@ public class CustomConfig {
     @Value("${cf.executor.thread.prefix}")
     private String cfThreadPrefix;
 
+    @Value("${ynab.budgets.url}")
+    private String ynabUrl;
+
     public String getPbExchangeUrl() {
         return pbExchangeUrl;
     }
@@ -162,8 +165,11 @@ public class CustomConfig {
         return cfMaxPoolSize;
     }
 
-
     public String getCfThreadPrefix() {
         return cfThreadPrefix;
+    }
+
+    public String getYnabUrl() {
+        return ynabUrl;
     }
 }

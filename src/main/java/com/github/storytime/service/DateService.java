@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +72,14 @@ public class DateService {
 
         return of(d.getYear(), d.getMonth(), d.getDay(), t.getHour(), t.getMinute(), t.getSecond())
                 .atZone(ZoneId.of(timeZone));
+    }
+
+    public Long zenStringToZonedSeconds(final String dateString, final String timeZone) {
+        return LocalDate
+                .parse(dateString, minfinDateTimeFormatter)
+                .atStartOfDay(ZoneId.of(timeZone))
+                .toInstant()
+                .getEpochSecond();
     }
 
     public String toZenFormat(final XMLGregorianCalendar d,

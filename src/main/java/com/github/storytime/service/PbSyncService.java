@@ -25,7 +25,6 @@ import java.util.function.Function;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.getZenDiffUpdateHandler;
 import static com.github.storytime.function.FunctionUtils.logAndGetEmptyForSync;
 import static java.util.Optional.of;
-import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -73,7 +72,7 @@ public class PbSyncService {
                                 .stream()
                                 .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo)) // create async requests
                                 .collect(toUnmodifiableList()))
-                                .flatMap(cfList -> of(allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
+                                .flatMap(cfList -> of(CompletableFuture.allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
                                         .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
                                         .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList))))) // process all data
                         .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync")));
