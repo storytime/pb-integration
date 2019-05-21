@@ -85,4 +85,6 @@ public class AppUser extends BaseEntity {
         this.ynabSyncBudget = ynabSyncBudget;
         return this;
     }
+
+
 }

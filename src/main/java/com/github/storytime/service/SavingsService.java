@@ -64,6 +64,7 @@ public class SavingsService {
             LOGGER.debug("Calling get savings info for user: [{}]", userId);
             return userService.findUserById(userId)
                     .map(appUser -> {
+                        //todo maybe async?
                         final List<SavingsInfo> savingsInfoList = getUserSavings(appUser);
                         final BigDecimal totalAmountInUah = savingsInfoList.stream()
                                 .map(SavingsInfo::getInUah)
@@ -81,6 +82,7 @@ public class SavingsService {
                     })
                     .orElse(EMPTY);
         } catch (Exception e) {
+            //todo return server error
             LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getCause());
             return EMPTY;
         }

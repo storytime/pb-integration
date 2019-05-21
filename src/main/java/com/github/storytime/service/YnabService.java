@@ -43,9 +43,10 @@ public class YnabService {
             final HttpEntity httpEntity = new HttpEntity<>(createHeader(user.getYnabAuthToken()));
             final StopWatch st = new StopWatch();
             st.start();
-            final Optional<YnabBudgetResponse> body = ofNullable(restTemplate.exchange(customConfig.getYnabUrl(), GET, httpEntity, YnabBudgetResponse.class).getBody());
+            final Optional<YnabBudgetResponse> body =
+                    ofNullable(restTemplate.exchange(customConfig.getYnabUrl(), GET, httpEntity, YnabBudgetResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab budgets was fetched time:[{}]", st.getTotalTimeMillis());
+            LOGGER.debug("Ynab budgets for user:[{}] were fetched time:[{}]", user.id, st.getTotalTimeMillis());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot ynab budgets, error:[{}]", e.getMessage());
@@ -54,41 +55,47 @@ public class YnabService {
     }
 
 
-    public Optional<YnabCategoryResponse> getCategories(AppUser appUser, String id) {
+    public Optional<YnabCategoryResponse> getCategories(final AppUser appUser,
+                                                        final String id) {
         try {
             final String ynabToken = appUser.getYnabAuthToken();
             final HttpEntity httpEntity = new HttpEntity<>(createHeader(ynabToken));
             final StopWatch st = new StopWatch();
             st.start();
             final String url = customConfig.getYnabUrl() + "/" + id + "/categories";
-            final Optional<YnabCategoryResponse> body = ofNullable(restTemplate.exchange(url, GET, httpEntity, YnabCategoryResponse.class).getBody());
+            final Optional<YnabCategoryResponse> body =
+                    ofNullable(restTemplate.exchange(url, GET, httpEntity, YnabCategoryResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab budgets categories fetched time:[{}]", st.getTotalTimeMillis());
+            LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeMillis());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot ynab categories, error:[{}]", e.getMessage());
+            LOGGER.error("Cannot ynab categories for user:[{}], error:[{}]", appUser.id, e.getMessage());
             return empty();
         }
     }
 
-    public Optional<YnabAccountResponse> getAccounts(AppUser appUser, String id) {
+    public Optional<YnabAccountResponse> getAccounts(final AppUser appUser,
+                                                     final String id) {
         try {
             final String ynabToken = appUser.getYnabAuthToken();
             final HttpEntity httpEntity = new HttpEntity<>(createHeader(ynabToken));
             final StopWatch st = new StopWatch();
             st.start();
             final String url = customConfig.getYnabUrl() + "/" + id + "/accounts";
-            final Optional<YnabAccountResponse> body = ofNullable(restTemplate.exchange(url, GET, httpEntity, YnabAccountResponse.class).getBody());
+            final Optional<YnabAccountResponse> body =
+                    ofNullable(restTemplate.exchange(url, GET, httpEntity, YnabAccountResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab accounts was fetched time:[{}]", st.getTotalTimeMillis());
+            LOGGER.debug("Ynab accounts for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeMillis());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot ynab accounts, error:[{}]", e.getMessage());
+            LOGGER.error("Cannot ynab fetch accounts for user:[{}], error:[{}]", appUser.id, e.getMessage());
             return empty();
         }
     }
 
-    public Optional<String> pushToYnab(final AppUser u, String id, final YnabTransactionsRequest request) {
+    public Optional<String> pushToYnab(final AppUser u,
+                                       final String id,
+                                       final YnabTransactionsRequest request) {
         try {
             final HttpEntity<YnabTransactionsRequest> diffObject = new HttpEntity<>(request, createHeader(u.getYnabAuthToken()));
             final String url = customConfig.getYnabUrl() + "/" + id + "/transactions";
@@ -96,10 +103,10 @@ public class YnabService {
             st.start();
             final Optional<String> body = ofNullable(restTemplate.postForEntity(url, diffObject, String.class).getBody());
             st.stop();
-            LOGGER.info("Finish! {} were pushed to ynam", request.getTransactions().size());
+            LOGGER.info("Finish! [{}] were pushed to ynab, for user:[{}]", request.getTransactions().size(), u.id);
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getMessage());
+            LOGGER.error("Cannot to request:[{}]", e.getMessage());
             return empty();
         }
     }

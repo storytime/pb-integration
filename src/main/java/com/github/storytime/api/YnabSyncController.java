@@ -2,6 +2,7 @@ package com.github.storytime.api;
 
 import com.github.storytime.service.YnabSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +21,7 @@ public class YnabSyncController {
     }
 
     @GetMapping(value = API_PREFIX + "/ynab/{userId}/sync", produces = TEXT_PLAIN_VALUE)
-    public String getVersion(@PathVariable("userId") long userId) {
-        ynabSyncService.syncTransactions(userId);
-        return "";
+    public HttpStatus getVersion(@PathVariable("userId") long userId) {
+        return ynabSyncService.syncTransactions(userId);
     }
 }
