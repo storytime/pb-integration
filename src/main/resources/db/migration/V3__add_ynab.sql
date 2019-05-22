@@ -4,8 +4,17 @@ ALTER TABLE app_user
 ALTER TABLE app_user
     ADD COLUMN ynab_sync_enabled boolean;
 
-ALTER TABLE app_user
-    ADD COLUMN ynab_last_sync_timestamp int8;
+CREATE TABLE ynab_sync_config
+(
+    id          bigint                  NOT NULL,
+    budget_name character varying(1024) NOT NULL,
+    user_id     bigint                  NOT NULL,
+    last_sync   int8                    NOT NULL,
+    PRIMARY KEY (id)
+);
 
-ALTER TABLE app_user
-    ADD COLUMN ynab_sync_budget varchar(255);
+CREATE TABLE ynab_sync_config_tags_sync_properties
+(
+    ynab_sync_config_id  bigint NOT NULL,
+    tags_sync_properties character varying(255)
+);

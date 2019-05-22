@@ -1,6 +1,7 @@
 package com.github.storytime.function;
 
 import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.zen.ZenSyncRequest;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,19 +50,14 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-    public Supplier<HttpEntity> getYnabFunction(final AppUser u, final long clientSyncTime) {
+    public Supplier<HttpEntity> getYnabFunction(final AppUser user,
+                                                final long clientSyncTime,
+                                                final YnabSyncConfig ynabSyncConfig) {
         return () -> {
-            final Long ynabLastSyncTimestamp = u.getYnabLastSyncTimestamp();
-
-            if (ynabLastSyncTimestamp == null || ynabLastSyncTimestamp == INITIAL_TIMESTAMP) {
-                LOGGER.error("YNAB Start Sync time is empty, sync with YNAB will be stopped");
-                //throw new Exception("YNAB Start Sync time is empty, sync with YNAB will be stopped");
-            }
-
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(clientSyncTime);
             zenSyncRequest.setForceFetch(Set.of(TAG, ACCOUNT));
-            zenSyncRequest.setServerTimestamp(ynabLastSyncTimestamp);
-            return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
+            zenSyncRequest.setServerTimestamp(ynabSyncConfig.getLastSync());
+            return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
         };
     }
 

@@ -19,10 +19,6 @@ public class AppUser extends BaseEntity {
 
     private Boolean ynabSyncEnabled;
 
-    private Long ynabLastSyncTimestamp;
-
-    private String ynabSyncBudget;
-
     public String getZenAuthToken() {
         return zenAuthToken;
     }
@@ -67,24 +63,4 @@ public class AppUser extends BaseEntity {
         this.ynabSyncEnabled = ynabSyncEnabled;
         return this;
     }
-
-    public Long getYnabLastSyncTimestamp() {
-        return ynabLastSyncTimestamp;
-    }
-
-    public AppUser setYnabLastSyncTimestamp(Long ynabLastSyncTimestamp) {
-        this.ynabLastSyncTimestamp = ynabLastSyncTimestamp;
-        return this;
-    }
-
-    public String getYnabSyncBudget() {
-        return ynabSyncBudget;
-    }
-
-    public AppUser setYnabSyncBudget(String ynabSyncBudget) {
-        this.ynabSyncBudget = ynabSyncBudget;
-        return this;
-    }
-
-
 }

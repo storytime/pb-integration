@@ -22,17 +22,17 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.springframework.http.HttpMethod.GET;
 
 @Service
-public class YnabService {
+public class YnabExchangeService {
 
-    private static final Logger LOGGER = getLogger(YnabService.class);
+    private static final Logger LOGGER = getLogger(YnabExchangeService.class);
 
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
 
 
     @Autowired
-    public YnabService(final RestTemplate restTemplate,
-                       final CustomConfig customConfig) {
+    public YnabExchangeService(final RestTemplate restTemplate,
+                               final CustomConfig customConfig) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
     }
@@ -49,7 +49,7 @@ public class YnabService {
             LOGGER.debug("Ynab budgets for user:[{}] were fetched time:[{}]", user.id, st.getTotalTimeMillis());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot ynab budgets, error:[{}]", e.getMessage());
+            LOGGER.error("Cannot fetch ynab budgets, for user:[{}], error:[{}]", user.id, e.getMessage());
             return empty();
         }
     }
@@ -69,7 +69,7 @@ public class YnabService {
             LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeMillis());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot ynab categories for user:[{}], error:[{}]", appUser.id, e.getMessage());
+            LOGGER.error("Cannot fetch ynab categories, for user:[{}], error:[{}]", appUser.id, e.getMessage());
             return empty();
         }
     }
@@ -88,7 +88,7 @@ public class YnabService {
             LOGGER.debug("Ynab accounts for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeMillis());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot ynab fetch accounts for user:[{}], error:[{}]", appUser.id, e.getMessage());
+            LOGGER.error("Cannot fetch ynab accounts, for user:[{}], error:[{}]", appUser.id, e.getMessage());
             return empty();
         }
     }
@@ -96,6 +96,7 @@ public class YnabService {
     public Optional<String> pushToYnab(final AppUser u,
                                        final String id,
                                        final YnabTransactionsRequest request) {
+        final int transactionCount = request.getTransactions().size();
         try {
             final HttpEntity<YnabTransactionsRequest> diffObject = new HttpEntity<>(request, createHeader(u.getYnabAuthToken()));
             final String url = customConfig.getYnabUrl() + "/" + id + "/transactions";
@@ -106,7 +107,7 @@ public class YnabService {
             LOGGER.info("Finish! [{}] were pushed to ynab, for user:[{}]", request.getTransactions().size(), u.id);
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot to request:[{}]", e.getMessage());
+            LOGGER.error("Cannot push transactions:[{}] to ynab, for user:[{}], error:[{}]", transactionCount, u.id, e.getMessage());
             return empty();
         }
     }
