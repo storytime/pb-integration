@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public class YnabZenHolder {
 
-    final private List<YnabZenComplianceObject> storage;
+    private final List<YnabZenComplianceObject> storage;
 
     public YnabZenHolder() {
         this.storage = new ArrayList<>();
@@ -39,5 +39,9 @@ public class YnabZenHolder {
 
     public int size() {
         return storage.size();
+    }
+
+    public boolean isEmpty() {
+        return storage.isEmpty();
     }
 }

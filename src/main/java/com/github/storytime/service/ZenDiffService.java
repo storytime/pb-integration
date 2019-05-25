@@ -9,6 +9,7 @@ import com.github.storytime.model.zen.ZenResponse;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.*;
+import static com.github.storytime.other.Utils.createHeader;
 import static java.lang.String.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
@@ -43,7 +45,15 @@ public class ZenDiffService {
 
     public Optional<ZenResponse> pushToZen(final AppUser u, final ZenDiffRequest request) {
         try {
-            return empty();
+            final HttpEntity<ZenDiffRequest> diffObject = new HttpEntity<>(request, createHeader(u.getZenAuthToken()));
+            final StopWatch st = new StopWatch();
+            st.start();
+            final ResponseEntity<ZenResponse> zenResponseResponseEntity = restTemplate
+                    .postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
+            st.stop();
+            final Optional<ZenResponse> body = ofNullable(zenResponseResponseEntity.getBody());
+            LOGGER.info("Finish! Updated zen diff with [{}] was pushed to zen for user id:[{}] time:[{}]", request.getTransaction(), u.getId(), st.getTotalTimeSeconds());
+            return body;
         } catch (Exception e) {
             LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getMessage());
             return empty();
