@@ -202,39 +202,6 @@ public class YnabSyncService {
         }, cfThreadPool);
     }
 
-//    public List<YnabBudgetSyncStatus> pushNewZenTransactionToYnab(final AppUser user,
-//                                                                  final ZenResponse zenResponse,
-//                                                                  final YnabSyncConfig budgetsToSync) {
-//
-//
-//        final List<AccountItem> zenAccounts = ofNullable(zenResponse.getAccount()).orElse(emptyList());
-//        final List<TagItem> zenTags = ofNullable(zenResponse.getTag()).orElse(emptyList());
-//        final List<TransactionItem> zenTransactions = ofNullable(zenResponse.getTransaction()).orElse(emptyList());
-//
-//        if (zenTransactions.isEmpty()) {
-//            LOGGER.warn("No new zen transactions, since last push nothing to push to YNAB for user:[{}]", user.id);
-//            return emptyList();
-//        }
-//
-//        final Set<String> budgetNames = budgetsToSync
-//                .stream()
-//                .map(ysc -> ysc.getBudgetName().trim())
-//                .collect(toUnmodifiableSet());
-//
-//        final List<YnabBudgets> bugdetIds = getYnabBudgetsFromYnabInUse(user, budgetNames);
-//
-//        final List<CompletableFuture<YnabBudgetSyncStatus>> requestCfList = bugdetIds
-//                .stream()
-//                .map(budget -> collectAllNeededYnabData(user, zenAccounts, zenTags, zenTransactions, budget))
-//                //.thenApply(pushResponse -> new YnabBudgetSyncStatus(budgetToSync.getName(), pushResponse.orElse(EMPTY)));
-//                .collect(toUnmodifiableList());
-//
-//        return CompletableFuture.allOf(requestCfList.toArray(new CompletableFuture[bugdetIds.size()]))
-//                .thenApply(aVoid -> requestCfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList()))
-//                .join();
-//
-//    }
-
     public CompletableFuture<List<YnabBudgets>> getYnabBudgetsFromYnabInUse(AppUser user, Set<String> budgetNames) {
         return supplyAsync(() -> ynabExchangeService.getBudget(user)
                         .map(ynabBudgetResponse -> ynabBudgetResponse
@@ -374,6 +341,7 @@ public class YnabSyncService {
         ynabTransactions.setCategoryId(tagId);
         ynabTransactions.setPayeeName(zTr.getPayee());
         ynabTransactions.setCleared("cleared");
+        ynabTransactions.setApproved(true);
 
         return ynabTransactions;
     }
