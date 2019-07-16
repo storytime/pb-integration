@@ -117,7 +117,7 @@ public class PbSyncService {
                         .flatMap(zr -> zenDiffService.pushToZen(appUser, zr)))
                 .thenApply(zenResponse -> zenResponse
                         .flatMap(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp()))))
-                .thenAccept(au -> onSuccess.commit())
+                .thenAccept(au -> au.ifPresent(saveUserInfo -> onSuccess.commit()))
                 .handle(getZenDiffUpdateHandler());
 
     }
