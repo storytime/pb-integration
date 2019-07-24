@@ -21,6 +21,9 @@ public class CustomConfig {
     @Value("${pb.transactions.url}")
     private String pbTransactionsUrl;
 
+    @Value("${pb.account.url}")
+    private String pbAccountsUrl;
+
     @Value("${zen.diff.url}")
     private String zenDiffUrl;
 
@@ -171,5 +174,9 @@ public class CustomConfig {
 
     public String getYnabUrl() {
         return ynabUrl;
+    }
+
+    public String getPbAccountsUrl() {
+        return pbAccountsUrl;
     }
 }

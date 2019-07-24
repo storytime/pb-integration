@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.exchange;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.db.AppUser;

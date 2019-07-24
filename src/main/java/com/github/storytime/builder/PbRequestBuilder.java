@@ -1,7 +1,7 @@
 package com.github.storytime.builder;
 
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.jaxb.statement.request.Request;
+import com.github.storytime.model.pb.jaxb.request.Request;
 import com.github.storytime.service.SignatureGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,18 +11,18 @@ import java.util.List;
 import static com.github.storytime.config.props.Constants.*;
 
 @Service
-public class StatementRequestBuilder {
+public class PbRequestBuilder {
 
     private final SignatureGeneratorService signatureGeneratorService;
 
     @Autowired
-    public StatementRequestBuilder(final SignatureGeneratorService signatureGeneratorService) {
+    public PbRequestBuilder(final SignatureGeneratorService signatureGeneratorService) {
         this.signatureGeneratorService = signatureGeneratorService;
     }
 
-    private void buildDataPaymentProperties(final List<Request.Data.Payment.Prop> prop,
-                                            final String sd, final String en,
-                                            final String cardNumber) {
+    private void buildAccountDataPaymentProperties(final List<Request.Data.Payment.Prop> prop,
+                                                   final String sd, final String en,
+                                                   final String cardNumber) {
 
         final Request.Data.Payment.Prop startDate = new Request.Data.Payment.Prop();
         startDate.setName(START_DATE);
@@ -69,6 +69,38 @@ public class StatementRequestBuilder {
         return request;
     }
 
+    private void buildAccountDataPaymentProperties(final List<Request.Data.Payment.Prop> prop,
+                                                   final String cardNumber) {
+
+        final Request.Data.Payment.Prop cardNumb = new Request.Data.Payment.Prop();
+
+        cardNumb.setName(CARDNUM);
+        cardNumb.setValue(cardNumber);
+        prop.add(cardNumb);
+
+        final Request.Data.Payment.Prop country = new Request.Data.Payment.Prop();
+        country.setName(COUNTRY);
+        country.setValue(UA);
+        prop.add(country);
+    }
+
+    public Request buildAccountRequest(final MerchantInfo m) {
+        final Integer merchantId = m.getMerchantId();
+        final String password = m.getPassword();
+        final String card = m.getCardNumber();
+
+        final Request.Data.Payment payment = buildDataPayment();
+        buildAccountDataPaymentProperties(payment.getProp(), card);
+        final Request.Data data = buildRequestData();
+        data.setPayment(payment);
+
+        final String signature = signatureGeneratorService.generateAccountSignature(card, password);
+        final Request.Merchant merchant = buildMerchant(merchantId, signature);
+
+        return buildRequestRoot(merchant, data);
+    }
+
+
     public Request buildStatementRequest(final MerchantInfo m,
                                          final String startDate,
                                          final String endDate) {
@@ -77,11 +109,11 @@ public class StatementRequestBuilder {
         final String card = m.getCardNumber();
 
         final Request.Data.Payment payment = buildDataPayment();
-        buildDataPaymentProperties(payment.getProp(), startDate, endDate, card);
+        buildAccountDataPaymentProperties(payment.getProp(), startDate, endDate, card);
         final Request.Data data = buildRequestData();
         data.setPayment(payment);
 
-        final String signature = signatureGeneratorService.generateSignature(startDate, endDate, card, password);
+        final String signature = signatureGeneratorService.generateStatementSignature(startDate, endDate, card, password);
         final Request.Merchant merchant = buildMerchant(merchantId, signature);
 
         return buildRequestRoot(merchant, data);

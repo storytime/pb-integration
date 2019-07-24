@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.info;
 
 import com.github.storytime.config.props.Constants;
 import com.github.storytime.function.ZenDiffLambdaHolder;
@@ -7,7 +7,9 @@ import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
+import com.github.storytime.service.CurrencyService;
 import com.github.storytime.service.access.UserService;
+import com.github.storytime.service.exchange.ZenDiffService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

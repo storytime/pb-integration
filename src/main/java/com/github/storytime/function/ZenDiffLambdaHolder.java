@@ -3,7 +3,6 @@ package com.github.storytime.function;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.zen.ZenSyncRequest;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
@@ -13,12 +12,9 @@ import java.util.function.Supplier;
 
 import static com.github.storytime.other.Utils.createHeader;
 import static java.time.Instant.now;
-import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
 public class ZenDiffLambdaHolder {
-
-    private static final Logger LOGGER = getLogger(ZenDiffLambdaHolder.class);
 
     private static final long INITIAL_TIMESTAMP = 0L;
     private static final String ACCOUNT = "account";
@@ -67,6 +63,16 @@ public class ZenDiffLambdaHolder {
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(now().getEpochSecond())
                     .setForceFetch(Set.of(ACCOUNT, INSTRUMENT));
+            return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
+        };
+    }
+
+    public Supplier<HttpEntity> getAccount(final AppUser u) {
+        return () -> {
+            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
+                    .setCurrentClientTimestamp(now().getEpochSecond())
+                    .setServerTimestamp(now().getEpochSecond())
+                    .setForceFetch(Set.of(ACCOUNT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }

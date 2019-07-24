@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.info;
 
 import com.github.storytime.api.VersionController;
 import org.apache.logging.log4j.LogManager;

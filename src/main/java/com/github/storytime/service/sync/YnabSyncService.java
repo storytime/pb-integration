@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.sync;
 
 
 import com.github.storytime.function.ZenDiffLambdaHolder;
@@ -22,6 +22,8 @@ import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.repository.YnabSyncServiceRepository;
 import com.github.storytime.service.access.UserService;
+import com.github.storytime.service.exchange.YnabExchangeService;
+import com.github.storytime.service.exchange.ZenDiffService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -61,14 +63,12 @@ public class YnabSyncService {
     private final YnabExchangeService ynabExchangeService;
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
     private final Executor cfThreadPool;
-    private final DateService dateService;
     private final YnabSyncServiceRepository ynabSyncServiceRepository;
 
     @Autowired
     public YnabSyncService(final ZenDiffService zenDiffService,
                            final ZenDiffLambdaHolder zenDiffLambdaHolder,
                            final YnabExchangeService ynabExchangeService,
-                           final DateService dateService,
                            final Executor cfThreadPool,
                            final YnabSyncServiceRepository ynabSyncServiceRepository,
                            final UserService userService) {
@@ -76,7 +76,6 @@ public class YnabSyncService {
         this.userService = userService;
         this.ynabExchangeService = ynabExchangeService;
         this.cfThreadPool = cfThreadPool;
-        this.dateService = dateService;
         this.ynabSyncServiceRepository = ynabSyncServiceRepository;
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
     }
@@ -282,16 +281,16 @@ public class YnabSyncService {
         final YnabTagsSyncProperties ynabTagsSyncProperty = ofNullable(ynabSyncConfig.getTagsSyncProperties()).orElse(emptyList())
                 .stream()
                 .findFirst()
-                .orElse(MATCH_INNER_TAGS);
+                .orElse(MATCH_PARENT_TAGS);
 
         final YnabZenHolder commonAccounts = mapCommonAccounts(zenAccounts, ynabAccounts);
         final YnabZenHolder commonTags = mapCommonTags(zenTags, ynabCategories);
         List<TransactionItem> transaction = emptyList();
 
         if (ynabTagsSyncProperty.equals(MATCH_INNER_TAGS)) {
-            transaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig, user);
+            transaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig);
         } else if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
-            transaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig, user)
+            transaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig)
                     .stream()
                     .map(zt -> flatToParentCategory(zenTags, zt))
                     .collect(toUnmodifiableList());
@@ -342,6 +341,7 @@ public class YnabSyncService {
         ynabTransactions.setPayeeName(zTr.getPayee());
         ynabTransactions.setCleared("cleared");
         ynabTransactions.setApproved(true);
+        ynabTransactions.setImportId(zTr.getId());
 
         return ynabTransactions;
     }
@@ -370,8 +370,7 @@ public class YnabSyncService {
 
     public List<TransactionItem> filterZenTransactionToSync(final List<TransactionItem> zenTransactions,
                                                             final YnabZenHolder commonAccounts,
-                                                            final YnabSyncConfig ynabSyncConfig,
-                                                            final AppUser user) {
+                                                            final YnabSyncConfig ynabSyncConfig) {
         return zenTransactions
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
@@ -386,7 +385,6 @@ public class YnabSyncService {
                 .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new transactions
                 .filter(zt -> commonAccounts.isExistsByZenId(zt.getIncomeAccount())) //only for common accounts
                 .filter(zt -> commonAccounts.isExistsByZenId(zt.getOutcomeAccount())) //only for common accounts
-                //.filter(zt -> dateService.zenStringToZonedSeconds(zt.getDate(), user.getTimeZone()) >= ynabSyncConfig.getLastSync()) //sometimes tr can have wrong date
                 .sorted(comparing(TransactionItem::getCreated))
                 .collect(toUnmodifiableList());
     }

@@ -1,6 +1,6 @@
 package com.github.storytime.api;
 
-import com.github.storytime.service.SavingsService;
+import com.github.storytime.service.info.SavingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

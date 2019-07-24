@@ -1,6 +1,6 @@
-package com.github.storytime.model;
+package com.github.storytime.model.internal;
 
-import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 
 import java.util.Objects;
 import java.util.StringJoiner;

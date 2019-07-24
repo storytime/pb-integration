@@ -1,4 +1,4 @@
-package com.github.storytime.model.jaxb.statement.request;
+package com.github.storytime.model.pb.jaxb.request;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

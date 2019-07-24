@@ -14,4 +14,5 @@ public interface MerchantRepository extends JpaRepository<MerchantInfo, Long> {
     Optional<List<MerchantInfo>> findAllByEnabledIsTrueAndSyncPriority(final SyncPriority syncPriority);
 
     Optional<List<MerchantInfo>> findAllByEnabledIsTrueAndSyncPriorityIsNull();
+
 }

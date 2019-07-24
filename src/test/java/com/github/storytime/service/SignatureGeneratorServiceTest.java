@@ -21,7 +21,7 @@ public class SignatureGeneratorServiceTest extends BaseTestConfig {
 
     @Test
     public void testWithValidData() {
-        final String signature = signatureGeneratorService.generateSignature(START_DATE, END_DATE, CARD, PASS);
+        final String signature = signatureGeneratorService.generateStatementSignature(START_DATE, END_DATE, CARD, PASS);
         assertThat(signature).as(EXPECTED_VALID_SIGN).isNotNull();
         assertThat(signature).as(EXPECTED_VALID_SIGN).isEqualTo(VALID_SIGNATURE);
     }

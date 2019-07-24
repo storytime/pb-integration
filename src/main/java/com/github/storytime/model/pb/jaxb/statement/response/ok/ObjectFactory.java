@@ -1,4 +1,4 @@
-package com.github.storytime.model.jaxb.statement.response.ok;
+package com.github.storytime.model.pb.jaxb.statement.response.ok;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

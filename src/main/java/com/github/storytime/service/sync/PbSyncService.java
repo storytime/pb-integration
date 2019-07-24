@@ -1,14 +1,16 @@
-package com.github.storytime.service;
+package com.github.storytime.service.sync;
 
 import com.github.storytime.function.OnSuccess;
 import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.mapper.PbToZenMapper;
-import com.github.storytime.model.ExpiredPbStatement;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.internal.ExpiredPbStatement;
+import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.access.UserService;
+import com.github.storytime.service.exchange.PbStatementsService;
+import com.github.storytime.service.exchange.ZenDiffService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;

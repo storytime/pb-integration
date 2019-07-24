@@ -1,13 +1,15 @@
-package com.github.storytime.service;
+package com.github.storytime.service.exchange;
 
-import com.github.storytime.builder.StatementRequestBuilder;
+import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.mapper.PbStatementMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.jaxb.statement.request.Request;
-import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.pb.jaxb.request.Request;
+import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.service.AdditionalCommentService;
+import com.github.storytime.service.DateService;
 import com.github.storytime.service.access.MerchantService;
 import io.micrometer.core.instrument.Timer;
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +57,7 @@ public class PbStatementsService {
     private final DateService dateService;
     private final AdditionalCommentService additionalCommentService;
     private final CustomConfig customConfig;
-    private final StatementRequestBuilder statementRequestBuilder;
+    private final PbRequestBuilder pbRequestBuilder;
     private final PbStatementMapper pbStatementMapper;
     private final MerchantService merchantService;
     private final Timer pbRequestTimeTimer;
@@ -68,7 +70,7 @@ public class PbStatementsService {
                                final MerchantService merchantService,
                                final Timer pbRequestTimeTimer,
                                final Executor cfThreadPool,
-                               final StatementRequestBuilder statementRequestBuilder,
+                               final PbRequestBuilder statementRequestBuilder,
                                final AdditionalCommentService additionalCommentService,
                                final DateService dateService) {
         this.restTemplate = restTemplate;
@@ -77,7 +79,7 @@ public class PbStatementsService {
         this.pbRequestTimeTimer = pbRequestTimeTimer;
         this.merchantService = merchantService;
         this.cfThreadPool = cfThreadPool;
-        this.statementRequestBuilder = statementRequestBuilder;
+        this.pbRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
         this.dateService = dateService;
     }
@@ -100,7 +102,7 @@ public class PbStatementsService {
                 right(m.getCardNumber(), CARD_LAST_DIGITS)
         );
 
-        final Request requestToBank = statementRequestBuilder.buildStatementRequest(m, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
+        final Request requestToBank = pbRequestBuilder.buildStatementRequest(m, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
         final Supplier<List<Statement>> pullPbTransactionsSupplier = () -> pullPbTransactions(requestToBank)
                 .map(b -> handleResponse(u, m, startDate, endDate, b))
                 .orElse(emptyList());
@@ -120,7 +122,7 @@ public class PbStatementsService {
                                            final ZonedDateTime endDate,
                                            final ResponseEntity<String> body) {
         try {
-            final List<Statement> allPbTransactions = pbStatementMapper.mapRequestBody(body);
+            final List<Statement> allPbTransactions = pbStatementMapper.mapStatementRequestBody(body);
             final List<Statement> onlyNewPbTransactions = filterNewPbTransactions(startDate, endDate, allPbTransactions, u);
             m.setSyncStartDate(endDate.toInstant().toEpochMilli()); // later will do save to update last sync time
             return onlyNewPbTransactions;

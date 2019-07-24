@@ -2,7 +2,7 @@
 //
 //import com.github.storytime.BaseTestConfig;
 //import com.github.storytime.config.CustomConfig;
-//import com.github.storytime.model.ExpiredPbStatement;
+//import com.github.storytime.model.internal.ExpiredPbStatement;
 //import com.github.storytime.model.zen.TransactionItem;
 //import org.junit.Before;
 //import org.junit.Test;
