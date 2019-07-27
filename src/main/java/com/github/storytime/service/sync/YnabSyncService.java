@@ -340,7 +340,7 @@ public class YnabSyncService {
         ynabTransactions.setCategoryId(tagId);
         ynabTransactions.setPayeeName(zTr.getPayee());
         ynabTransactions.setCleared("cleared");
-        ynabTransactions.setApproved(true);
+        ynabTransactions.setApproved(false);
         ynabTransactions.setImportId(zTr.getId());
 
         return ynabTransactions;
