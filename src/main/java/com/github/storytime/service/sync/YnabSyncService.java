@@ -310,18 +310,16 @@ public class YnabSyncService {
                 .collect(toUnmodifiableList());
 
         if (commonAccounts.isEmpty()) {
-            LOGGER.error("No common accounts for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
+            LOGGER.debug("Finish! No common accounts for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
             return empty();
         }
 
         if (ynabTransactions.isEmpty()) {
-            LOGGER.warn("No unsynced transactions: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
+            LOGGER.debug("Finish! No not synced transactions: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
             return empty();
         }
 
-        ynabTransactions.forEach(yTr -> {
-            LOGGER.debug("Going to next transactions to YNAB: [{}], payee: [{}], date: [{}]", yTr.getAmount(), yTr.getPayeeName(), yTr.getDate());
-        });
+        ynabTransactions.forEach(yTr -> LOGGER.debug("Going to push to YNAB: [{}], payee: [{}], date: [{}]", yTr.getAmount(), yTr.getPayeeName(), yTr.getDate()));
 
         final YnabTransactionsRequest ynabTransactionsRequest = new YnabTransactionsRequest();
         ynabTransactionsRequest.setTransactions(ynabTransactions);
