@@ -30,6 +30,7 @@ import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.math.RoundingMode.HALF_UP;
 import static java.util.Collections.emptyList;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -111,6 +112,7 @@ public class SavingsService {
                 .map(zenResponse -> zenResponse.getAccount()
                         .stream()
                         .filter(AccountItem::getSavings)
+                        .filter(not(AccountItem::isArchive))
                         .collect(toUnmodifiableList())
                         .stream()
                         .map(accountItem -> buildSavingsInfo(accountItem, zenResponse))

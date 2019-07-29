@@ -86,18 +86,18 @@ public class YnabSyncService {
 
     public ResponseEntity syncTransactions(final long userId) {
         try {
-            LOGGER.debug("Calling ynab sync for user:[{}]", userId);
+            LOGGER.debug("Calling YNAB sync for user:[{}]", userId);
 
             final AppUser appUser = userService.findUserById(userId).get();
             final String ynabAuthToken = appUser.getYnabAuthToken();
 
             if (ynabAuthToken == null) {
-                LOGGER.warn("Ynab sync is stopped for user:[{}], token not installed", userId);
+                LOGGER.warn("YNAB sync is stopped for user:[{}], token not installed", userId);
                 return new ResponseEntity(INTERNAL_SERVER_ERROR);
             }
 
             if (!appUser.getYnabSyncEnabled()) {
-                LOGGER.warn("Ynab sync is stopped for user:[{}], not ynab sync enabled", userId);
+                LOGGER.warn("YNAB sync is stopped for user:[{}], not YNAB sync enabled", userId);
                 return new ResponseEntity(INTERNAL_SERVER_ERROR);
             }
 
@@ -164,7 +164,7 @@ public class YnabSyncService {
                         .map(ynabToZenSyncHolder -> ynabBudgets
                                 .stream()
                                 .filter(b -> ynabToZenSyncHolder.getYnabSyncConfig().getBudgetName().equalsIgnoreCase(b.getName()))
-                                .map(budget -> {  //always will find one element because names in ynab are unique
+                                .map(budget -> {  //always will find one element because names in YNAB are unique
                                     final YnabSyncConfig ynabSyncConfig = ynabToZenSyncHolder.getYnabSyncConfig();
                                     final ZenResponse zenResponse = ynabToZenSyncHolder.getZenResponse().get();
                                     final List<AccountItem> zenAccounts = ofNullable(zenResponse.getAccount()).orElse(emptyList());
@@ -200,7 +200,7 @@ public class YnabSyncService {
                                                                       final long clientSyncTime,
                                                                       final YnabSyncConfig config) {
         return supplyAsync(() -> {
-            LOGGER.debug("Calling ZEN diff for ynab budget config: [{}], last sync [{}], tags method [{}]", config.getBudgetName(), config.getLastSync(), config.getTagsSyncProperties());
+            LOGGER.debug("Calling ZEN diff for YNAB budget config: [{}], last sync [{}], tags method [{}]", config.getBudgetName(), config.getLastSync(), config.getTagsSyncProperties());
             final Optional<ZenResponse> zenDiffByUser = zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getYnabFunction(user, clientSyncTime, config));
             return new YnabToZenSyncHolder(zenDiffByUser, config);
         }, cfThreadPool);
@@ -242,7 +242,7 @@ public class YnabSyncService {
     }
 
     public List<YnabCategories> mapYnabCategoriesFromResponse(Optional<YnabCategoryResponse> yMaybeCat) {
-        //collect ynab tags
+        //collect YNAB tags
         return yMaybeCat
                 .map(yCat -> ofNullable(yCat.getYnabCategoryData())
                         .map(data -> ofNullable(data.getCategoryGroups())
@@ -315,7 +315,7 @@ public class YnabSyncService {
         }
 
         if (ynabTransactions.isEmpty()) {
-            LOGGER.debug("Finish! No not synced transactions: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
+            LOGGER.debug("Finish! No not synced transactions for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
             return empty();
         }
 
@@ -436,7 +436,7 @@ public class YnabSyncService {
                 .map(ztag -> commonTags.add(new YnabZenComplianceObject(ztag.getId(), yTag.getId(), ztag.getTitle().trim())))
         );
 
-        LOGGER.info("Common tags mapped: [{}], ynab tags count [{}], zen tags count [{}]", commonTags.size(), ynabTags.size(), zenTags.size());
+        LOGGER.info("Common tags mapped: [{}], YNAB tags count [{}], zen tags count [{}]", commonTags.size(), ynabTags.size(), zenTags.size());
 
         //log not common tags
         final Set<String> ynabNonCompliance = ynabTags
@@ -445,7 +445,7 @@ public class YnabSyncService {
                 .map(YnabCategories::getName)
                 .collect(toUnmodifiableSet());
 
-        LOGGER.debug("Ynab tags that were not mapped [{}]", ynabNonCompliance);
+        LOGGER.debug("YNAB tags that were not mapped [{}]", ynabNonCompliance);
 
         return commonTags;
     }
@@ -460,7 +460,7 @@ public class YnabSyncService {
                 .findFirst()
                 .map(zAccount -> commonAccounts.add(new YnabZenComplianceObject(zAccount.getId(), yAccount.getId(), zAccount.getTitle().trim())))
         );
-        LOGGER.info("Common accounts mapped: [{}], ynab acc count [{}], zen acc count [{}]", commonAccounts.size(), ynabAccounts.size(), zenAccounts.size());
+        LOGGER.info("Common accounts mapped: [{}], YNAB acc count [{}], zen acc count [{}]", commonAccounts.size(), ynabAccounts.size(), zenAccounts.size());
         return commonAccounts;
     }
 }
