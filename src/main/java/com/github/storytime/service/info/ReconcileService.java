@@ -104,7 +104,7 @@ public class ReconcileService {
                 var zenAccs = getZenAccounts(appUser);
 
                 LOGGER.debug("Combine accounts info collecting info, for user: [{}]", userId);
-                buildRow(table, ACCOUNT, ZEN, YNAB, PB, PB_ZEN, ZEN_YNAB, STATUS);
+                buildRow(table, ACCOUNT, PB, ZEN, YNAB, PB_ZEN, ZEN_YNAB, STATUS);
                 zenAccs.forEach(zenAcc -> combineAccountsInfo(table, ynabAccs, pbAccs, zenAcc));
                 buildCell(table, rightPad(PLUS, TABLE_SIZE, MINUS), PLUS, VERTICAL_BAR_SIZE);
 
@@ -196,15 +196,15 @@ public class ReconcileService {
         var status = zenYnabDiff.longValue() == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
 
         final Consumer<PbAccountBalance> ifExistsFk = pbAccountBalance -> {
-            final BigDecimal balance = pbAccountBalance.getBalance();
-            var zenPbDiff = balance.subtract(zenBal).setScale(CURRENCY_SCALE, HALF_DOWN);
+            final BigDecimal pbBal = pbAccountBalance.getBalance();
+            var zenPbDiff = pbBal.subtract(zenBal).setScale(CURRENCY_SCALE, HALF_DOWN);
             var fullStatus = (zenYnabDiff.longValue() + zenPbDiff.longValue()) == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
 
-            buildRow(table, zenAccTitle, zenBal.toString(), ynabBal.toString(), balance.toString(), zenPbDiff.toString(), zenYnabDiff.toString(), fullStatus);
+            buildRow(table, zenAccTitle, pbBal.toString(), zenBal.toString(), ynabBal.toString(), zenPbDiff.toString(), zenYnabDiff.toString(), fullStatus);
         };
 
         final Runnable ifNotExistsFk =
-                () -> buildRow(table, zenAccTitle, zenBal.toString(), ynabBal.toString(), X, X, zenYnabDiff.toString(), status);
+                () -> buildRow(table, zenAccTitle, X, zenBal.toString(), ynabBal.toString(), X, zenYnabDiff.toString(), status);
 
         pbAccs.stream()
                 .filter(pbAccountBalance -> pbAccountBalance.getAccount().equalsIgnoreCase(zenAccTitle))
