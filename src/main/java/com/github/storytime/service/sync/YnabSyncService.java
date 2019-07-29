@@ -21,6 +21,7 @@ import com.github.storytime.model.zen.TagItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.repository.YnabSyncServiceRepository;
+import com.github.storytime.service.DateService;
 import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.exchange.YnabExchangeService;
 import com.github.storytime.service.exchange.ZenDiffService;
@@ -63,12 +64,14 @@ public class YnabSyncService {
     private final YnabExchangeService ynabExchangeService;
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
     private final Executor cfThreadPool;
+    private final DateService dateService;
     private final YnabSyncServiceRepository ynabSyncServiceRepository;
 
     @Autowired
     public YnabSyncService(final ZenDiffService zenDiffService,
                            final ZenDiffLambdaHolder zenDiffLambdaHolder,
                            final YnabExchangeService ynabExchangeService,
+                           final DateService dateService,
                            final Executor cfThreadPool,
                            final YnabSyncServiceRepository ynabSyncServiceRepository,
                            final UserService userService) {
@@ -76,6 +79,7 @@ public class YnabSyncService {
         this.userService = userService;
         this.ynabExchangeService = ynabExchangeService;
         this.cfThreadPool = cfThreadPool;
+        this.dateService = dateService;
         this.ynabSyncServiceRepository = ynabSyncServiceRepository;
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
     }
@@ -300,7 +304,7 @@ public class YnabSyncService {
                 .stream()
                 .map(zTr -> commonAccounts
                         .findByZenId(zTr.getIncomeAccount())
-                        .map(ynabZenComplianceObject -> createYnabTransactions(commonTags, zTr, ynabZenComplianceObject))
+                        .map(ynabZenComplianceObject -> createYnabTransactions(commonTags, zTr, ynabZenComplianceObject, user))
                         .get())
                 .collect(toUnmodifiableList());
 
@@ -321,7 +325,8 @@ public class YnabSyncService {
 
     public YnabTransactions createYnabTransactions(final YnabZenHolder commonTags,
                                                    final TransactionItem zTr,
-                                                   final YnabZenComplianceObject ynabZenComplianceObject) {
+                                                   final YnabZenComplianceObject ynabZenComplianceObject,
+                                                   final AppUser user) {
         final YnabTransactions ynabTransactions = new YnabTransactions();
         final String zenTagId = ofNullable(zTr.getTag())
                 .flatMap(zTags -> zTags.stream().findFirst())
@@ -330,12 +335,11 @@ public class YnabSyncService {
                 .findByZenId(zenTagId)
                 .map(YnabZenComplianceObject::getYnabId)
                 .orElse(null);
-        final String date = zTr.getDate();
 
         mapTransactionType(zTr, ynabTransactions);
 
         ynabTransactions.setAccountId(ynabZenComplianceObject.getYnabId());
-        ynabTransactions.setDate(date);
+        ynabTransactions.setDate(dateService.toIsoFormat(zTr.getCreated(), user));
         ynabTransactions.setMemo(zTr.getComment());
         ynabTransactions.setCategoryId(tagId);
         ynabTransactions.setPayeeName(zTr.getPayee());
