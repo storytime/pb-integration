@@ -344,7 +344,7 @@ public class YnabSyncService {
         mapTransactionType(zTr, ynabTransactions);
 
         ynabTransactions.setAccountId(ynabZenComplianceObject.getYnabId());
-        ynabTransactions.setDate(dateService.toIsoFormat(zTr.getCreated(), user));
+        ynabTransactions.setDate(dateService.secsToIsoFormat(zTr.getCreated(), user));
         ynabTransactions.setMemo(zTr.getComment());
         ynabTransactions.setCategoryId(tagId);
         ynabTransactions.setPayeeName(zTr.getPayee());

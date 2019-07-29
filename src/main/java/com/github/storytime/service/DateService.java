@@ -15,6 +15,7 @@ import java.util.Set;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 import static java.time.Instant.ofEpochMilli;
+import static java.time.Instant.ofEpochSecond;
 import static java.time.LocalDateTime.of;
 import static java.time.ZonedDateTime.ofInstant;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
@@ -54,15 +55,24 @@ public class DateService {
         return ofInstant(instant, ZoneId.of(u.getTimeZone()));
     }
 
+    public ZonedDateTime secToUserDate(Long secs, AppUser u) {
+        final Instant instant = ofEpochSecond(secs);
+        return ofInstant(instant, ZoneId.of(u.getTimeZone()));
+    }
+
     public String toPbFormat(Long millis, AppUser u) {
         return pbDateTimeFormatter.format(millisUserDate(millis, u));
     }
 
-    public String toIsoFormat(Long millis, AppUser u) {
+    public String millisToIsoFormat(Long millis, AppUser u) {
         return isoDateTimeFormatter.format(millisUserDate(millis, u));
     }
 
-    public String toIsoFormat(ZonedDateTime zonedDateTime) {
+    public String secsToIsoFormat(Long secs, AppUser u) {
+        return isoDateTimeFormatter.format(secToUserDate(secs, u));
+    }
+
+    public String millisToIsoFormat(ZonedDateTime zonedDateTime) {
         return isoDateTimeFormatter.format(zonedDateTime);
     }
 

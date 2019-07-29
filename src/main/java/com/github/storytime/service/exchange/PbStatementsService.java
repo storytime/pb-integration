@@ -97,8 +97,8 @@ public class PbStatementsService {
                 ofNullable(m.getShortDesc()).orElse(EMPTY),
                 m.getId(),
                 m.getMerchantId(),
-                dateService.toIsoFormat(startDate),
-                dateService.toIsoFormat(endDate),
+                dateService.millisToIsoFormat(startDate),
+                dateService.millisToIsoFormat(endDate),
                 right(m.getCardNumber(), CARD_LAST_DIGITS)
         );
 
@@ -132,8 +132,8 @@ public class PbStatementsService {
             LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]",
                     ofNullable(m.getShortDesc()).orElse(EMPTY),
                     m.getMerchantId(),
-                    dateService.toIsoFormat(startDate),
-                    dateService.toIsoFormat(rollBackStartDate, u));
+                    dateService.millisToIsoFormat(startDate),
+                    dateService.millisToIsoFormat(rollBackStartDate, u));
             merchantService.save(m.setSyncStartDate(rollBackStartDate));
             return emptyList();
         }
