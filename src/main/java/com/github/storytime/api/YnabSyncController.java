@@ -1,6 +1,6 @@
 package com.github.storytime.api;
 
-import com.github.storytime.service.YnabSyncService;
+import com.github.storytime.service.sync.YnabSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

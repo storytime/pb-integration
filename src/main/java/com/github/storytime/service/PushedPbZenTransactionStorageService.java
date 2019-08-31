@@ -2,7 +2,7 @@ package com.github.storytime.service;
 
 
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.model.ExpiredPbStatement;
+import com.github.storytime.model.internal.ExpiredPbStatement;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -21,14 +21,31 @@ public class SignatureGeneratorService {
     private static final String FORMAT = "%02x";
     private static final int HEX = 0xff;
 
-    public String generateSignature(final String starDate, final String endDate,
-                                    final String card, final String password) {
+    public String generateStatementSignature(final String starDate, final String endDate,
+                                             final String card, final String password) {
 
         try {
             final String dataString = "<oper>" + CMT + "</oper><wait>" + PB_WAIT + "</wait><test>" + TEST + "</test>" +
                     "<payment id=\"\"><prop name=\"sd\" value=\"" + starDate + "\"/>" +
                     "<prop name=\"ed\" value=\"" + endDate + "\"/>" +
                     "<prop name=\"card\" value=\"" + card + "\"/>" +
+                    "</payment>";
+
+            return getSha1(getMd5(dataString + password));
+        } catch (Exception e) {
+            LOGGER.error("Cannot generate request signature");
+            throw new PbSignatureException("No such algo " + e.getMessage());
+        }
+    }
+
+
+    public String generateAccountSignature(final String card, final String password) {
+
+        try {
+            final String dataString = "<oper>" + CMT + "</oper><wait>" + PB_WAIT + "</wait><test>" + TEST + "</test>" +
+                    "<payment id=\"\">" +
+                    "<prop name=\"cardnum\" value=\"" + card + "\"/>" +
+                    "<prop name=\"country\" value=\"" + UA + "\"/>" +
                     "</payment>";
 
             return getSha1(getMd5(dataString + password));
@@ -55,7 +72,6 @@ public class SignatureGeneratorService {
         final MessageDigest crypt = MessageDigest.getInstance(SHA_1);
         crypt.reset();
         crypt.update(str.getBytes(UTF_8));
-
         return new BigInteger(POSITIVE, crypt.digest()).toString(RADIX);
     }
 }

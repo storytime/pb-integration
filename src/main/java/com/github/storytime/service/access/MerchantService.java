@@ -27,6 +27,11 @@ public class MerchantService {
         return repository.findAllByEnabledIsTrueAndSyncPriorityIsNull();
     }
 
+    //TODO: Need to add user id
+    public List<MerchantInfo> getAllEnabledMerchants() {
+        return repository.findAll();
+    }
+
     public void saveAll(final List<MerchantInfo> all) {
         repository.saveAll(all);
     }

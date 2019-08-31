@@ -1,6 +1,6 @@
 package com.github.storytime.other;
 
-import com.github.storytime.service.VersionService;
+import com.github.storytime.service.info.VersionService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;

@@ -1,6 +1,6 @@
 package com.github.storytime.api;
 
-import com.github.storytime.service.ReconcileService;
+import com.github.storytime.service.info.ReconcileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +21,6 @@ public class ReconcileController {
 
     @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info", produces = TEXT_PLAIN_VALUE)
     public String reconcileInfo(@PathVariable("userId") long userId, @PathVariable("budgetName") String budgetName) {
-        return reconcileService.getAllSavingsInfo(userId, budgetName);
+        return reconcileService.getRecompileTable(userId, budgetName);
     }
 }
