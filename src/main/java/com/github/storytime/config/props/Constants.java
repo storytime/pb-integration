@@ -52,10 +52,6 @@ public class Constants {
     public static final String RECONCILE_OK = "OK";
     public static final String RECONCILE_NOT_OK = "Not OK!";
     public static final long ZERO_DIIF = 0l;
-    public static final int START_POS = 0;
-    public static final String CARDNUM = "cardnum";
-    public static final String COUNTRY = "country";
-    public static final String UA = "UA";
 
     private Constants() {
     }

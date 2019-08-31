@@ -10,5 +10,5 @@ COPY build/libs/pb-integration.jar /home/${aUser}
 CMD mkdir -p /home/${aUser}/logs
 RUN chown -R ${aUser}:${aUser} /home/${aUser}
 USER ${aUser}:${aUser}
-CMD java -version
-CMD java -Dserver.port=8080 $JAVA_OPTIONS -jar pb-integration.jar
+CMD /usr/bin/java -version
+CMD /usr/bin/java -Dserver.port=8080 $JAVA_OPTIONS -jar pb-integration.jar

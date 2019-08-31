@@ -2,12 +2,11 @@ package com.github.storytime.mapper;
 
 import com.github.storytime.error.exception.ZenUserNotFoundException;
 import com.github.storytime.model.db.AppUser;
-import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.*;
-import com.github.storytime.service.exchange.ZenDiffService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

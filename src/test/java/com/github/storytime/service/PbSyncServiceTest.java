@@ -1,8 +1,6 @@
 package com.github.storytime.service;
 
 import com.github.storytime.BaseTestConfig;
-import com.github.storytime.service.exchange.PbStatementsService;
-import com.github.storytime.service.sync.PbSyncService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

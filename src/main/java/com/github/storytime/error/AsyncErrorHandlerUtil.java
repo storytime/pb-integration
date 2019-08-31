@@ -1,6 +1,6 @@
 package com.github.storytime.error;
 
-import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.model.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

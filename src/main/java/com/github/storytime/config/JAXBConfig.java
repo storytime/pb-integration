@@ -1,6 +1,5 @@
 package com.github.storytime.config;
 
-import com.github.storytime.model.pb.jaxb.statement.response.error.Response;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,7 +21,7 @@ public class JAXBConfig {
     @Bean
     public Marshaller jaxbMarshaller() throws JAXBException {
         final JAXBContext jaxbContext = JAXBContext.newInstance(
-                com.github.storytime.model.pb.jaxb.statement.response.ok.Response.class
+                com.github.storytime.model.jaxb.statement.response.ok.Response.class
         );
         return jaxbContext.createMarshaller();
     }
@@ -30,21 +29,14 @@ public class JAXBConfig {
     @Bean
     public Unmarshaller jaxbStatementErrorUnmarshaller() throws JAXBException {
         final JAXBContext jaxbContext = JAXBContext
-                .newInstance(Response.class);
+                .newInstance(com.github.storytime.model.jaxb.statement.response.error.Response.class);
         return jaxbContext.createUnmarshaller();
     }
 
     @Bean
     public Unmarshaller jaxbStatementOkUnmarshaller() throws JAXBException {
         final JAXBContext jaxbContext = JAXBContext
-                .newInstance(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.class);
-        return jaxbContext.createUnmarshaller();
-    }
-
-    @Bean
-    public Unmarshaller jaxbAccountOkUnmarshaller() throws JAXBException {
-        final JAXBContext jaxbContext = JAXBContext
-                .newInstance(com.github.storytime.model.pb.jaxb.account.response.Response.class);
+                .newInstance(com.github.storytime.model.jaxb.statement.response.ok.Response.class);
         return jaxbContext.createUnmarshaller();
     }
 }
