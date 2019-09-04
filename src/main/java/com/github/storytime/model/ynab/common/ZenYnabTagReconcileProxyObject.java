@@ -10,15 +10,12 @@ public class ZenYnabTagReconcileProxyObject {
     private String diff;
 
     public ZenYnabTagReconcileProxyObject(String category,
-                                          Double zenAmount,
-                                          Double ynabAmount) {
+                                          BigDecimal zenAmount,
+                                          BigDecimal ynabAmount) {
         this.category = category;
         this.zenAmount = String.valueOf(zenAmount);
         this.ynabAmount = String.valueOf(ynabAmount);
-
-        final BigDecimal zenAmountBd = BigDecimal.valueOf(zenAmount);
-        final BigDecimal ynabAmountBd = BigDecimal.valueOf(ynabAmount);
-        this.diff = ynabAmountBd.subtract(zenAmountBd).toString();
+        this.diff = ynabAmount.subtract(zenAmount).toString();
     }
 
     public String getCategory() {

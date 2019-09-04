@@ -6,6 +6,7 @@ import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ public class ZenCommonMapper {
                 .orElse(emptyList());
     }
 
-    public TreeMap<String, Double> getZenTagsSummaryByCategory(long startDate,
+    public TreeMap<String, BigDecimal> getZenTagsSummaryByCategory(long startDate,
                                                                long endDate,
                                                                final Optional<ZenResponse> maybeZr) {
 
@@ -92,8 +93,8 @@ public class ZenCommonMapper {
                 .collect(groupingBy(transactionItem -> transactionItem.getTag().stream().findFirst().orElse(EMPTY),
                         Collectors.summarizingDouble(TransactionItem::getOutcome)));
 
-        final TreeMap<String, Double> zenSummary = new TreeMap<>();
-        groupByTags.forEach((zenTagId, summary) -> zenSummary.put(this.getTagNameByTagId(zenTags, zenTagId), summary.getSum()));
+        final TreeMap<String, BigDecimal> zenSummary = new TreeMap<>();
+        groupByTags.forEach((zenTagId, summary) -> zenSummary.put(this.getTagNameByTagId(zenTags, zenTagId), BigDecimal.valueOf(summary.getSum())));
 
         return zenSummary;
     }

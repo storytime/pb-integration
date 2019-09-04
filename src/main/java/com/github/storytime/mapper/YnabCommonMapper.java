@@ -98,7 +98,7 @@ public class YnabCommonMapper {
     }
 
 
-    public TreeMap<String, Double> getYnabSummaryByCategory(AppUser appUser,
+    public TreeMap<String, BigDecimal> getYnabSummaryByCategory(AppUser appUser,
                                                             List<TransactionsItem> ynabTransactions,
                                                             List<YnabCategories> ynabCategories,
                                                             long startDate,
@@ -106,8 +106,8 @@ public class YnabCommonMapper {
         final Map<String, DoubleSummaryStatistics> ynabGroupBy =
                 this.getYnabExtendedSummaryByCategory(appUser, ynabTransactions, ynabCategories, startDate, endDate);
 
-        final TreeMap<String, Double> ynabSummary = new TreeMap<>();
-        ynabGroupBy.forEach((ynabTagName, summary) -> ynabSummary.put(ynabTagName, summary.getSum()));
+        final TreeMap<String, BigDecimal> ynabSummary = new TreeMap<>();
+        ynabGroupBy.forEach((ynabTagName, summary) -> ynabSummary.put(ynabTagName, BigDecimal.valueOf(summary.getSum())));
         return ynabSummary;
     }
 }
