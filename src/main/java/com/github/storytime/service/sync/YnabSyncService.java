@@ -2,6 +2,8 @@ package com.github.storytime.service.sync;
 
 
 import com.github.storytime.function.ZenDiffLambdaHolder;
+import com.github.storytime.mapper.YnabCommonMapper;
+import com.github.storytime.mapper.ZenCommonMapper;
 import com.github.storytime.model.api.YnabBudgetSyncStatus;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
@@ -65,6 +67,8 @@ public class YnabSyncService {
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
     private final Executor cfThreadPool;
     private final DateService dateService;
+    private final ZenCommonMapper zenCommonMapper;
+    private final YnabCommonMapper ynabCommonMapper;
     private final YnabSyncServiceRepository ynabSyncServiceRepository;
 
     @Autowired
@@ -73,6 +77,8 @@ public class YnabSyncService {
                            final YnabExchangeService ynabExchangeService,
                            final DateService dateService,
                            final Executor cfThreadPool,
+                           final ZenCommonMapper zenCommonMapper,
+                           final YnabCommonMapper ynabCommonMapper,
                            final YnabSyncServiceRepository ynabSyncServiceRepository,
                            final UserService userService) {
         this.zenDiffService = zenDiffService;
@@ -80,6 +86,8 @@ public class YnabSyncService {
         this.ynabExchangeService = ynabExchangeService;
         this.cfThreadPool = cfThreadPool;
         this.dateService = dateService;
+        this.zenCommonMapper = zenCommonMapper;
+        this.ynabCommonMapper = ynabCommonMapper;
         this.ynabSyncServiceRepository = ynabSyncServiceRepository;
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
     }
@@ -232,7 +240,7 @@ public class YnabSyncService {
         return yCategoriesCf
                 .thenCombine(yAccountsCf, (yMaybeCat, yMaybeAcc) -> {
                     final List<YnabAccounts> ynabAccounts = mapYnabAccountsFromResponse(yMaybeAcc);
-                    final List<YnabCategories> ynabCategories = mapYnabCategoriesFromResponse(yMaybeCat);
+                    final List<YnabCategories> ynabCategories = ynabCommonMapper.mapYnabCategoriesFromResponse(yMaybeCat);
                     return mapDataAllDataForYnab(zenAccounts, zenTags, zenTransactions, ynabCategories, ynabAccounts, ynabSyncConfig, user);
                 })
                 .thenApply(ynabTransactionsRequest -> ynabTransactionsRequest
@@ -241,23 +249,6 @@ public class YnabSyncService {
                 .thenApply(pushResponse -> new YnabBudgetSyncStatus(budgetToSync.getName(), pushResponse.orElse(EMPTY)));
     }
 
-    public List<YnabCategories> mapYnabCategoriesFromResponse(Optional<YnabCategoryResponse> yMaybeCat) {
-        //collect YNAB tags
-        return yMaybeCat
-                .map(yCat -> ofNullable(yCat.getYnabCategoryData())
-                        .map(data -> ofNullable(data.getCategoryGroups())
-                                .orElse(emptyList()))
-                        .stream()
-                        .flatMap(categoryGroupsItems ->
-                                ofNullable(categoryGroupsItems)
-                                        .orElse(emptyList())
-                                        .stream()
-                                        .flatMap(categoryGroupsItem -> ofNullable(categoryGroupsItem.getCategories())
-                                                .orElse(emptyList())
-                                                .stream()))
-                        .collect(toUnmodifiableList()))
-                .orElse(emptyList());
-    }
 
     public List<YnabAccounts> mapYnabAccountsFromResponse(Optional<YnabAccountResponse> yMaybeAcc) {
         return yMaybeAcc
@@ -297,7 +288,7 @@ public class YnabSyncService {
         } else if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
             transaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig)
                     .stream()
-                    .map(zt -> flatToParentCategory(zenTags, zt))
+                    .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
                     .collect(toUnmodifiableList());
         }
 
@@ -396,23 +387,6 @@ public class YnabSyncService {
                 .collect(toUnmodifiableList());
     }
 
-
-    public TransactionItem flatToParentCategory(final List<TagItem> zenTags,
-                                                final TransactionItem zt) {
-        final String innerTagId = ofNullable(zt.getTag()).orElse(emptyList())
-                .stream()
-                .filter(not(s -> s.startsWith(PROJECT_TAG)))
-                .findFirst()
-                .orElse(EMPTY);
-        final String parentTag = zenTags
-                .stream()
-                .filter(tagItem -> tagItem.getId().equalsIgnoreCase(innerTagId))
-                .findFirst()
-                .map(tagItem -> ofNullable(tagItem.getParent()).orElse(innerTagId))
-                .orElse(innerTagId);
-
-        return zt.setTag(List.of(parentTag));
-    }
 
     public YnabZenHolder mapCommonTags(final List<TagItem> responseZenTags,
                                        final List<YnabCategories> ynabTags) {

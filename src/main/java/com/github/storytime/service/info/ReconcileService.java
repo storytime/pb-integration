@@ -1,13 +1,20 @@
 package com.github.storytime.service.info;
 
 import com.github.storytime.function.ZenDiffLambdaHolder;
+import com.github.storytime.mapper.YnabCommonMapper;
+import com.github.storytime.mapper.ZenCommonMapper;
 import com.github.storytime.model.db.AppUser;
-import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.budget.YnabBudgets;
+import com.github.storytime.model.ynab.category.YnabCategories;
+import com.github.storytime.model.ynab.common.ZenYnabAccountReconcileProxyObject;
+import com.github.storytime.model.ynab.common.ZenYnabTagReconcileProxyObject;
+import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.model.zen.AccountItem;
-import com.github.storytime.repository.YnabSyncServiceRepository;
+import com.github.storytime.model.zen.ZenResponse;
+import com.github.storytime.service.DateService;
+import com.github.storytime.service.ReconcileTableService;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.exchange.PbAccountsService;
@@ -19,94 +26,99 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 import static com.github.storytime.config.props.Constants.*;
+import static com.github.storytime.service.ReconcileTableService.X;
+import static java.lang.String.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.*;
 
 @Component
 public class ReconcileService {
 
-    public static final int BALANCE_AFTER_DIGITS = 3;
-    public static final String PLUS = "+";
-    public static final String MINUS = "-";
-    public static final String VERTICAL_BAR = "|";
-    public static final String END_HEADER_LINE = "+\n|";
-    public static final String END_LINE = "|\n";
-    public static final int ACCOUNT_NAME = 30;
-    public static final int ZEN_BALANCE = 15;
-    public static final int YNAB_BALANCE = 15;
-    public static final int PB_BALANCE = 15;
-    public static final int ZEN_YNAB_DIFF = 15;
-    public static final int ZEN_PB_DIFF = 15;
-    public static final int ACCOUNT_STATUS = 12;
-    public static final int VERTICAL_BAR_SIZE = 1;
-    public static final int END_LINE_SIZE = 2;
-    public static final int END_HEADER_SIZE = 3;
 
-    //Total table size
-    public static final int TABLE_SIZE = ACCOUNT_NAME + ZEN_BALANCE + YNAB_BALANCE + PB_BALANCE + ZEN_PB_DIFF + ZEN_YNAB_DIFF + ACCOUNT_STATUS + END_HEADER_SIZE + END_LINE_SIZE + VERTICAL_BAR_SIZE + 1;
-    public static final String ACCOUNT = "ACCOUNT";
-    public static final String ZEN = "ZEN";
-    public static final String YNAB = "YNAB";
-    public static final String PB = "PB";
-    public static final String PB_ZEN = "PB-ZEN";
-    public static final String ZEN_YNAB = "ZEN-YNAB";
-    public static final String STATUS = "STATUS";
-    public static final String X = "X";
     private static final Logger LOGGER = LogManager.getLogger(ReconcileService.class);
+
     private final ZenDiffService zenDiffService;
     private final UserService userService;
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
-    private final YnabSyncServiceRepository ynabSyncServiceRepository;
     private final Executor cfThreadPool;
     private final YnabExchangeService ynabExchangeService;
     private final MerchantService merchantService;
     private final PbAccountsService pbAccountsService;
+    private final ZenCommonMapper zenCommonMapper;
+    private final YnabCommonMapper ynabCommonMapper;
+    private final DateService dateService;
+    private final ReconcileTableService reconcileTableService;
 
     @Autowired
     public ReconcileService(final ZenDiffService zenDiffService,
                             final UserService userService,
                             final Executor cfThreadPool,
                             final MerchantService merchantService,
-                            final YnabSyncServiceRepository ynabSyncServiceRepository,
+                            final ZenCommonMapper zenCommonMapper,
                             final YnabExchangeService ynabExchangeService,
                             final PbAccountsService pbAccountsService,
+                            final DateService dateService,
+                            final YnabCommonMapper ynabCommonMapper,
+                            final ReconcileTableService reconcileTableService,
                             final ZenDiffLambdaHolder zenDiffLambdaHolder) {
         this.zenDiffService = zenDiffService;
         this.userService = userService;
         this.cfThreadPool = cfThreadPool;
         this.merchantService = merchantService;
         this.ynabExchangeService = ynabExchangeService;
-        this.ynabSyncServiceRepository = ynabSyncServiceRepository;
+        this.zenCommonMapper = zenCommonMapper;
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
+        this.ynabCommonMapper = ynabCommonMapper;
         this.pbAccountsService = pbAccountsService;
+        this.reconcileTableService = reconcileTableService;
+        this.dateService = dateService;
     }
 
 
-    public String getRecompileTable(final long userId, final String budgetName) {
+    public String getRecompileTable(final long userId, final String budgetName, int year, int mouth) {
         var table = new StringBuilder(EMPTY);
         try {
             LOGGER.debug("Building reconcile table, collecting info, for user: [{}]", userId);
             userService.findUserById(userId).ifPresent(appUser -> runAsync(() -> {
                 var pbAccs = getPbAccounts(appUser);
-                var ynabAccs = getYnabAccounts(appUser, findUserBudget(userId, budgetName));
-                var zenAccs = getZenAccounts(appUser);
+                var ynabBudget = getBudget(appUser, budgetName);
+                var ynabAccs = getYnabAccounts(appUser, ynabBudget);
+                var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
+                var ynabCategories = getYnabCategories(appUser, ynabBudget);
+                var maybeZr = getZenDiff(appUser);
+                var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
+
+                final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
+                final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
+
+                var allInfoForTagTable = mapInfoForTagsTable(appUser, ynabTransactions, ynabCategories, maybeZr, startDate, endDate);
+                var allInfoForAccountTable = mapInfoForAccountTable(zenAccs, ynabAccs, pbAccs);
 
                 LOGGER.debug("Combine accounts info collecting info, for user: [{}]", userId);
-                buildRow(table, ACCOUNT, PB, ZEN, YNAB, PB_ZEN, ZEN_YNAB, STATUS);
-                zenAccs.forEach(zenAcc -> combineAccountsInfo(table, ynabAccs, pbAccs, zenAcc));
-                buildCell(table, rightPad(PLUS, TABLE_SIZE, MINUS), PLUS, VERTICAL_BAR_SIZE);
+                reconcileTableService.buildAccountHeader(table);
+                allInfoForAccountTable.forEach(o -> reconcileTableService.buildAccountRow(table, o.getAccount(), o.getPbAmount(), o.getZenAmount(), o.getYnabAmount(), o.getPbZenDiff(), o.getZenYnabDiff(), o.getStatus()));
+                reconcileTableService.buildAccountLastLine(table);
+
+                reconcileTableService.addEmptyLine(table);
+                reconcileTableService.addEmptyLine(table);
+                reconcileTableService.addEmptyLine(table);
+                reconcileTableService.addEmptyLine(table);
+                reconcileTableService.addEmptyLine(table);
+
+                LOGGER.debug("Combine all category info, for user: [{}]", userId);
+                reconcileTableService.buildTagHeader(table);
+                allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmount(), t.getYnabAmount(), t.getDiff()));
+                reconcileTableService.buildTagLastLine(table);
 
             }, cfThreadPool).join());
         } catch (Exception e) {
@@ -117,31 +129,51 @@ public class ReconcileService {
         return table.toString();
     }
 
-    public String findUserBudget(final long userId, final String budgetName) {
-        return ynabSyncServiceRepository
-                .findByUserId(userId)
-                .orElse(emptyList())
-                .stream()
-                .collect(toUnmodifiableList())
-                .stream()
-                .filter(ynabSyncConfig -> ynabSyncConfig.getBudgetName().equalsIgnoreCase(budgetName))
-                .findFirst()
-                .map(YnabSyncConfig::getBudgetName)
-                .orElse(EMPTY);
+    private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(AppUser appUser, List<TransactionsItem> ynabTransactions, List<YnabCategories> ynabCategories, Optional<ZenResponse> maybeZr, long startDate, long endDate) {
+        final TreeMap<String, Double> zenSummary =
+                zenCommonMapper.getZenTagsSummaryByCategory(startDate, endDate, maybeZr);
+
+        final TreeMap<String, Double> ynabSummary =
+                ynabCommonMapper.getYnabSummaryByCategory(appUser, ynabTransactions, ynabCategories, startDate, endDate);
+
+        List<ZenYnabTagReconcileProxyObject> allInfoForTagTable = new ArrayList<>();
+        zenSummary.forEach((zenTag, zenAmount) -> {
+            final Double ynabValue = ynabSummary.get(zenTag);
+            if (ynabValue != null) {
+                allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(zenTag.trim(), zenAmount, ynabValue));
+            }
+        });
+        return allInfoForTagTable;
     }
 
-    public List<AccountItem> getZenAccounts(final AppUser appUser) {
-        LOGGER.debug("Fetching ZEN accounts, for user: [{}]", appUser.getId());
-        return supplyAsync(() -> zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser)), cfThreadPool)
-                .join()
-                .flatMap(zr -> ofNullable(zr.getAccount()))
+    private Optional<ZenResponse> getZenDiff(AppUser appUser) {
+        return supplyAsync(() -> {
+            LOGGER.debug("Fetching ZEN accounts, for user: [{}]", appUser.getId());
+            return zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser));
+        }, cfThreadPool).join();
+    }
+
+    public List<YnabAccounts> getYnabAccounts(final AppUser appUser, final Optional<YnabBudgets> budgetToReconcile) {
+        return budgetToReconcile
+                .map(budgets -> mapYnabAccounts(appUser, budgets))
                 .orElse(emptyList());
     }
 
-    public List<YnabAccounts> getYnabAccounts(final AppUser appUser, final String budgetToReconcile) {
+    public Optional<YnabBudgets> getBudget(AppUser appUser, String budgetToReconcile) {
         return supplyAsync(() -> mapYnabBudgetData(appUser, budgetToReconcile), cfThreadPool)
-                .join()
-                .map(budgets -> mapYnabAccounts(appUser, budgets))
+                .join();
+    }
+
+    public List<TransactionsItem> getYnabTransactions(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
+        return ynabBudget
+                .map(budgets -> supplyAsync(() -> mapYnabTransactionsData(appUser, budgets.getId()), cfThreadPool).join())
+                .orElse(emptyList());
+    }
+
+    public List<YnabCategories> getYnabCategories(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
+        return ynabBudget
+                .map(budgets -> supplyAsync(() -> ynabExchangeService.getCategories(appUser, budgets.getId()), cfThreadPool).join())
+                .map(ynabCommonMapper::mapYnabCategoriesFromResponse)
                 .orElse(emptyList());
     }
 
@@ -154,8 +186,9 @@ public class ReconcileService {
     }
 
     public Optional<YnabBudgets> mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
-        LOGGER.debug("Fetching Ynab data, for user: [{}]", appUser.getId());
-        return ynabExchangeService.getBudget(appUser)
+        LOGGER.debug("Fetching Ynab budgets, for user: [{}]", appUser.getId());
+        return supplyAsync(() -> ynabExchangeService.getBudget(appUser), cfThreadPool)
+                .join()
                 .flatMap(ynabBudgetResponse -> ynabBudgetResponse
                         .getYnabBudgetData()
                         .getBudgets()
@@ -166,83 +199,58 @@ public class ReconcileService {
                         .findFirst());
     }
 
+    public List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {
+        LOGGER.debug("Fetching Ynab transactions, for user: [{}]", appUser.getId());
+        return supplyAsync(() -> ynabExchangeService.getYnabTransactions(appUser, budgetToReconcile), cfThreadPool)
+                .join()
+                .map(ynabBudgetResponse -> ynabBudgetResponse
+                        .getData()
+                        .getTransactions()
+                        .stream()
+                        .filter(not(TransactionsItem::isDeleted))
+                        .collect(toUnmodifiableList()))
+                .orElse(emptyList());
+    }
+
     public List<PbAccountBalance> getPbAccounts(final AppUser appUser) {
         var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
         return pbAccountsService.getPbAsyncAccounts(appUser, merchantInfos);
     }
 
-    public void combineAccountsInfo(final StringBuilder table,
-                                    final List<YnabAccounts> ynabAccs,
-                                    final List<PbAccountBalance> pbAccs,
-                                    final AccountItem zenAcc) {
-        var zenAccTitle = zenAcc.getTitle();
-        ynabAccs.stream()
-                .filter(yA -> yA.getName().equalsIgnoreCase(zenAccTitle))
+    public List<ZenYnabAccountReconcileProxyObject> mapInfoForAccountTable(final List<AccountItem> zenAccs,
+                                                                           final List<YnabAccounts> ynabAccs,
+                                                                           final List<PbAccountBalance> pbAccs) {
+        return zenAccs
+                .stream()
+                .map(zenAcc -> ynabAccs.stream()
+                        .filter(yA -> yA.getName().equalsIgnoreCase(zenAcc.getTitle()))
+                        .collect(toUnmodifiableList())
+                        .stream()
+                        .map(yAcc -> mapSimpleRepresentation(pbAccs, zenAcc, zenAcc.getTitle(), yAcc))
+                        .collect(toUnmodifiableList()))
                 .collect(toUnmodifiableList())
                 .stream()
-                .findFirst()
-                .ifPresent(yAcc -> buildTable(table, pbAccs, zenAcc, yAcc));
-
+                .flatMap(Collection::stream)
+                .collect(toUnmodifiableList());
     }
 
-    public void buildTable(final StringBuilder table,
-                           final List<PbAccountBalance> pbAccs,
-                           final AccountItem zenAcc,
-                           final YnabAccounts yAcc) {
-        var ynabBal = parseYnabBal(yAcc);
-        var zenAccTitle = zenAcc.getTitle();
+    private ZenYnabAccountReconcileProxyObject mapSimpleRepresentation(List<PbAccountBalance> pbAccs, AccountItem zenAcc, String zenAccTitle, YnabAccounts yAcc) {
+        var ynabBal = ynabCommonMapper.parseYnabBal(valueOf(yAcc.getBalance()));
         var zenBal = BigDecimal.valueOf(zenAcc.getBalance());
         var zenYnabDiff = zenBal.subtract(ynabBal).setScale(CURRENCY_SCALE, HALF_DOWN);
         var status = zenYnabDiff.longValue() == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
 
-        final Consumer<PbAccountBalance> ifExistsFk = pbAccountBalance -> {
-            final BigDecimal pbBal = pbAccountBalance.getBalance();
+        final Optional<PbAccountBalance> pbAcc = pbAccs.stream()
+                .filter(pbAccountBalance -> pbAccountBalance.getAccount().equalsIgnoreCase(zenAccTitle))
+                .findFirst();
+
+        if (pbAcc.isPresent()) {
+            final BigDecimal pbBal = pbAcc.get().getBalance();
             var zenPbDiff = pbBal.subtract(zenBal).setScale(CURRENCY_SCALE, HALF_DOWN);
             var fullStatus = (zenYnabDiff.longValue() + zenPbDiff.longValue()) == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
-
-            buildRow(table, zenAccTitle, pbBal.toString(), zenBal.toString(), ynabBal.toString(), zenPbDiff.toString(), zenYnabDiff.toString(), fullStatus);
-        };
-
-        final Runnable ifNotExistsFk =
-                () -> buildRow(table, zenAccTitle, X, zenBal.toString(), ynabBal.toString(), X, zenYnabDiff.toString(), status);
-
-        pbAccs.stream()
-                .filter(pbAccountBalance -> pbAccountBalance.getAccount().equalsIgnoreCase(zenAccTitle))
-                .findFirst()
-                .ifPresentOrElse(ifExistsFk, ifNotExistsFk);
-    }
-
-    public BigDecimal parseYnabBal(YnabAccounts yAcc) {
-        var balStr = String.valueOf(yAcc.getBalance());
-        var endIndex = balStr.length() - BALANCE_AFTER_DIGITS;
-        var beforeDot = String.valueOf(yAcc.getBalance()).substring(START_POS, endIndex);
-        var afterDot = String.valueOf(yAcc.getBalance()).substring(endIndex, balStr.length());
-        return BigDecimal.valueOf(Float.valueOf(beforeDot + DOT + afterDot)).setScale(CURRENCY_SCALE, HALF_DOWN);
-    }
-
-    public void buildRow(final StringBuilder table,
-                         final String s1,
-                         final String s2,
-                         final String s3,
-                         final String s4,
-                         final String s5,
-                         final String s6,
-                         final String s7) {
-        buildCell(table, rightPad(PLUS, TABLE_SIZE, MINUS), END_HEADER_LINE, END_HEADER_SIZE);
-        buildCell(table, center(s1, ACCOUNT_NAME, SPACE), VERTICAL_BAR, VERTICAL_BAR_SIZE);
-        buildCell(table, center(s2, ZEN_BALANCE, SPACE), VERTICAL_BAR, VERTICAL_BAR_SIZE);
-        buildCell(table, center(s3, YNAB_BALANCE, SPACE), VERTICAL_BAR, VERTICAL_BAR_SIZE);
-        buildCell(table, center(s4, PB_BALANCE, SPACE), VERTICAL_BAR, VERTICAL_BAR_SIZE);
-        buildCell(table, center(s5, ZEN_PB_DIFF, SPACE), VERTICAL_BAR, VERTICAL_BAR_SIZE);
-        buildCell(table, center(s6, ZEN_YNAB_DIFF, SPACE), VERTICAL_BAR, VERTICAL_BAR_SIZE);
-        buildCell(table, center(s7, ACCOUNT_STATUS, SPACE), END_LINE, END_LINE_SIZE);
-    }
-
-    public void buildCell(final StringBuilder table,
-                          final String s,
-                          final String endHeaderLine,
-                          final int endHeaderSize) {
-        table.append(s);
-        table.append(rightPad(endHeaderLine, endHeaderSize));
+            return new ZenYnabAccountReconcileProxyObject(zenAccTitle, zenBal.toString(), ynabBal.toString(), pbBal.toString(), zenPbDiff.toString(), zenYnabDiff.toString(), fullStatus);
+        } else {
+            return new ZenYnabAccountReconcileProxyObject(zenAccTitle, zenBal.toString(), ynabBal.toString(), X, X, zenYnabDiff.toString(), status);
+        }
     }
 }

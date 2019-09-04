@@ -124,4 +124,21 @@ public class DateService {
         return of(trandate.getYear(), trandate.getMonth(), trandate.getDay(), 0, 0, 0)
                 .atZone(ZoneId.of(timeZone));
     }
+
+    public long getStartOfMouthInSeconds(int year, int mouth, final AppUser u) {
+        return YearMonth.of(year, mouth)
+                .atDay(1)
+                .atStartOfDay(ZoneId.of(u.getTimeZone()))
+                .toInstant()
+                .getEpochSecond();
+    }
+
+    public long getEndOfMouthInSeconds(int year, int mouth, final AppUser u) {
+        return YearMonth.of(year, mouth)
+                .atEndOfMonth()
+                .atStartOfDay(ZoneId.of(u.getTimeZone()))
+                .plusHours(24)
+                .toInstant()
+                .getEpochSecond();
+    }
 }

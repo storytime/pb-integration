@@ -59,6 +59,7 @@ public class PbAccountsService {
     }
 
     public List<PbAccountBalance> getPbAsyncAccounts(final AppUser appUser, final List<MerchantInfo> merchantInfos) {
+        LOGGER.debug("Fetching Ynab accounts, for user: [{}]", appUser.getId());
         final List<CompletableFuture<PbAccountBalance>> pbAccountCf = merchantInfos
                 .stream()
                 .map(merchantInfo -> getPbAsyncAccounts(appUser, merchantInfo))
