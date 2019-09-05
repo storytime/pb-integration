@@ -90,16 +90,16 @@ public class ReconcileService {
         try {
             LOGGER.debug("Building reconcile table, collecting info, for user: [{}]", userId);
             userService.findUserById(userId).ifPresent(appUser -> runAsync(() -> {
+                final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
+                final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
+
                 var pbAccs = getPbAccounts(appUser);
                 var ynabBudget = getBudget(appUser, budgetName);
                 var ynabAccs = getYnabAccounts(appUser, ynabBudget);
                 var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
                 var ynabCategories = getYnabCategories(appUser, ynabBudget);
-                var maybeZr = getZenDiff(appUser);
+                var maybeZr = getZenDiff(appUser, startDate);
                 var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
-
-                final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
-                final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
 
                 var allInfoForTagTable = mapInfoForTagsTable(appUser, ynabTransactions, ynabCategories, maybeZr, startDate, endDate);
                 var allInfoForAccountTable = mapInfoForAccountTable(zenAccs, ynabAccs, pbAccs);
@@ -109,9 +109,6 @@ public class ReconcileService {
                 allInfoForAccountTable.forEach(o -> reconcileTableService.buildAccountRow(table, o.getAccount(), o.getPbAmount(), o.getZenAmount(), o.getYnabAmount(), o.getPbZenDiff(), o.getZenYnabDiff(), o.getStatus()));
                 reconcileTableService.buildAccountLastLine(table);
 
-                reconcileTableService.addEmptyLine(table);
-                reconcileTableService.addEmptyLine(table);
-                reconcileTableService.addEmptyLine(table);
                 reconcileTableService.addEmptyLine(table);
                 reconcileTableService.addEmptyLine(table);
 
@@ -146,10 +143,10 @@ public class ReconcileService {
         return allInfoForTagTable;
     }
 
-    private Optional<ZenResponse> getZenDiff(AppUser appUser) {
+    private Optional<ZenResponse> getZenDiff(AppUser appUser, long startDate) {
         return supplyAsync(() -> {
             LOGGER.debug("Fetching ZEN accounts, for user: [{}]", appUser.getId());
-            return zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser));
+            return zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate));
         }, cfThreadPool).join();
     }
 

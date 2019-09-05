@@ -68,11 +68,11 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-    public Supplier<HttpEntity> getAccount(final AppUser u) {
+    public Supplier<HttpEntity> getAccount(final AppUser u, long startDate) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
-                    .setServerTimestamp(now().getEpochSecond())
+                    .setServerTimestamp(startDate)
                     .setForceFetch(Set.of(TAG, ACCOUNT, TRANSACTION));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
