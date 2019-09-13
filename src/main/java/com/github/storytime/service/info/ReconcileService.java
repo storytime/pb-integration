@@ -34,6 +34,7 @@ import static com.github.storytime.service.ReconcileTableService.X;
 import static java.lang.String.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -112,7 +113,7 @@ public class ReconcileService {
                 reconcileTableService.addEmptyLine(table);
                 reconcileTableService.addEmptyLine(table);
 
-                LOGGER.debug("Combine all category info, for user: [{}]", userId);
+                LOGGER.debug("Combine all category info, for user: [{}], info: [{}]", userId, allInfoForTagTable);
                 reconcileTableService.buildTagHeader(table);
                 allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmount(), t.getYnabAmount(), t.getDiff()));
                 reconcileTableService.buildTagLastLine(table);
@@ -135,19 +136,13 @@ public class ReconcileService {
                 ynabCommonMapper.getYnabSummaryByCategory(appUser, ynabTransactions, ynabCategories, startDate, endDate);
 
         List<ZenYnabTagReconcileProxyObject> allInfoForTagTable = new ArrayList<>();
-        zenSummary.forEach((zenTag, zenAmount) -> {
-            final BigDecimal ynabValue = ynabSummary.get(zenTag);
-            if (ynabValue != null) {
-                allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(zenTag, zenAmount, ynabValue));
-            }
-        });
-
         ynabSummary.forEach((ynabTag, ynabAmount) -> {
             final BigDecimal zenAmount = zenSummary.get(ynabTag);
             if (zenAmount != null) {
                 allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(ynabTag, zenAmount, ynabAmount));
             }
         });
+        allInfoForTagTable.sort(comparing(ZenYnabTagReconcileProxyObject::getCategory));
         return allInfoForTagTable;
     }
 
