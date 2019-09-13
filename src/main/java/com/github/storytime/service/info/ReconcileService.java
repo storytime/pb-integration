@@ -126,7 +126,8 @@ public class ReconcileService {
         return table.toString();
     }
 
-    private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(AppUser appUser, List<TransactionsItem> ynabTransactions, List<YnabCategories> ynabCategories, Optional<ZenResponse> maybeZr, long startDate, long endDate) {
+    private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(AppUser appUser, List<TransactionsItem> ynabTransactions,
+                                                                     List<YnabCategories> ynabCategories, Optional<ZenResponse> maybeZr, long startDate, long endDate) {
         final TreeMap<String, BigDecimal> zenSummary =
                 zenCommonMapper.getZenTagsSummaryByCategory(startDate, endDate, maybeZr);
 
@@ -137,7 +138,14 @@ public class ReconcileService {
         zenSummary.forEach((zenTag, zenAmount) -> {
             final BigDecimal ynabValue = ynabSummary.get(zenTag);
             if (ynabValue != null) {
-                allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(zenTag.trim(), zenAmount, ynabValue));
+                allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(zenTag, zenAmount, ynabValue));
+            }
+        });
+
+        ynabSummary.forEach((ynabTag, ynabAmount) -> {
+            final BigDecimal zenAmount = zenSummary.get(ynabTag);
+            if (zenAmount != null) {
+                allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(ynabTag, zenAmount, ynabAmount));
             }
         });
         return allInfoForTagTable;
