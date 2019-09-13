@@ -113,7 +113,7 @@ public class ReconcileService {
                 reconcileTableService.addEmptyLine(table);
                 reconcileTableService.addEmptyLine(table);
 
-                LOGGER.debug("Combine all category info, for user: [{}], info: [{}]", userId, allInfoForTagTable);
+                LOGGER.debug("Combine all category info, for user: [{}]", userId);
                 reconcileTableService.buildTagHeader(table);
                 allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmount(), t.getYnabAmount(), t.getDiff()));
                 reconcileTableService.buildTagLastLine(table);
@@ -142,8 +142,10 @@ public class ReconcileService {
                 allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(ynabTag, zenAmount, ynabAmount));
             }
         });
-        allInfoForTagTable.sort(comparing(ZenYnabTagReconcileProxyObject::getCategory));
-        return allInfoForTagTable;
+        return allInfoForTagTable
+                .stream()
+                .filter(not(x -> x.getCategory().isEmpty()))
+                .collect(toUnmodifiableList());
     }
 
     private Optional<ZenResponse> getZenDiff(AppUser appUser, long startDate) {
