@@ -144,7 +144,6 @@ public class ReconcileService {
         return allInfoForTagTable
                 .stream()
                 .filter(not(x -> x.getCategory().isEmpty()))
-                .sorted()
                 .collect(toUnmodifiableList());
     }
 
