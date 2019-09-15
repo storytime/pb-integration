@@ -2,6 +2,9 @@ package com.github.storytime.model.ynab.common;
 
 import java.math.BigDecimal;
 
+import static com.github.storytime.config.props.Constants.CURRENCY_SCALE;
+import static java.math.RoundingMode.HALF_DOWN;
+
 public class ZenYnabTagReconcileProxyObject {
 
     private String category;
@@ -13,9 +16,9 @@ public class ZenYnabTagReconcileProxyObject {
                                           BigDecimal zenAmount,
                                           BigDecimal ynabAmount) {
         this.category = category;
-        this.zenAmount = String.valueOf(zenAmount);
-        this.ynabAmount = String.valueOf(ynabAmount);
-        this.diff = ynabAmount.subtract(zenAmount).toString();
+        this.zenAmount = String.valueOf(zenAmount.setScale(CURRENCY_SCALE, HALF_DOWN));
+        this.ynabAmount = String.valueOf(ynabAmount.setScale(CURRENCY_SCALE, HALF_DOWN));
+        this.diff = ynabAmount.subtract(zenAmount).setScale(CURRENCY_SCALE, HALF_DOWN).toString();
     }
 
     public String getCategory() {

@@ -34,7 +34,6 @@ import static com.github.storytime.service.ReconcileTableService.X;
 import static java.lang.String.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.util.Collections.emptyList;
-import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -145,6 +144,7 @@ public class ReconcileService {
         return allInfoForTagTable
                 .stream()
                 .filter(not(x -> x.getCategory().isEmpty()))
+                .sorted()
                 .collect(toUnmodifiableList());
     }
 

@@ -88,6 +88,7 @@ public class ZenCommonMapper {
                 .sorted(comparing(TransactionItem::getCreated))
                 .collect(toUnmodifiableList());
 
+        //TODO: add amount of transactions
         final Map<String, DoubleSummaryStatistics> groupByTags = zenTr
                 .stream()
                 .collect(groupingBy(transactionItem -> transactionItem.getTag().stream().findFirst().orElse(EMPTY),
