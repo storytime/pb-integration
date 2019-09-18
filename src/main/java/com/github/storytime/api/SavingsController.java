@@ -20,7 +20,7 @@ public class SavingsController {
     }
 
     @GetMapping(value = API_PREFIX + "/savings/{userId}/info", produces = TEXT_PLAIN_VALUE)
-    public String getVersion(@PathVariable("userId") long userId) {
+    public String savingsInfo(@PathVariable("userId") long userId) {
         return savingsService.getAllSavingsInfo(userId);
     }
 }

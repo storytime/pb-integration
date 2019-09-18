@@ -39,7 +39,7 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 @Service
 public class SavingsService {
 
-    public static final BigDecimal ONE_HUNDRED = new BigDecimal(Constants.ONE_HUNDRED);
+    private static final BigDecimal ONE_HUNDRED = new BigDecimal(Constants.ONE_HUNDRED);
     private static final Logger LOGGER = getLogger(SavingsService.class);
     private static final int USD_ID = 1;
     private static final int EUR_ID = 3;
@@ -86,7 +86,7 @@ public class SavingsService {
                     .orElse(EMPTY);
         } catch (Exception e) {
             //todo return server error
-            LOGGER.error("Cannot push Diff to ZEN request:[{}]", e.getCause());
+            LOGGER.error("Cannot collect saving info for user [{}] request:[{}]", userId, e.getCause());
             return EMPTY;
         }
     }

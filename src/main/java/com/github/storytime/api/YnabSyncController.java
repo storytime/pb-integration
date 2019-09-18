@@ -21,7 +21,7 @@ public class YnabSyncController {
     }
 
     @GetMapping(value = API_PREFIX + "/ynab/{userId}/sync", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getVersion(@PathVariable("userId") long userId) {
+    public ResponseEntity pushToYnab(@PathVariable("userId") long userId) {
         return ynabSyncService.syncTransactions(userId);
     }
 }

@@ -12,6 +12,7 @@ import com.github.storytime.model.ynab.common.ZenYnabAccountReconcileProxyObject
 import com.github.storytime.model.ynab.common.ZenYnabTagReconcileProxyObject;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.model.zen.AccountItem;
+import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.DateService;
 import com.github.storytime.service.ReconcileTableService;
@@ -34,6 +35,7 @@ import static com.github.storytime.service.ReconcileTableService.X;
 import static java.lang.String.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -43,7 +45,6 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Component
 public class ReconcileService {
-
 
     private static final Logger LOGGER = LogManager.getLogger(ReconcileService.class);
 
@@ -114,20 +115,24 @@ public class ReconcileService {
 
                 LOGGER.debug("Combine all category info, for user: [{}]", userId);
                 reconcileTableService.buildTagHeader(table);
-                allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmount(), t.getYnabAmount(), t.getDiff()));
+                allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmountAsString(), t.getYnabAmountAsString(), t.getDiff()));
                 reconcileTableService.buildTagLastLine(table);
 
             }, cfThreadPool).join());
         } catch (Exception e) {
-            LOGGER.error("Cannot build reconcile table ", e.getCause());
+            LOGGER.error("Cannot build reconcile table for user [{}], error [{}]", userId, e.getCause());
             return table.toString();
         }
         LOGGER.debug("Finish building reconcile table, for user: [{}]", userId);
         return table.toString();
     }
 
-    private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(AppUser appUser, List<TransactionsItem> ynabTransactions,
-                                                                     List<YnabCategories> ynabCategories, Optional<ZenResponse> maybeZr, long startDate, long endDate) {
+    private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(AppUser appUser,
+                                                                     List<TransactionsItem> ynabTransactions,
+                                                                     List<YnabCategories> ynabCategories,
+                                                                     Optional<ZenResponse> maybeZr,
+                                                                     long startDate,
+                                                                     long endDate) {
         final TreeMap<String, BigDecimal> zenSummary =
                 zenCommonMapper.getZenTagsSummaryByCategory(startDate, endDate, maybeZr);
 
@@ -144,6 +149,7 @@ public class ReconcileService {
         return allInfoForTagTable
                 .stream()
                 .filter(not(x -> x.getCategory().isEmpty()))
+                .sorted(comparing(ZenYnabTagReconcileProxyObject::getZenAmount).reversed())
                 .collect(toUnmodifiableList());
     }
 
