@@ -12,7 +12,6 @@ import com.github.storytime.model.ynab.common.ZenYnabAccountReconcileProxyObject
 import com.github.storytime.model.ynab.common.ZenYnabTagReconcileProxyObject;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.model.zen.AccountItem;
-import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.DateService;
 import com.github.storytime.service.ReconcileTableService;

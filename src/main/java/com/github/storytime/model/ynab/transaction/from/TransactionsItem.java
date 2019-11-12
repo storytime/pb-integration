@@ -15,7 +15,7 @@ public class TransactionsItem {
     private String transferTransactionId;
 
     @JsonProperty("amount")
-    private int amount;
+    private long amount;
 
     @JsonProperty("category_name")
     private String categoryName;
@@ -81,11 +81,11 @@ public class TransactionsItem {
         this.transferTransactionId = transferTransactionId;
     }
 
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 
