@@ -34,7 +34,7 @@ public class Constants {
     public static final int COMMENT_SIZE = 50;
     public static final String NBU_LAST_DAY = "In: ";
     public static final String USD_COMMENT = "$ ";
-    public static final String BANK_RATE = "BR: ";
+    public static final String BANK_RATE = "";
     public static final int EMPTY_AMOUNT = 0;
     public static final int NOT_CHANGED = 0;
     public static final int ONE_HUNDRED = 100;
