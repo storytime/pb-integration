@@ -240,7 +240,11 @@ public class ReconcileService {
                 .collect(toUnmodifiableList());
     }
 
-    private ZenYnabAccountReconcileProxyObject mapSimpleRepresentation(List<PbAccountBalance> pbAccs, AccountItem zenAcc, String zenAccTitle, YnabAccounts yAcc) {
+    private ZenYnabAccountReconcileProxyObject mapSimpleRepresentation(final List<PbAccountBalance> pbAccs,
+                                                                       final AccountItem zenAcc,
+                                                                       final String zenAccTitle,
+                                                                       final YnabAccounts yAcc) {
+        LOGGER.debug("Ynab bal to parse: {}",yAcc.getBalance());
         var ynabBal = ynabCommonMapper.parseYnabBal(valueOf(yAcc.getBalance()));
         var zenBal = BigDecimal.valueOf(zenAcc.getBalance());
         var zenYnabDiff = zenBal.subtract(ynabBal).setScale(CURRENCY_SCALE, HALF_DOWN);
