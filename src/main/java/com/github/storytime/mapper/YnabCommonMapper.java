@@ -6,6 +6,9 @@ import com.github.storytime.model.ynab.category.YnabCategories;
 import com.github.storytime.model.ynab.category.YnabCategoryResponse;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.service.DateService;
+import com.github.storytime.service.info.ReconcileService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +26,8 @@ import static java.util.stream.Collectors.*;
 
 @Component
 public class YnabCommonMapper {
+
+    private static final Logger LOGGER = LogManager.getLogger(YnabCommonMapper.class);
 
     private final DateService dateService;
 
@@ -59,18 +64,19 @@ public class YnabCommonMapper {
                 .orElse(EMPTY);
     }
 
-    public BigDecimal parseYnabBal(String balStr) {
+    public BigDecimal parseYnabBal(final String balStr) {
+        LOGGER.debug("Ynab bal to parse: {}", balStr);
         var endIndex = balStr.length() - BALANCE_AFTER_DIGITS;
         var beforeDot = balStr.substring(START_POS, endIndex);
         var afterDot = balStr.substring(endIndex);
         return BigDecimal.valueOf(Float.valueOf(beforeDot + DOT + afterDot)).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
-    private Map<String, DoubleSummaryStatistics> getYnabExtendedSummaryByCategory(AppUser appUser,
-                                                                                  List<TransactionsItem> ynabTransactions,
-                                                                                  List<YnabCategories> ynabCategories,
-                                                                                  long startDate,
-                                                                                  long endDate) {
+    private Map<String, DoubleSummaryStatistics> getYnabExtendedSummaryByCategory(final AppUser appUser,
+                                                                                  final List<TransactionsItem> ynabTransactions,
+                                                                                  final List<YnabCategories> ynabCategories,
+                                                                                  final long startDate,
+                                                                                  final long endDate) {
         final List<YnabTransactionProxyObject> ynabTransProxy = ynabTransactions
                 .stream()
                 .filter(transactionsItem -> filterTransactions(appUser, startDate, endDate, transactionsItem))
@@ -82,8 +88,8 @@ public class YnabCommonMapper {
                 .collect(groupingBy(YnabTransactionProxyObject::getCategoryId, summarizingDouble(YnabTransactionProxyObject::getAmount)));
     }
 
-    private YnabTransactionProxyObject mapTransactionsToSimpleRepresentation(List<YnabCategories> ynabCategories,
-                                                                             TransactionsItem transactionsItem) {
+    private YnabTransactionProxyObject mapTransactionsToSimpleRepresentation(final List<YnabCategories> ynabCategories,
+                                                                             final TransactionsItem transactionsItem) {
         final BigDecimal bigDecimal = parseYnabBal(valueOf(transactionsItem.getAmount()));
         final String tagNameByTagId = this.getTagNameByTagId(ynabCategories, transactionsItem.getCategoryId());
         return new YnabTransactionProxyObject(tagNameByTagId, abs(bigDecimal.doubleValue()));
@@ -99,10 +105,10 @@ public class YnabCommonMapper {
 
 
     public TreeMap<String, BigDecimal> getYnabSummaryByCategory(AppUser appUser,
-                                                            List<TransactionsItem> ynabTransactions,
-                                                            List<YnabCategories> ynabCategories,
-                                                            long startDate,
-                                                            long endDate) {
+                                                                List<TransactionsItem> ynabTransactions,
+                                                                List<YnabCategories> ynabCategories,
+                                                                long startDate,
+                                                                long endDate) {
         final Map<String, DoubleSummaryStatistics> ynabGroupBy =
                 this.getYnabExtendedSummaryByCategory(appUser, ynabTransactions, ynabCategories, startDate, endDate);
 
