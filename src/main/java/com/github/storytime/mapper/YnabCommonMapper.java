@@ -66,10 +66,14 @@ public class YnabCommonMapper {
 
     public BigDecimal parseYnabBal(final String balStr) {
         LOGGER.debug("Ynab bal to parse: {}", balStr);
+
+        if (balStr.equals(YNAB_ZERO_BALANCE))
+            return new BigDecimal(0);
+
         var endIndex = balStr.length() - BALANCE_AFTER_DIGITS;
         var beforeDot = balStr.substring(START_POS, endIndex);
         var afterDot = balStr.substring(endIndex);
-        return BigDecimal.valueOf(Float.valueOf(beforeDot + DOT + afterDot)).setScale(CURRENCY_SCALE, HALF_DOWN);
+        return BigDecimal.valueOf(Float.parseFloat(beforeDot + DOT + afterDot)).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
     private Map<String, DoubleSummaryStatistics> getYnabExtendedSummaryByCategory(final AppUser appUser,

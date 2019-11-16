@@ -56,6 +56,7 @@ public class Constants {
     public static final String CARDNUM = "cardnum";
     public static final String COUNTRY = "country";
     public static final String UA = "UA";
+    public static final String YNAB_ZERO_BALANCE = "0";
 
     private Constants() {
     }
