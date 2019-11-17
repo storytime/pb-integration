@@ -65,7 +65,6 @@ public class YnabCommonMapper {
     }
 
     public BigDecimal parseYnabBal(final String balStr) {
-        LOGGER.debug("Ynab bal to parse: {}", balStr);
 
         if (balStr.equals(YNAB_ZERO_BALANCE))
             return new BigDecimal(0);
