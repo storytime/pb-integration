@@ -67,7 +67,7 @@ public class YnabExchangeService {
             final Optional<YnabCategoryResponse> body =
                     ofNullable(restTemplate.exchange(url, GET, httpEntity, YnabCategoryResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeSeconds());
+            LOGGER.debug("Ynab categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch ynab categories, for user:[{}], error:[{}]", appUser.id, e.getMessage());
@@ -86,10 +86,10 @@ public class YnabExchangeService {
             final Optional<TransactionsFormYnab> body =
                     ofNullable(restTemplate.exchange(url, GET, httpEntity, TransactionsFormYnab.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeSeconds());
+            LOGGER.debug("Ynab budgets transactions for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch ynab categories, for user:[{}], error:[{}]", appUser.id, e.getMessage());
+            LOGGER.error("Cannot fetch ynab transactions, for user:[{}], error:[{}]", appUser.id, e.getMessage());
             return empty();
         }
     }

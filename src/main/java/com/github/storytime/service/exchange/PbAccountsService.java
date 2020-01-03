@@ -104,7 +104,7 @@ public class PbAccountsService {
             st.start();
             final Optional<ResponseEntity<String>> response = of(restTemplate.postForEntity(pbAccountsUrl, requestToBank, String.class));
             st.stop();
-            LOGGER.debug("Receive bank response, execution time:[{}] sec", st.getTotalTimeSeconds());
+            LOGGER.debug("Receive bank account response, execution time:[{}] sec", st.getTotalTimeSeconds());
             pbRequestTimeTimer.record(st.getTotalTimeMillis(), TimeUnit.MILLISECONDS);
             return response;
         } catch (Exception e) {
