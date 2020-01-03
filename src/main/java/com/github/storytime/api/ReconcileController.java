@@ -20,10 +20,15 @@ public class ReconcileController {
     }
 
     @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info/{year}/{mouth}", produces = TEXT_PLAIN_VALUE)
-    public String reconcileInfo(@PathVariable("userId") long userId,
-                                @PathVariable("budgetName") String budgetName,
-                                @PathVariable("year") int year,
-                                @PathVariable("mouth") int mouth) {
-        return reconcileService.getRecompileTable(userId, budgetName, year, mouth);
+    public String reconcileByDate(@PathVariable("userId") long userId,
+                                  @PathVariable("budgetName") String budgetName,
+                                  @PathVariable("year") int year,
+                                  @PathVariable("mouth") int mouth) {
+        return reconcileService.reconcileTableByDate(userId, budgetName, year, mouth);
+    }
+
+    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info", produces = TEXT_PLAIN_VALUE)
+    public String reconcile(@PathVariable("userId") long userId, @PathVariable("budgetName") String budgetName) {
+        return reconcileService.reconcileTableDefault(userId, budgetName);
     }
 }

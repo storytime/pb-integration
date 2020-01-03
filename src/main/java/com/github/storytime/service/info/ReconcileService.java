@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.Executor;
 
@@ -84,8 +86,19 @@ public class ReconcileService {
         this.dateService = dateService;
     }
 
+    public String reconcileTableDefault(final long userId, final String budgetName) {
+        try {
+            var appUser = userService.findUserById(userId).orElseThrow(() -> new RuntimeException("Cannot find user"));
+            int year = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getYear();
+            int month = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getMonthValue();
+            return this.reconcileTableByDate(userId, budgetName, year, month);
+        } catch (Exception e) {
+            LOGGER.error("Cannot build reconcile table for user [{}], error [{}] for default dates", userId, e.getCause());
+            return EMPTY;
+        }
+    }
 
-    public String getRecompileTable(final long userId, final String budgetName, int year, int mouth) {
+    public String reconcileTableByDate(final long userId, final String budgetName, int year, int mouth) {
         var table = new StringBuilder(EMPTY);
         try {
             LOGGER.debug("Building reconcile table, collecting info, for user: [{}]", userId);
@@ -165,25 +178,25 @@ public class ReconcileService {
                 .orElse(emptyList());
     }
 
-    public Optional<YnabBudgets> getBudget(AppUser appUser, String budgetToReconcile) {
+    private Optional<YnabBudgets> getBudget(AppUser appUser, String budgetToReconcile) {
         return supplyAsync(() -> mapYnabBudgetData(appUser, budgetToReconcile), cfThreadPool)
                 .join();
     }
 
-    public List<TransactionsItem> getYnabTransactions(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
+    private List<TransactionsItem> getYnabTransactions(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
         return ynabBudget
                 .map(budgets -> supplyAsync(() -> mapYnabTransactionsData(appUser, budgets.getId()), cfThreadPool).join())
                 .orElse(emptyList());
     }
 
-    public List<YnabCategories> getYnabCategories(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
+    private List<YnabCategories> getYnabCategories(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
         return ynabBudget
                 .map(budgets -> supplyAsync(() -> ynabExchangeService.getCategories(appUser, budgets.getId()), cfThreadPool).join())
                 .map(ynabCommonMapper::mapYnabCategoriesFromResponse)
                 .orElse(emptyList());
     }
 
-    public List<YnabAccounts> mapYnabAccounts(final AppUser appUser, final YnabBudgets budgets) {
+    private List<YnabAccounts> mapYnabAccounts(final AppUser appUser, final YnabBudgets budgets) {
         LOGGER.debug("Fetching Ynab accounts, for user: [{}]", appUser.getId());
         return supplyAsync(() -> ynabExchangeService.getAccounts(appUser, budgets.getId()), cfThreadPool)
                 .join()
@@ -191,7 +204,7 @@ public class ReconcileService {
                 .orElse(emptyList());
     }
 
-    public Optional<YnabBudgets> mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
+    private Optional<YnabBudgets> mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
         LOGGER.debug("Fetching Ynab budgets, for user: [{}]", appUser.getId());
         return supplyAsync(() -> ynabExchangeService.getBudget(appUser), cfThreadPool)
                 .join()
@@ -205,7 +218,7 @@ public class ReconcileService {
                         .findFirst());
     }
 
-    public List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {
+    private List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {
         LOGGER.debug("Fetching Ynab transactions, for user: [{}]", appUser.getId());
         return supplyAsync(() -> ynabExchangeService.getYnabTransactions(appUser, budgetToReconcile), cfThreadPool)
                 .join()
@@ -218,14 +231,14 @@ public class ReconcileService {
                 .orElse(emptyList());
     }
 
-    public List<PbAccountBalance> getPbAccounts(final AppUser appUser) {
+    private List<PbAccountBalance> getPbAccounts(final AppUser appUser) {
         var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
         return pbAccountsService.getPbAsyncAccounts(appUser, merchantInfos);
     }
 
-    public List<ZenYnabAccountReconcileProxyObject> mapInfoForAccountTable(final List<AccountItem> zenAccs,
-                                                                           final List<YnabAccounts> ynabAccs,
-                                                                           final List<PbAccountBalance> pbAccs) {
+    private List<ZenYnabAccountReconcileProxyObject> mapInfoForAccountTable(final List<AccountItem> zenAccs,
+                                                                            final List<YnabAccounts> ynabAccs,
+                                                                            final List<PbAccountBalance> pbAccs) {
         return zenAccs
                 .stream()
                 .map(zenAcc -> ynabAccs.stream()
@@ -262,4 +275,6 @@ public class ReconcileService {
             return new ZenYnabAccountReconcileProxyObject(zenAccTitle, zenBal.toString(), ynabBal.toString(), X, X, zenYnabDiff.toString(), status);
         }
     }
+
+
 }
