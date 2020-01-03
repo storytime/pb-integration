@@ -67,7 +67,7 @@ public class ZenDiffService {
             st.start();
             final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), httpEntity, ZenResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Zen diff was fetched time:[{}]", st.getTotalTimeMillis());
+            LOGGER.debug("Zen diff was fetched time:[{}]", st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch zen diff, error:[{}]", e.getMessage());

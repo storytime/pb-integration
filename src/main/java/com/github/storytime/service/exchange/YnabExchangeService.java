@@ -47,7 +47,7 @@ public class YnabExchangeService {
             final Optional<YnabBudgetResponse> body =
                     ofNullable(restTemplate.exchange(customConfig.getYnabUrl(), GET, httpEntity, YnabBudgetResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab budgets for user:[{}] were fetched time:[{}]", user.id, st.getTotalTimeMillis());
+            LOGGER.debug("Ynab budgets for user:[{}] were fetched time:[{}]", user.id, st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch ynab budgets, for user:[{}], error:[{}]", user.id, e.getMessage());
@@ -67,7 +67,7 @@ public class YnabExchangeService {
             final Optional<YnabCategoryResponse> body =
                     ofNullable(restTemplate.exchange(url, GET, httpEntity, YnabCategoryResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeMillis());
+            LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch ynab categories, for user:[{}], error:[{}]", appUser.id, e.getMessage());
@@ -86,7 +86,7 @@ public class YnabExchangeService {
             final Optional<TransactionsFormYnab> body =
                     ofNullable(restTemplate.exchange(url, GET, httpEntity, TransactionsFormYnab.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeMillis());
+            LOGGER.debug("Ynab budgets categories for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch ynab categories, for user:[{}], error:[{}]", appUser.id, e.getMessage());
@@ -105,7 +105,7 @@ public class YnabExchangeService {
             final Optional<YnabAccountResponse> body =
                     ofNullable(restTemplate.exchange(url, GET, httpEntity, YnabAccountResponse.class).getBody());
             st.stop();
-            LOGGER.debug("Ynab accounts for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeMillis());
+            LOGGER.debug("Ynab accounts for user:[{}] were fetched time:[{}]", appUser.id, st.getTotalTimeSeconds());
             return body;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch ynab accounts, for user:[{}], error:[{}]", appUser.id, e.getMessage());
