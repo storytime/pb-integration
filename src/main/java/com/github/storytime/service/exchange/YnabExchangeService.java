@@ -26,7 +26,6 @@ import static org.springframework.http.HttpMethod.GET;
 public class YnabExchangeService {
 
     private static final Logger LOGGER = getLogger(YnabExchangeService.class);
-
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
 
@@ -54,7 +53,6 @@ public class YnabExchangeService {
             return empty();
         }
     }
-
 
     public Optional<YnabCategoryResponse> getCategories(final AppUser appUser,
                                                         final String budgetId) {
@@ -131,5 +129,4 @@ public class YnabExchangeService {
             return empty();
         }
     }
-
 }
