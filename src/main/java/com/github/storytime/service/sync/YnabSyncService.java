@@ -1,6 +1,7 @@
 package com.github.storytime.service.sync;
 
 
+import com.github.storytime.config.props.Constants;
 import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.mapper.YnabCommonMapper;
 import com.github.storytime.mapper.ZenCommonMapper;
@@ -372,14 +373,7 @@ public class YnabSyncService {
         return zenTransactions
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
-                .filter(zt -> {
-                    try {
-                        ofEpochSecond(zt.getCreated());
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                })
+                .filter(zt -> zt.getCreated() < Constants.EPOCH_MILLI_FIX)
                 .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new transactions
                 .filter(zt -> commonAccounts.isExistsByZenId(zt.getIncomeAccount())) //only for common accounts
                 .filter(zt -> commonAccounts.isExistsByZenId(zt.getOutcomeAccount())) //only for common accounts
