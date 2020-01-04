@@ -57,7 +57,7 @@ public class Constants {
     public static final String COUNTRY = "country";
     public static final String UA = "UA";
     public static final String YNAB_ZERO_BALANCE = "0";
-    public static final long EPOCH_MILLI_FIX = 2146143031000L;
+    public static final long EPOCH_MILLI_FIX = 2146078276;
     public static final String CLEARED = "cleared";
 
     private Constants() {
