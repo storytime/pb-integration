@@ -107,7 +107,6 @@ public class ReconcileService {
                 final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
 
                 var pbAccs = getPbAccounts(appUser);
-                pbAccs.forEach(t -> LOGGER.debug(t.getBalance() + "----------------"));
                 var ynabBudget = getBudget(appUser, budgetName);
                 var ynabAccs = getYnabAccounts(appUser, ynabBudget);
                 var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
