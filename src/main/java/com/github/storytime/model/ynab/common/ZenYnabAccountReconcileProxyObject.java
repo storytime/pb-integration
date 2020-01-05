@@ -10,13 +10,13 @@ public class ZenYnabAccountReconcileProxyObject {
     private String zenYnabDiff;
     private String status;
 
-    public ZenYnabAccountReconcileProxyObject(String account,
-                                              String zenAmount,
-                                              String ynabAmount,
-                                              String pbAmount,
-                                              String pbZenDiff,
-                                              String zenYnabDiff,
-                                              String status) {
+    public ZenYnabAccountReconcileProxyObject(final String account,
+                                              final String zenAmount,
+                                              final String ynabAmount,
+                                              final String pbAmount,
+                                              final String pbZenDiff,
+                                              final String zenYnabDiff,
+                                              final String status) {
         this.account = account;
         this.zenAmount = zenAmount;
         this.ynabAmount = ynabAmount;

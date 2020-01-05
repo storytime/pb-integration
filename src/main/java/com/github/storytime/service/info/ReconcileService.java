@@ -251,7 +251,7 @@ public class ReconcileService {
                 .collect(toUnmodifiableList())
                 .stream()
                 .flatMap(Collection::stream)
-                .sorted((a, b) -> new BigDecimal(b.getPbAmount()).compareTo(new BigDecimal(a.getPbAmount())))
+                .sorted((t1, t2) -> new BigDecimal(t2.getPbAmount()).compareTo(new BigDecimal(t1.getPbAmount())))
                 .collect(toUnmodifiableList());
     }
 
