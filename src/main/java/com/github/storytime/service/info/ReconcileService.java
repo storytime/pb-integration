@@ -139,25 +139,26 @@ public class ReconcileService {
         return table.toString();
     }
 
-    private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(AppUser appUser,
-                                                                     List<TransactionsItem> ynabTransactions,
-                                                                     List<YnabCategories> ynabCategories,
-                                                                     Optional<ZenResponse> maybeZr,
-                                                                     long startDate,
-                                                                     long endDate) {
+    private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(final AppUser appUser,
+                                                                     final List<TransactionsItem> ynabTransactions,
+                                                                     final List<YnabCategories> ynabCategories,
+                                                                     final Optional<ZenResponse> maybeZr,
+                                                                     final long startDate,
+                                                                     final long endDate) {
         final TreeMap<String, BigDecimal> zenSummary =
                 zenCommonMapper.getZenTagsSummaryByCategory(startDate, endDate, maybeZr);
-
         final TreeMap<String, BigDecimal> ynabSummary =
                 ynabCommonMapper.getYnabSummaryByCategory(appUser, ynabTransactions, ynabCategories, startDate, endDate);
 
-        List<ZenYnabTagReconcileProxyObject> allInfoForTagTable = new ArrayList<>();
+        final List<ZenYnabTagReconcileProxyObject> allInfoForTagTable = new ArrayList<>();
+        //TODO: One map
         ynabSummary.forEach((ynabTag, ynabAmount) -> {
             final BigDecimal zenAmount = zenSummary.get(ynabTag);
             if (zenAmount != null) {
                 allInfoForTagTable.add(new ZenYnabTagReconcileProxyObject(ynabTag, zenAmount, ynabAmount));
             }
         });
+
         return allInfoForTagTable
                 .stream()
                 .filter(not(x -> x.getCategory().isEmpty()))
@@ -250,6 +251,7 @@ public class ReconcileService {
                 .collect(toUnmodifiableList())
                 .stream()
                 .flatMap(Collection::stream)
+                .sorted((a, b) -> new BigDecimal(b.getPbAmount()).compareTo(new BigDecimal(a.getPbAmount())))
                 .collect(toUnmodifiableList());
     }
 
