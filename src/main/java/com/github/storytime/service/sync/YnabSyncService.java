@@ -282,18 +282,18 @@ public class YnabSyncService {
 
         final YnabZenHolder commonAccounts = mapCommonAccounts(zenAccounts, ynabAccounts);
         final YnabZenHolder commonTags = mapCommonTags(zenTags, ynabCategories);
-        List<TransactionItem> transaction = emptyList();
+        List<TransactionItem> zenTransaction = emptyList();
 
         if (ynabTagsSyncProperty.equals(MATCH_INNER_TAGS)) {
-            transaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig);
+            zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig);
         } else if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
-            transaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig)
+            zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig)
                     .stream()
                     .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
                     .collect(toUnmodifiableList());
         }
 
-        final List<YnabTransactions> ynabTransactions = transaction
+        final List<YnabTransactions> ynabTransactions = zenTransaction
                 .stream()
                 .map(zTr -> commonAccounts
                         .findByZenId(zTr.getIncomeAccount())
@@ -373,6 +373,7 @@ public class YnabSyncService {
         return zenTransactions
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
+                .filter(not(zt -> zt.getComment().trim().startsWith(YNAB_IGNORE)))
                 .filter(zt -> zt.getCreated() < Constants.EPOCH_MILLI_FIX)
                 .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new transactions
                 .filter(zt -> commonAccounts.isExistsByZenId(zt.getIncomeAccount())) //only for common accounts
