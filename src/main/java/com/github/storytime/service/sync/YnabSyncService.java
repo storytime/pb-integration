@@ -373,7 +373,7 @@ public class YnabSyncService {
         return zenTransactions
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
-                .filter(not(zt -> zt.getComment().trim().startsWith(YNAB_IGNORE)))
+                .filter(not(zt -> ofNullable(zt.getComment()).orElse(EMPTY).trim().startsWith(YNAB_IGNORE)))
                 .filter(zt -> zt.getCreated() < Constants.EPOCH_MILLI_FIX)
                 .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new transactions
                 .filter(zt -> commonAccounts.isExistsByZenId(zt.getIncomeAccount())) //only for common accounts
