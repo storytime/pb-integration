@@ -45,7 +45,6 @@ import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_I
 import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_PARENT_TAGS;
 import static com.github.storytime.model.ynab.transaction.YnabTransactionColour.*;
 import static java.time.Instant.now;
-import static java.time.Instant.ofEpochSecond;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.*;
@@ -93,62 +92,62 @@ public class YnabSyncService {
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
     }
 
-    public ResponseEntity syncTransactions(final long userId) {
+
+    public ResponseEntity<String> startSync(final long userId, final long startFrom) {
         try {
-            LOGGER.debug("Calling YNAB sync for user:[{}]", userId);
-
-            final AppUser appUser = userService.findUserById(userId).get();
-            final String ynabAuthToken = appUser.getYnabAuthToken();
-
-            if (ynabAuthToken == null) {
-                LOGGER.warn("YNAB sync is stopped for user:[{}], token not installed", userId);
-                return new ResponseEntity(INTERNAL_SERVER_ERROR);
-            }
-
-            if (!appUser.getYnabSyncEnabled()) {
-                LOGGER.warn("YNAB sync is stopped for user:[{}], not YNAB sync enabled", userId);
-                return new ResponseEntity(INTERNAL_SERVER_ERROR);
-            }
-
-            final var clientSyncTime = now().getEpochSecond();
-
-            final List<YnabSyncConfig> ynabSyncConfigs = ynabSyncServiceRepository
-                    .findByUserId(userId)
-                    .orElse(emptyList())
-                    .stream()
-                    .map(this::correctYnabSyncConfig)
-                    .collect(toUnmodifiableList());
-
-
-            final List<CompletableFuture<YnabToZenSyncHolder>> collect = ynabSyncConfigs
-                    .stream()
-                    .map(ynabSyncConfig -> getZenDiffForBudget(appUser, clientSyncTime, ynabSyncConfig))
-                    .collect(toUnmodifiableList());
-
-            final List<YnabBudgetSyncStatus> pushToYnabResponse = allOf(collect.toArray(new CompletableFuture[collect.size()]))
-                    .thenApply(aVoid -> collect.stream().map(CompletableFuture::join).collect(toUnmodifiableList()))
-                    .thenApply(ynabToZenSyncHoldersList -> pushFromZenTransactionToYnab(appUser, ynabToZenSyncHoldersList))
-                    .join();
-
-            pushToYnabResponse
-                    .stream()
-                    .filter(not(ynabBudgetSyncStatus -> ynabBudgetSyncStatus.getStatus().isEmpty()))
-                    .collect(toUnmodifiableList())
-                    .forEach(ynabBudgetSyncStatus -> ynabSyncConfigs
-                            .stream()
-                            .filter(ynabSyncConfig -> ynabSyncConfig.getBudgetName().equalsIgnoreCase(ynabBudgetSyncStatus.getName()))
-                            .findFirst()
-                            .ifPresent(ynabSyncConfig -> ynabSyncServiceRepository.save(ynabSyncConfig.setLastSync(clientSyncTime))));
-
-            if (pushToYnabResponse.isEmpty()) {
-                return new ResponseEntity(NO_CONTENT);
-            } else {
-                return ResponseEntity.ok().body(pushToYnabResponse.stream().map(YnabBudgetSyncStatus::getName));
-            }
-
+            return pushToYnab(userId, startFrom);
         } catch (Exception e) {
             LOGGER.error("Cannot push Diff to ZEN request ", e.getCause());
-            return new ResponseEntity(INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private ResponseEntity<String> pushToYnab(final long userId, final long startFrom) {
+
+        final AppUser appUser = userService.findUserById(userId).get();
+        final String ynabAuthToken = appUser.getYnabAuthToken();
+
+        if (ynabAuthToken == null) {
+            LOGGER.warn("YNAB sync is stopped for user:[{}], token not installed", userId);
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
+
+        if (!appUser.getYnabSyncEnabled()) {
+            LOGGER.warn("YNAB sync is stopped for user:[{}], not YNAB sync enabled", userId);
+            return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+        }
+
+        final List<YnabSyncConfig> ynabSyncConfigs = ynabSyncServiceRepository
+                .findByUserId(userId)
+                .orElse(emptyList())
+                .stream()
+                .map(this::correctYnabSyncConfig)
+                .collect(toUnmodifiableList());
+
+        final List<CompletableFuture<YnabToZenSyncHolder>> collect = ynabSyncConfigs
+                .stream()
+                .map(ynabSyncConfig -> getZenDiffForBudget(appUser, startFrom, ynabSyncConfig))
+                .collect(toUnmodifiableList());
+
+        final List<YnabBudgetSyncStatus> pushToYnabResponse = allOf(collect.toArray(new CompletableFuture[collect.size()]))
+                .thenApply(aVoid -> collect.stream().map(CompletableFuture::join).collect(toUnmodifiableList()))
+                .thenApply(ynabToZenSyncHoldersList -> pushFromZenTransactionToYnab(appUser, ynabToZenSyncHoldersList))
+                .join();
+
+        pushToYnabResponse
+                .stream()
+                .filter(not(ynabBudgetSyncStatus -> ynabBudgetSyncStatus.getStatus().isEmpty()))
+                .collect(toUnmodifiableList())
+                .forEach(ynabBudgetSyncStatus -> ynabSyncConfigs
+                        .stream()
+                        .filter(ynabSyncConfig -> ynabSyncConfig.getBudgetName().equalsIgnoreCase(ynabBudgetSyncStatus.getName()))
+                        .findFirst()
+                        .ifPresent(ynabSyncConfig -> ynabSyncServiceRepository.save(ynabSyncConfig.setLastSync(startFrom))));
+
+        if (pushToYnabResponse.isEmpty()) {
+            return new ResponseEntity<>(NO_CONTENT);
+        } else {
+            return ResponseEntity.ok().body(pushToYnabResponse.stream().map(YnabBudgetSyncStatus::getName).findFirst().orElse(YNAB_PUSH_UNKNOWN_ERROR));
         }
     }
 

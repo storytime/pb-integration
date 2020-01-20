@@ -20,6 +20,7 @@ import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.exchange.PbAccountsService;
 import com.github.storytime.service.exchange.YnabExchangeService;
 import com.github.storytime.service.exchange.ZenDiffService;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +107,7 @@ public class ReconcileService {
                 final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
                 final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
 
-                var pbAccs = getPbAccounts(appUser);
+                var pbAccs =  pbAccountsService.getPbAsyncAccounts(appUser, ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList()));
                 var ynabBudget = getBudget(appUser, budgetName);
                 var ynabAccs = getYnabAccounts(appUser, ynabBudget);
                 var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
@@ -180,8 +181,7 @@ public class ReconcileService {
     }
 
     private Optional<YnabBudgets> getBudget(AppUser appUser, String budgetToReconcile) {
-        return supplyAsync(() -> mapYnabBudgetData(appUser, budgetToReconcile), cfThreadPool)
-                .join();
+        return supplyAsync(() -> mapYnabBudgetData(appUser, budgetToReconcile), cfThreadPool).join();
     }
 
     private List<TransactionsItem> getYnabTransactions(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
@@ -232,10 +232,6 @@ public class ReconcileService {
                 .orElse(emptyList());
     }
 
-    private List<PbAccountBalance> getPbAccounts(final AppUser appUser) {
-        var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
-        return pbAccountsService.getPbAsyncAccounts(appUser, merchantInfos);
-    }
 
     private List<ZenYnabAccountReconcileProxyObject> mapInfoForAccountTable(final List<AccountItem> zenAccs,
                                                                             final List<YnabAccounts> ynabAccs,

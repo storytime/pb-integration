@@ -60,6 +60,7 @@ public class Constants {
     public static final long EPOCH_MILLI_FIX = 2146078276;
     public static final String CLEARED = "cleared";
     public static final String YNAB_IGNORE = "#";
+    public static final String YNAB_PUSH_UNKNOWN_ERROR = "Unknown Ynab sync error";
 
     private Constants() {
     }
