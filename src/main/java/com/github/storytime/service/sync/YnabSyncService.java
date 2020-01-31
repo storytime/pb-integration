@@ -39,9 +39,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 import static com.github.storytime.config.props.Constants.*;
-import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_INNER_TAGS;
 import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_PARENT_TAGS;
 import static com.github.storytime.model.ynab.transaction.YnabTransactionColour.*;
 import static java.time.Instant.now;
@@ -283,9 +283,7 @@ public class YnabSyncService {
         final YnabZenHolder commonTags = mapCommonTags(zenTags, ynabCategories);
         List<TransactionItem> zenTransaction = emptyList();
 
-        if (ynabTagsSyncProperty.equals(MATCH_INNER_TAGS)) {
-            zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig);
-        } else if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
+        if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
             zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig)
                     .stream()
                     .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
@@ -407,15 +405,20 @@ public class YnabSyncService {
         LOGGER.info("Common tags mapped: [{}], YNAB tags count [{}], zen tags count [{}]", commonTags.size(), ynabTags.size(), zenTags.size());
 
         //log not common tags
-        final Set<String> ynabNonCompliance = ynabTags
-                .stream()
-                .filter(not(yTag -> commonTags.isExistsByName(yTag.getName().trim())))
-                .map(YnabCategories::getName)
-                .collect(toUnmodifiableSet());
-
-        LOGGER.debug("YNAB tags that were not mapped [{}]", ynabNonCompliance);
+        Predicate<YnabCategories> ynabCategoriesPredicate = yTag -> commonTags.isExistsByName(yTag.getName().trim());
+        LOGGER.debug("YNAB tags that were NOT mapped [{}]", selectTags(ynabTags, not(ynabCategoriesPredicate)));
+        LOGGER.debug("YNAB tags that were mapped [{}]", selectTags(ynabTags, ynabCategoriesPredicate));
 
         return commonTags;
+    }
+
+    private Set<String> selectTags(final List<YnabCategories> ynabTags,
+                                   final Predicate<YnabCategories> ynabCategoriesPredicate) {
+        return ynabTags
+                    .stream()
+                    .filter(ynabCategoriesPredicate)
+                    .map(YnabCategories::getName)
+                    .collect(toUnmodifiableSet());
     }
 
     public YnabZenHolder mapCommonAccounts(final List<AccountItem> zenAccounts,
