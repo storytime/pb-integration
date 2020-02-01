@@ -42,6 +42,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
 import static com.github.storytime.config.props.Constants.*;
+import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_INNER_TAGS;
 import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_PARENT_TAGS;
 import static com.github.storytime.model.ynab.transaction.YnabTransactionColour.*;
 import static java.time.Instant.now;
@@ -283,7 +284,9 @@ public class YnabSyncService {
         final YnabZenHolder commonTags = mapCommonTags(zenTags, ynabCategories);
         List<TransactionItem> zenTransaction = emptyList();
 
-        if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
+        if (ynabTagsSyncProperty.equals(MATCH_INNER_TAGS)) {
+            zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig);
+        } else if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
             zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig)
                     .stream()
                     .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
