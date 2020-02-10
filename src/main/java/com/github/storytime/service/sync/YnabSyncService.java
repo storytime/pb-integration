@@ -325,7 +325,7 @@ public class YnabSyncService {
         LOGGER.debug("zenRawTr.getTag(): {}",zenRawTr.getTag());
         final String zenTagId = ofNullable(zenRawTr.getTag())
                 .or(() -> Optional.of(List.of("Uncategorized")))
-                .flatMap(zTags -> zTags.stream().findFirst())
+                .flatMap(zTags -> zTags.stream().findFirst().or(()-> of("Uncategorized")))
                 .get();
 
         LOGGER.debug("zenTagId: {}",zenTagId);
