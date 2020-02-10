@@ -323,7 +323,7 @@ public class YnabSyncService {
                                                    final AppUser user) {
         final YnabTransactions ynabTransactions = new YnabTransactions();
         final String zenTagId = ofNullable(zenRawTr.getTag())
-                .or(() -> Optional.of(List.of("")))
+                .or(() -> Optional.of(List.of("Uncategorized")))
                 .flatMap(zTags -> zTags.stream().findFirst())
                 .get();
 
