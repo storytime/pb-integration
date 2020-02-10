@@ -324,8 +324,14 @@ public class YnabSyncService {
         final YnabTransactions ynabTransactions = new YnabTransactions();
         LOGGER.debug("zenRawTr.getTag(): {}",zenRawTr.getTag());
         final String zenTagId = ofNullable(zenRawTr.getTag())
-                .or(() -> Optional.of(List.of("Uncategorized")))
-                .flatMap(zTags -> zTags.stream().findFirst().or(()-> of("Uncategorized")))
+                .or(() -> {
+                    LOGGER.debug("1");
+                    return  of(List.of("Uncategorized"));
+                })
+                .flatMap(zTags -> zTags.stream().findFirst().or(()-> {
+                    LOGGER.debug("2");
+                    return  of("Uncategorized");
+                }))
                 .get();
 
         LOGGER.debug("zenTagId: {}",zenTagId);
