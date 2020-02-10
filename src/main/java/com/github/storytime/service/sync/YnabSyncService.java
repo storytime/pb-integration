@@ -100,7 +100,7 @@ public class YnabSyncService {
         try {
             return pushToYnab(userId, startFrom);
         } catch (Exception e) {
-            LOGGER.error("Cannot push Diff to ZEN request ", e.getCause());
+            LOGGER.error("Cannot push to YNAB ", e.getCause());
             return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
         }
     }
@@ -299,6 +299,7 @@ public class YnabSyncService {
                 .stream()
                 .map(zTr -> sameAccounts
                         .findByZenId(zTr.getIncomeAccount())
+                        .or(() -> sameAccounts.findByZenId(zTr.getOutcomeAccount()))
                         .map(ynabZenSyncObject -> createYnabTransactions(sameTags, zTr, ynabZenSyncObject, user))
                         .get())
                 .collect(toUnmodifiableList());
