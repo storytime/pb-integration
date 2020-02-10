@@ -10,7 +10,6 @@ import java.util.Optional;
 @Transactional
 public interface YnabSyncServiceRepository extends JpaRepository<YnabSyncConfig, Long> {
 
-    Optional<List<YnabSyncConfig>> findByUserId(Long id);
-
+    Optional<List<YnabSyncConfig>> findAllByEnabledIsTrueAndUserId(Long id);
 
 }

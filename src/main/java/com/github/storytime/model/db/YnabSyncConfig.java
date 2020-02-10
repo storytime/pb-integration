@@ -31,6 +31,13 @@ public class YnabSyncConfig extends BaseEntity {
     @ElementCollection(fetch = EAGER)
     private List<YnabTagsSyncProperties> tagsSyncProperties;
 
+    @NotNull
+    private Boolean enabled;
+
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
     public Long getUserId() {
         return userId;
     }

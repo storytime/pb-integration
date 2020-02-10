@@ -115,7 +115,7 @@ public class YnabSyncService {
         }
 
         final List<YnabSyncConfig> ynabSyncConfigs = ynabSyncServiceRepository
-                .findByUserId(userId)
+                .findAllByEnabledIsTrueAndUserId(userId)
                 .orElse(emptyList())
                 .stream()
                 .map(this::correctYnabSyncConfig)
