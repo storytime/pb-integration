@@ -123,13 +123,14 @@ public class ReconcileService {
                 allInfoForAccountTable.forEach(o -> reconcileTableService.buildAccountRow(table, o.getAccount(), o.getPbAmount(), o.getZenAmount(), o.getYnabAmount(), o.getPbZenDiff(), o.getZenYnabDiff(), o.getStatus()));
                 reconcileTableService.buildAccountLastLine(table);
 
-                reconcileTableService.addEmptyLine(table);
-                reconcileTableService.addEmptyLine(table);
-
-                LOGGER.debug("Combine all category info, for user: [{}]", userId);
-                reconcileTableService.buildTagHeader(table);
-                allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmountAsString(), t.getYnabAmountAsString(), t.getDiff()));
-                reconcileTableService.buildTagLastLine(table);
+                if (!allInfoForTagTable.isEmpty()) {
+                    reconcileTableService.addEmptyLine(table);
+                    reconcileTableService.addEmptyLine(table);
+                    LOGGER.debug("Combine all category info, for user: [{}]", userId);
+                    reconcileTableService.buildTagHeader(table);
+                    allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmountAsString(), t.getYnabAmountAsString(), t.getDiff()));
+                    reconcileTableService.buildTagLastLine(table);
+                }
 
             }, cfThreadPool).join());
         } catch (Exception e) {

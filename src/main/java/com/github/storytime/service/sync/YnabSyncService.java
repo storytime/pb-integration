@@ -10,7 +10,7 @@ import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.db.inner.YnabTagsSyncProperties;
 import com.github.storytime.model.ynab.YnabToZenSyncHolder;
-import com.github.storytime.model.ynab.YnabZenComplianceObject;
+import com.github.storytime.model.ynab.YnabZenSyncObject;
 import com.github.storytime.model.ynab.YnabZenHolder;
 import com.github.storytime.model.ynab.account.YnabAccountResponse;
 import com.github.storytime.model.ynab.account.YnabAccounts;
@@ -227,12 +227,12 @@ public class YnabSyncService {
                 cfThreadPool);
     }
 
-    public CompletableFuture<YnabBudgetSyncStatus> collectAllNeededYnabData(AppUser user,
-                                                                            List<AccountItem> zenAccounts,
-                                                                            List<TagItem> zenTags,
-                                                                            List<TransactionItem> zenTransactions,
-                                                                            YnabBudgets budgetToSync,
-                                                                            YnabSyncConfig ynabSyncConfig) {
+    public CompletableFuture<YnabBudgetSyncStatus> collectAllNeededYnabData(final AppUser user,
+                                                                            final List<AccountItem> zenAccounts,
+                                                                            final List<TagItem> zenTags,
+                                                                            final List<TransactionItem> zenTransactions,
+                                                                            final YnabBudgets budgetToSync,
+                                                                            final YnabSyncConfig ynabSyncConfig) {
         final CompletableFuture<Optional<YnabCategoryResponse>> yCategoriesCf =
                 supplyAsync(() -> ynabExchangeService.getCategories(user, budgetToSync.getId()), cfThreadPool);
         final CompletableFuture<Optional<YnabAccountResponse>> yAccountsCf =
@@ -280,14 +280,14 @@ public class YnabSyncService {
                 .findFirst()
                 .orElse(MATCH_PARENT_TAGS);
 
-        final YnabZenHolder commonAccounts = mapCommonAccounts(zenAccounts, ynabAccounts);
-        final YnabZenHolder commonTags = mapCommonTags(zenTags, ynabCategories);
+        final YnabZenHolder sameAccounts = mapSameAccounts(zenAccounts, ynabAccounts);
+        final YnabZenHolder sameTags = mapSameTags(zenTags, ynabCategories);
         List<TransactionItem> zenTransaction = emptyList();
 
         if (ynabTagsSyncProperty.equals(MATCH_INNER_TAGS)) {
-            zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig);
+            zenTransaction = selectZenNotSyncedTransactions(zenTransactions, sameAccounts, ynabSyncConfig);
         } else if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
-            zenTransaction = filterZenTransactionToSync(zenTransactions, commonAccounts, ynabSyncConfig)
+            zenTransaction = selectZenNotSyncedTransactions(zenTransactions, sameAccounts, ynabSyncConfig)
                     .stream()
                     .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
                     .collect(toUnmodifiableList());
@@ -295,14 +295,14 @@ public class YnabSyncService {
 
         final List<YnabTransactions> ynabTransactions = zenTransaction
                 .stream()
-                .map(zTr -> commonAccounts
+                .map(zTr -> sameAccounts
                         .findByZenId(zTr.getIncomeAccount())
-                        .map(ynabZenComplianceObject -> createYnabTransactions(commonTags, zTr, ynabZenComplianceObject, user))
+                        .map(ynabZenSyncObject -> createYnabTransactions(sameTags, zTr, ynabZenSyncObject, user))
                         .get())
                 .collect(toUnmodifiableList());
 
-        if (commonAccounts.isEmpty()) {
-            LOGGER.debug("Finish! No common accounts for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
+        if (sameAccounts.isEmpty()) {
+            LOGGER.debug("Finish! No same accounts for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
             return empty();
         }
 
@@ -311,36 +311,37 @@ public class YnabSyncService {
             return empty();
         }
 
-        ynabTransactions.forEach(yTr -> LOGGER.debug("Going to push to YNAB: [{}], payee: [{}], date: [{}]", yTr.getAmount(), yTr.getPayeeName(), yTr.getDate()));
+        ynabTransactions.forEach(yTr -> LOGGER.debug("Going to push to YNAB: [{}], payee: [{}], date: [{}], catI: [{}]", yTr.getAmount(), yTr.getPayeeName(), yTr.getDate(), yTr.getCategoryId()));
 
         final YnabTransactionsRequest ynabTransactionsRequest = new YnabTransactionsRequest();
         ynabTransactionsRequest.setTransactions(ynabTransactions);
         return of(ynabTransactionsRequest);
     }
 
-    public YnabTransactions createYnabTransactions(final YnabZenHolder commonTags,
-                                                   final TransactionItem zTr,
-                                                   final YnabZenComplianceObject ynabZenComplianceObject,
+    public YnabTransactions createYnabTransactions(final YnabZenHolder sameTags,
+                                                   final TransactionItem zenRawTr,
+                                                   final YnabZenSyncObject ynabZenSyncObject,
                                                    final AppUser user) {
         final YnabTransactions ynabTransactions = new YnabTransactions();
-        final String zenTagId = ofNullable(zTr.getTag())
+        final String zenTagId = ofNullable(zenRawTr.getTag())
                 .flatMap(zTags -> zTags.stream().findFirst())
                 .orElse(EMPTY);
-        final String tagId = commonTags
+
+        final String ynabTagId = sameTags
                 .findByZenId(zenTagId)
-                .map(YnabZenComplianceObject::getYnabId)
+                .map(YnabZenSyncObject::getYnabId)
                 .orElse(null);
 
-        mapTransactionType(zTr, ynabTransactions);
+        mapTransactionType(zenRawTr, ynabTransactions);
 
-        ynabTransactions.setAccountId(ynabZenComplianceObject.getYnabId());
-        ynabTransactions.setDate(dateService.secsToIsoFormat(zTr.getCreated(), user));
-        ynabTransactions.setMemo(zTr.getComment());
-        ynabTransactions.setCategoryId(tagId);
-        ynabTransactions.setPayeeName(zTr.getPayee());
+        ynabTransactions.setAccountId(ynabZenSyncObject.getYnabId());
+        ynabTransactions.setDate(dateService.secsToIsoFormat(zenRawTr.getCreated(), user));
+        ynabTransactions.setMemo(zenRawTr.getComment());
+        ynabTransactions.setCategoryId(ynabTagId);
+        ynabTransactions.setPayeeName(zenRawTr.getPayee());
         ynabTransactions.setCleared(CLEARED);
         ynabTransactions.setApproved(true);
-        ynabTransactions.setImportId(zTr.getId());
+        ynabTransactions.setImportId(zenRawTr.getId());
 
         return ynabTransactions;
     }
@@ -350,43 +351,46 @@ public class YnabSyncService {
         final Double outcome = zTr.getOutcome();
         final Double income = zTr.getIncome();
 
-        if (outcome != EMPTY_AMOUNT) {
+        if (outcome != EMPTY_AMOUNT && income == EMPTY_AMOUNT) {
+            // outcome
             final double amount = outcome * YNAB_AMOUNT_CONST;
             ynabTransactions.setAmount(-(int) amount);
             ynabTransactions.setFlagColor(RED);
         }
 
-        if (income != EMPTY_AMOUNT) {
+        if (income != EMPTY_AMOUNT && outcome == EMPTY_AMOUNT) {
+            // income
             final double amount = income * YNAB_AMOUNT_CONST;
             ynabTransactions.setAmount((int) amount);
             ynabTransactions.setFlagColor(GREEN);
         }
 
         if (outcome != EMPTY_AMOUNT && income != EMPTY_AMOUNT) {
+            // transfer
             ynabTransactions.setFlagColor(BLUE);
         }
     }
 
-    public List<TransactionItem> filterZenTransactionToSync(final List<TransactionItem> zenTransactions,
-                                                            final YnabZenHolder commonAccounts,
-                                                            final YnabSyncConfig ynabSyncConfig) {
+    public List<TransactionItem> selectZenNotSyncedTransactions(final List<TransactionItem> zenTransactions,
+                                                                final YnabZenHolder sameAccounts,
+                                                                final YnabSyncConfig ynabSyncConfig) {
         return zenTransactions
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
                 .filter(not(zt -> ofNullable(zt.getComment()).orElse(EMPTY).trim().startsWith(YNAB_IGNORE)))
                 .filter(zt -> zt.getCreated() < Constants.EPOCH_MILLI_FIX)
                 .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new transactions
-                .filter(zt -> commonAccounts.isExistsByZenId(zt.getIncomeAccount())) //only for common accounts
-                .filter(zt -> commonAccounts.isExistsByZenId(zt.getOutcomeAccount())) //only for common accounts
+                .filter(zt -> sameAccounts.isExistsByZenId(zt.getIncomeAccount())) //only for same accounts
+                .filter(zt -> sameAccounts.isExistsByZenId(zt.getOutcomeAccount())) //only for same accounts
                 .sorted(comparing(TransactionItem::getCreated))
                 .collect(toUnmodifiableList());
     }
 
 
-    public YnabZenHolder mapCommonTags(final List<TagItem> responseZenTags,
+    public YnabZenHolder mapSameTags(final List<TagItem> responseZenTags,
                                        final List<YnabCategories> ynabTags) {
 
-        final YnabZenHolder commonTags = new YnabZenHolder();
+        final YnabZenHolder sameTags = new YnabZenHolder();
 
         //filter zen tags to avoid #projects
         final List<TagItem> zenTags = responseZenTags
@@ -394,7 +398,7 @@ public class YnabSyncService {
                 .filter(not(t -> t.getTitle().startsWith(PROJECT_TAG)))
                 .collect(toUnmodifiableList());
 
-        //common tags to use
+        //same tags to use
         ynabTags.forEach(yTag -> zenTags
                 .stream()
                 .filter(zTag -> yTag
@@ -402,17 +406,17 @@ public class YnabSyncService {
                         .trim()
                         .equalsIgnoreCase(zTag.getTitle().trim()))
                 .findFirst()
-                .map(ztag -> commonTags.add(new YnabZenComplianceObject(ztag.getId(), yTag.getId(), ztag.getTitle().trim())))
+                .map(ztag -> sameTags.add(new YnabZenSyncObject(ztag.getId(), yTag.getId(), ztag.getTitle().trim())))
         );
 
-        LOGGER.info("Common tags mapped: [{}], YNAB tags count [{}], zen tags count [{}]", commonTags.size(), ynabTags.size(), zenTags.size());
+        LOGGER.info("Same tags mapped: [{}], YNAB tags count [{}], zen tags count [{}]", sameTags.size(), ynabTags.size(), zenTags.size());
 
-        //log not common tags
-        Predicate<YnabCategories> ynabCategoriesPredicate = yTag -> commonTags.isExistsByName(yTag.getName().trim());
+        //log not same tags
+        Predicate<YnabCategories> ynabCategoriesPredicate = yTag -> sameTags.isExistsByName(yTag.getName().trim());
         LOGGER.debug("YNAB tags that were NOT mapped [{}]", selectTags(ynabTags, not(ynabCategoriesPredicate)));
         LOGGER.debug("YNAB tags that were mapped [{}]", selectTags(ynabTags, ynabCategoriesPredicate));
 
-        return commonTags;
+        return sameTags;
     }
 
     private Set<String> selectTags(final List<YnabCategories> ynabTags,
@@ -424,17 +428,17 @@ public class YnabSyncService {
                     .collect(toUnmodifiableSet());
     }
 
-    public YnabZenHolder mapCommonAccounts(final List<AccountItem> zenAccounts,
+    public YnabZenHolder mapSameAccounts(final List<AccountItem> zenAccounts,
                                            final List<YnabAccounts> ynabAccounts) {
 
-        final YnabZenHolder commonAccounts = new YnabZenHolder();
+        final YnabZenHolder sameAccounts = new YnabZenHolder();
         ynabAccounts.forEach(yAccount -> zenAccounts
                 .stream()
                 .filter(zAccount -> yAccount.getName().trim().equalsIgnoreCase(zAccount.getTitle().trim()))
                 .findFirst()
-                .map(zAccount -> commonAccounts.add(new YnabZenComplianceObject(zAccount.getId(), yAccount.getId(), zAccount.getTitle().trim())))
+                .map(zAccount -> sameAccounts.add(new YnabZenSyncObject(zAccount.getId(), yAccount.getId(), zAccount.getTitle().trim())))
         );
-        LOGGER.info("Common accounts mapped: [{}], YNAB acc count [{}], zen acc count [{}]", commonAccounts.size(), ynabAccounts.size(), zenAccounts.size());
-        return commonAccounts;
+        LOGGER.info("Same accounts mapped: [{}], YNAB acc count [{}], zen acc count [{}]", sameAccounts.size(), ynabAccounts.size(), zenAccounts.size());
+        return sameAccounts;
     }
 }

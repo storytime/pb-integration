@@ -1,12 +1,12 @@
 package com.github.storytime.model.ynab;
 
-public class YnabZenComplianceObject {
+public class YnabZenSyncObject {
 
     private String zenId;
     private String ynabId;
     private String name;
 
-    public YnabZenComplianceObject(String zenId, String ynabId, String name) {
+    public YnabZenSyncObject(String zenId, String ynabId, String name) {
         this.zenId = zenId;
         this.ynabId = ynabId;
         this.name = name;
@@ -16,7 +16,7 @@ public class YnabZenComplianceObject {
         return name;
     }
 
-    public YnabZenComplianceObject setName(String name) {
+    public YnabZenSyncObject setName(String name) {
         this.name = name;
         return this;
     }
@@ -32,9 +32,9 @@ public class YnabZenComplianceObject {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof YnabZenComplianceObject)) return false;
+        if (!(o instanceof YnabZenSyncObject)) return false;
 
-        YnabZenComplianceObject that = (YnabZenComplianceObject) o;
+        YnabZenSyncObject that = (YnabZenSyncObject) o;
 
         if (!getZenId().equals(that.getZenId())) return false;
         return getYnabId().equals(that.getYnabId());
