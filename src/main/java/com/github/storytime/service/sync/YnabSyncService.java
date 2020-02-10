@@ -1,7 +1,6 @@
 package com.github.storytime.service.sync;
 
 
-import com.github.storytime.config.props.Constants;
 import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.mapper.YnabCommonMapper;
 import com.github.storytime.mapper.ZenCommonMapper;
@@ -10,8 +9,8 @@ import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.db.inner.YnabTagsSyncProperties;
 import com.github.storytime.model.ynab.YnabToZenSyncHolder;
-import com.github.storytime.model.ynab.YnabZenSyncObject;
 import com.github.storytime.model.ynab.YnabZenHolder;
+import com.github.storytime.model.ynab.YnabZenSyncObject;
 import com.github.storytime.model.ynab.account.YnabAccountResponse;
 import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.budget.YnabBudgets;
@@ -325,7 +324,7 @@ public class YnabSyncService {
         final YnabTransactions ynabTransactions = new YnabTransactions();
         final String zenTagId = ofNullable(zenRawTr.getTag())
                 .flatMap(zTags -> zTags.stream().findFirst())
-                .orElse(EMPTY);
+                .orElse("Uncategorized");
 
         final String ynabTagId = sameTags
                 .findByZenId(zenTagId)
@@ -387,7 +386,7 @@ public class YnabSyncService {
 
 
     public YnabZenHolder mapSameTags(final List<TagItem> responseZenTags,
-                                       final List<YnabCategories> ynabTags) {
+                                     final List<YnabCategories> ynabTags) {
 
         final YnabZenHolder sameTags = new YnabZenHolder();
 
@@ -408,6 +407,11 @@ public class YnabSyncService {
                 .map(ztag -> sameTags.add(new YnabZenSyncObject(ztag.getId(), yTag.getId(), ztag.getTitle().trim())))
         );
 
+        ynabTags.stream()
+                .filter(yTag -> yTag.getName().equals("Uncategorized"))
+                .findFirst()
+                .map(yTag -> sameTags.add(new YnabZenSyncObject("Uncategorized", yTag.getId(), yTag.getName().trim())));
+
         LOGGER.info("Same tags mapped: [{}], YNAB tags count [{}], zen tags count [{}]", sameTags.size(), ynabTags.size(), zenTags.size());
 
         //log not same tags
@@ -421,14 +425,14 @@ public class YnabSyncService {
     private Set<String> selectTags(final List<YnabCategories> ynabTags,
                                    final Predicate<YnabCategories> ynabCategoriesPredicate) {
         return ynabTags
-                    .stream()
-                    .filter(ynabCategoriesPredicate)
-                    .map(YnabCategories::getName)
-                    .collect(toUnmodifiableSet());
+                .stream()
+                .filter(ynabCategoriesPredicate)
+                .map(YnabCategories::getName)
+                .collect(toUnmodifiableSet());
     }
 
     public YnabZenHolder mapSameAccounts(final List<AccountItem> zenAccounts,
-                                           final List<YnabAccounts> ynabAccounts) {
+                                         final List<YnabAccounts> ynabAccounts) {
 
         final YnabZenHolder sameAccounts = new YnabZenHolder();
         ynabAccounts.forEach(yAccount -> zenAccounts
