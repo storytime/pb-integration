@@ -325,32 +325,36 @@ public class YnabSyncService {
                                                    final YnabZenSyncObject sameAccount,
                                                    final AppUser user) {
         final YnabTransactions ynabTransactions = new YnabTransactions();
-        var zTag = ofNullable(zenRawTr.getTag())
-                .orElse(emptyList())
-                .stream()
-                .filter(not(String::isEmpty))
-                .findFirst()
-                .orElse("Uncategorized");
+        try {
+            var zTag = ofNullable(zenRawTr.getTag())
+                    .orElse(emptyList())
+                    .stream()
+                    .filter(not(String::isEmpty))
+                    .findFirst()
+                    .orElse("Uncategorized");
 
-        LOGGER.debug("zenRawTr.getTag(): {}", zTag);
+            LOGGER.debug("zenRawTr.getTag(): {}", zTag);
 
-        final String ynabTagId = sameTags
-                .findByZenId(zTag)
-                .map(YnabZenSyncObject::getYnabId)
-                .orElse(null);
+            final String ynabTagId = sameTags
+                    .findByZenId(zTag)
+                    .map(YnabZenSyncObject::getYnabId)
+                    .orElse(null);
 
-        LOGGER.debug("ynabTagId: {}", ynabTagId);
+            LOGGER.debug("ynabTagId: {}", ynabTagId);
 
-        mapTransactionType(zenRawTr, ynabTransactions, zTag);
+            mapTransactionType(zenRawTr, ynabTransactions, zTag);
 
-        ynabTransactions.setAccountId(sameAccount.getYnabId());
-        ynabTransactions.setDate(dateService.secsToIsoFormat(zenRawTr.getCreated(), user));
-        ynabTransactions.setMemo(zenRawTr.getComment());
-        ynabTransactions.setCategoryId(ynabTagId);
-        ynabTransactions.setPayeeName(zenRawTr.getPayee());
-        ynabTransactions.setCleared(CLEARED);
-        ynabTransactions.setApproved(true);
-        ynabTransactions.setImportId(zenRawTr.getId());
+            ynabTransactions.setAccountId(sameAccount.getYnabId());
+            ynabTransactions.setDate(dateService.secsToIsoFormat(zenRawTr.getCreated(), user));
+            ynabTransactions.setMemo(zenRawTr.getComment());
+            ynabTransactions.setCategoryId(ynabTagId);
+            ynabTransactions.setPayeeName(zenRawTr.getPayee());
+            ynabTransactions.setCleared(CLEARED);
+            ynabTransactions.setApproved(true);
+            ynabTransactions.setImportId(zenRawTr.getId());
+        } catch (Exception e) {
+            LOGGER.debug("e", e);
+        }
 
         return ynabTransactions;
     }
@@ -378,10 +382,10 @@ public class YnabSyncService {
         if (outcome != EMPTY_AMOUNT && income != EMPTY_AMOUNT) {
             // transfer
             if (ynabTransfer.getOrDefault(zTag, true)) {
-                ynabTransaction.setAmount(-(int) (outcome * YNAB_AMOUNT_CONST));
+                ynabTransaction.setAmount((int) (income * YNAB_AMOUNT_CONST));
                 ynabTransfer.put(zTag, false);
             } else {
-                ynabTransaction.setAmount((int) (income * YNAB_AMOUNT_CONST));
+                ynabTransaction.setAmount(-(int) (outcome * YNAB_AMOUNT_CONST));
             }
 
             ynabTransaction.setFlagColor(BLUE);
