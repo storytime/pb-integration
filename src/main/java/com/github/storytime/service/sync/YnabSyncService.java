@@ -326,10 +326,14 @@ public class YnabSyncService {
                 .flatMap(zTags -> zTags.stream().findFirst())
                 .orElse("Uncategorized");
 
+        LOGGER.debug("zenTagId: {}",zenTagId);
+
         final String ynabTagId = sameTags
                 .findByZenId(zenTagId)
                 .map(YnabZenSyncObject::getYnabId)
                 .orElse(null);
+
+        LOGGER.debug("ynabTagId: {}",ynabTagId);
 
         mapTransactionType(zenRawTr, ynabTransactions);
 
