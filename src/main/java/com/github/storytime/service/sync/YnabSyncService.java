@@ -378,10 +378,9 @@ public class YnabSyncService {
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
                 .filter(not(zt -> ofNullable(zt.getComment()).orElse(EMPTY).trim().startsWith(YNAB_IGNORE)))
-                .filter(zt -> zt.getCreated() < Constants.EPOCH_MILLI_FIX)
+                .filter(zt -> zt.getCreated() < EPOCH_MILLI_FIX)
                 .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new transactions
-                .filter(zt -> sameAccounts.isExistsByZenId(zt.getIncomeAccount())) //only for same accounts
-                .filter(zt -> sameAccounts.isExistsByZenId(zt.getOutcomeAccount())) //only for same accounts
+                .filter(zt -> sameAccounts.isExistsByZenId(zt.getIncomeAccount()) || sameAccounts.isExistsByZenId(zt.getOutcomeAccount()))
                 .sorted(comparing(TransactionItem::getCreated))
                 .collect(toUnmodifiableList());
     }
