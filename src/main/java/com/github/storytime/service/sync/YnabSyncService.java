@@ -32,10 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
@@ -322,22 +319,17 @@ public class YnabSyncService {
                                                    final YnabZenSyncObject ynabZenSyncObject,
                                                    final AppUser user) {
         final YnabTransactions ynabTransactions = new YnabTransactions();
-        LOGGER.debug("zenRawTr.getTag(): {}",zenRawTr.getTag());
-        final String zenTagId = ofNullable(zenRawTr.getTag())
-                .or(() -> {
-                    LOGGER.debug("1");
-                    return  of(List.of("Uncategorized"));
-                })
-                .flatMap(zTags -> zTags.stream().findFirst().or(()-> {
-                    LOGGER.debug("2");
-                    return  of("Uncategorized");
-                }))
-                .get();
+        var zTag = ofNullable(zenRawTr.getTag())
+                .orElse(emptyList())
+                .stream()
+                .filter(not(String::isEmpty))
+                .findFirst()
+                .orElse("Uncategorized");
 
-        LOGGER.debug("zenTagId: {}",zenTagId);
+        LOGGER.debug("zenRawTr.getTag(): {}", zTag);
 
         final String ynabTagId = sameTags
-                .findByZenId(zenTagId)
+                .findByZenId(zTag)
                 .map(YnabZenSyncObject::getYnabId)
                 .orElse(null);
 
