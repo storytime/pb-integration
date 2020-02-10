@@ -32,8 +32,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
@@ -67,6 +71,8 @@ public class YnabSyncService {
     private final ZenCommonMapper zenCommonMapper;
     private final YnabCommonMapper ynabCommonMapper;
     private final YnabSyncServiceRepository ynabSyncServiceRepository;
+    //TODO: replace
+    private final ConcurrentHashMap<String, Boolean> ynabTransfer = new ConcurrentHashMap<>();
 
     @Autowired
     public YnabSyncService(final ZenDiffService zenDiffService,
@@ -316,7 +322,7 @@ public class YnabSyncService {
 
     public YnabTransactions createYnabTransactions(final YnabZenHolder sameTags,
                                                    final TransactionItem zenRawTr,
-                                                   final YnabZenSyncObject ynabZenSyncObject,
+                                                   final YnabZenSyncObject sameAccount,
                                                    final AppUser user) {
         final YnabTransactions ynabTransactions = new YnabTransactions();
         var zTag = ofNullable(zenRawTr.getTag())
@@ -333,11 +339,11 @@ public class YnabSyncService {
                 .map(YnabZenSyncObject::getYnabId)
                 .orElse(null);
 
-        LOGGER.debug("ynabTagId: {}",ynabTagId);
+        LOGGER.debug("ynabTagId: {}", ynabTagId);
 
-        mapTransactionType(zenRawTr, ynabTransactions);
+        mapTransactionType(zenRawTr, ynabTransactions, zTag);
 
-        ynabTransactions.setAccountId(ynabZenSyncObject.getYnabId());
+        ynabTransactions.setAccountId(sameAccount.getYnabId());
         ynabTransactions.setDate(dateService.secsToIsoFormat(zenRawTr.getCreated(), user));
         ynabTransactions.setMemo(zenRawTr.getComment());
         ynabTransactions.setCategoryId(ynabTagId);
@@ -350,27 +356,36 @@ public class YnabSyncService {
     }
 
     public void mapTransactionType(final TransactionItem zTr,
-                                   final YnabTransactions ynabTransactions) {
+                                   final YnabTransactions ynabTransaction,
+                                   final String zTag) {
         final Double outcome = zTr.getOutcome();
         final Double income = zTr.getIncome();
 
         if (outcome != EMPTY_AMOUNT && income == EMPTY_AMOUNT) {
             // outcome
             final double amount = outcome * YNAB_AMOUNT_CONST;
-            ynabTransactions.setAmount(-(int) amount);
-            ynabTransactions.setFlagColor(RED);
+            ynabTransaction.setAmount(-(int) amount);
+            ynabTransaction.setFlagColor(RED);
         }
 
         if (income != EMPTY_AMOUNT && outcome == EMPTY_AMOUNT) {
             // income
             final double amount = income * YNAB_AMOUNT_CONST;
-            ynabTransactions.setAmount((int) amount);
-            ynabTransactions.setFlagColor(GREEN);
+            ynabTransaction.setAmount((int) amount);
+            ynabTransaction.setFlagColor(GREEN);
         }
 
         if (outcome != EMPTY_AMOUNT && income != EMPTY_AMOUNT) {
             // transfer
-            ynabTransactions.setFlagColor(BLUE);
+            if (ynabTransfer.getOrDefault(zTag, true)) {
+                ynabTransaction.setAmount(-(int) (outcome * YNAB_AMOUNT_CONST));
+                ynabTransfer.put(zTag, false);
+            } else {
+                ynabTransaction.setAmount((int) (income * YNAB_AMOUNT_CONST));
+            }
+
+            ynabTransaction.setFlagColor(BLUE);
+
         }
     }
 
