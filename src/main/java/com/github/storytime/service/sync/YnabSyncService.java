@@ -24,8 +24,8 @@ import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.repository.YnabSyncServiceRepository;
 import com.github.storytime.service.DateService;
 import com.github.storytime.service.access.UserService;
-import com.github.storytime.service.exchange.YnabExchangeService;
-import com.github.storytime.service.exchange.ZenDiffService;
+import com.github.storytime.service.http.YnabExchangeHttpService;
+import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +45,6 @@ import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_I
 import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_PARENT_TAGS;
 import static com.github.storytime.model.ynab.transaction.YnabTransactionColour.*;
 import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
@@ -62,9 +61,9 @@ import static org.springframework.http.HttpStatus.*;
 public class YnabSyncService {
 
     private static final Logger LOGGER = getLogger(YnabSyncService.class);
-    private final ZenDiffService zenDiffService;
+    private final ZenDiffHttpService zenDiffHttpService;
     private final UserService userService;
-    private final YnabExchangeService ynabExchangeService;
+    private final YnabExchangeHttpService ynabExchangeHttpService;
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
     private final Executor cfThreadPool;
     private final DateService dateService;
@@ -75,18 +74,18 @@ public class YnabSyncService {
     private final ConcurrentHashMap<String, Boolean> ynabTransfer = new ConcurrentHashMap<>();
 
     @Autowired
-    public YnabSyncService(final ZenDiffService zenDiffService,
+    public YnabSyncService(final ZenDiffHttpService zenDiffHttpService,
                            final ZenDiffLambdaHolder zenDiffLambdaHolder,
-                           final YnabExchangeService ynabExchangeService,
+                           final YnabExchangeHttpService ynabExchangeHttpService,
                            final DateService dateService,
                            final Executor cfThreadPool,
                            final ZenCommonMapper zenCommonMapper,
                            final YnabCommonMapper ynabCommonMapper,
                            final YnabSyncServiceRepository ynabSyncServiceRepository,
                            final UserService userService) {
-        this.zenDiffService = zenDiffService;
+        this.zenDiffHttpService = zenDiffHttpService;
         this.userService = userService;
-        this.ynabExchangeService = ynabExchangeService;
+        this.ynabExchangeHttpService = ynabExchangeHttpService;
         this.cfThreadPool = cfThreadPool;
         this.dateService = dateService;
         this.zenCommonMapper = zenCommonMapper;
@@ -216,13 +215,13 @@ public class YnabSyncService {
                                                                       final YnabSyncConfig config) {
         return supplyAsync(() -> {
             LOGGER.debug("Calling ZEN diff for YNAB budget config: [{}], last sync [{}], tags method [{}]", config.getBudgetName(), config.getLastSync(), config.getTagsSyncProperties());
-            final Optional<ZenResponse> zenDiffByUser = zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getYnabFunction(user, clientSyncTime, config));
+            final Optional<ZenResponse> zenDiffByUser = zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getYnabFunction(user, clientSyncTime, config));
             return new YnabToZenSyncHolder(zenDiffByUser, config);
         }, cfThreadPool);
     }
 
     public CompletableFuture<List<YnabBudgets>> getYnabBudgetsFromYnabInUse(AppUser user, Set<String> budgetNames) {
-        return supplyAsync(() -> ynabExchangeService.getBudget(user)
+        return supplyAsync(() -> ynabExchangeHttpService.getBudget(user)
                         .map(ynabBudgetResponse -> ynabBudgetResponse
                                 .getYnabBudgetData()
                                 .getBudgets()
@@ -240,9 +239,9 @@ public class YnabSyncService {
                                                                             final YnabBudgets budgetToSync,
                                                                             final YnabSyncConfig ynabSyncConfig) {
         final CompletableFuture<Optional<YnabCategoryResponse>> yCategoriesCf =
-                supplyAsync(() -> ynabExchangeService.getCategories(user, budgetToSync.getId()), cfThreadPool);
+                supplyAsync(() -> ynabExchangeHttpService.getCategories(user, budgetToSync.getId()), cfThreadPool);
         final CompletableFuture<Optional<YnabAccountResponse>> yAccountsCf =
-                supplyAsync(() -> ynabExchangeService.getAccounts(user, budgetToSync.getId()), cfThreadPool);
+                supplyAsync(() -> ynabExchangeHttpService.getAccounts(user, budgetToSync.getId()), cfThreadPool);
 
         return yCategoriesCf
                 .thenCombine(yAccountsCf, (yMaybeCat, yMaybeAcc) -> {
@@ -251,7 +250,7 @@ public class YnabSyncService {
                     return mapDataAllDataForYnab(zenAccounts, zenTags, zenTransactions, ynabCategories, ynabAccounts, ynabSyncConfig, user);
                 })
                 .thenApply(ynabTransactionsRequest -> ynabTransactionsRequest
-                        .flatMap(ynabTransactionsRequest1 -> ynabExchangeService.pushToYnab(user, budgetToSync.getId(), ynabTransactionsRequest1))
+                        .flatMap(ynabTransactionsRequest1 -> ynabExchangeHttpService.pushToYnab(user, budgetToSync.getId(), ynabTransactionsRequest1))
                 )
                 .thenApply(pushResponse -> new YnabBudgetSyncStatus(budgetToSync.getName(), pushResponse.orElse(EMPTY)));
     }

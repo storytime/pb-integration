@@ -9,7 +9,7 @@ import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.CurrencyService;
 import com.github.storytime.service.access.UserService;
-import com.github.storytime.service.exchange.ZenDiffService;
+import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,19 +43,19 @@ public class SavingsService {
     private static final Logger LOGGER = getLogger(SavingsService.class);
     private static final int USD_ID = 1;
     private static final int EUR_ID = 3;
-    private final ZenDiffService zenDiffService;
+    private final ZenDiffHttpService zenDiffHttpService;
     private final ZenInstrumentsMapper zenInstrumentsMapper;
     private final CurrencyService currencyService;
     private final UserService userService;
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
 
     @Autowired
-    public SavingsService(final ZenDiffService zenDiffService,
+    public SavingsService(final ZenDiffHttpService zenDiffHttpService,
                           final CurrencyService currencyService,
                           final UserService userService,
                           final ZenDiffLambdaHolder zenDiffLambdaHolder,
                           final ZenInstrumentsMapper zenInstrumentsMapper) {
-        this.zenDiffService = zenDiffService;
+        this.zenDiffHttpService = zenDiffHttpService;
         this.currencyService = currencyService;
         this.userService = userService;
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
@@ -108,7 +108,7 @@ public class SavingsService {
     }
 
     private List<SavingsInfo> getUserSavings(final AppUser appUser) {
-        return zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser))
+        return zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser))
                 .map(zenResponse -> zenResponse.getAccount()
                         .stream()
                         .filter(AccountItem::getSavings)

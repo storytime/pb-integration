@@ -1,7 +1,7 @@
 package com.github.storytime.service;
 
 import com.github.storytime.BaseTestConfig;
-import com.github.storytime.service.exchange.PbStatementsService;
+import com.github.storytime.service.http.PbStatementsHttpService;
 import com.github.storytime.service.sync.PbSyncService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class PbSyncServiceTest extends BaseTestConfig {
 
     @Autowired
-    private PbStatementsService pbStatementsService;
+    private PbStatementsHttpService pbStatementsHttpService;
 
     @Autowired
     private PbSyncService pbSyncService;

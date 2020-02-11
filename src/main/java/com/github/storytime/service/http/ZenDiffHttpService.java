@@ -1,4 +1,4 @@
-package com.github.storytime.service.exchange;
+package com.github.storytime.service.http;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.db.AppUser;
@@ -28,17 +28,17 @@ import static org.apache.commons.lang3.StringUtils.right;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
-public class ZenDiffService {
+public class ZenDiffHttpService {
 
-    private static final Logger LOGGER = getLogger(ZenDiffService.class);
+    private static final Logger LOGGER = getLogger(ZenDiffHttpService.class);
 
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
 
 
     @Autowired
-    public ZenDiffService(final RestTemplate restTemplate,
-                          final CustomConfig customConfig) {
+    public ZenDiffHttpService(final RestTemplate restTemplate,
+                              final CustomConfig customConfig) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
     }

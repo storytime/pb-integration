@@ -7,7 +7,7 @@ import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.*;
-import com.github.storytime.service.exchange.ZenDiffService;
+import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ public class PbToZenTransactionMapper {
     private static final Logger LOGGER = getLogger(PbToZenTransactionMapper.class);
 
     private final DateService dateService;
-    private final ZenDiffService zenDiffService;
+    private final ZenDiffHttpService zenDiffHttpService;
     private final CurrencyService currencyService;
     private final RegExpService regExpService;
     private final PbInternalTransferInfoService transferInfoService;
@@ -44,12 +44,12 @@ public class PbToZenTransactionMapper {
                                     final CurrencyService currencyService,
                                     final RegExpService regExpService,
                                     final CustomPayeeService customPayeeService,
-                                    final ZenDiffService zenDiffService) {
+                                    final ZenDiffHttpService zenDiffHttpService) {
         this.dateService = dateService;
         this.transferInfoService = pbInternalTransferInfoService;
         this.currencyService = currencyService;
         this.regExpService = regExpService;
-        this.zenDiffService = zenDiffService;
+        this.zenDiffHttpService = zenDiffHttpService;
         this.customPayeeService = customPayeeService;
     }
 
@@ -72,8 +72,8 @@ public class PbToZenTransactionMapper {
         final String opCurrency = substringAfter(s.getAmount(), SPACE);
         final var cardAmount = valueOf(substringBefore(s.getCardamount(), SPACE));
         final String cardCurrency = substringAfter(s.getCardamount(), SPACE);
-        final String accountId = zenDiffService.findAccountIdByPbCard(zenDiff, s.getCard());
-        final Integer currency = zenDiffService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
+        final String accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, s.getCard());
+        final Integer currency = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
 
         setAppCode(s, t, cardAmount);
 
@@ -102,7 +102,7 @@ public class PbToZenTransactionMapper {
 
         // cash withdrawal
         if (regExpService.isCashWithdrawal(transactionDesc)) {
-            zenDiffService.isCashAccountInCurrencyExists(zenDiff, opCurrency)
+            zenDiffHttpService.isCashAccountInCurrencyExists(zenDiff, opCurrency)
                     .ifPresent(updateIncomeIfCashWithdrawal(t, opAmount));
             //todo improve comment and separate bank tax
             LOGGER.info("Cash withdrawal transaction");
@@ -122,7 +122,7 @@ public class PbToZenTransactionMapper {
                 }
 
                 final String cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
-                final Optional<String> fromAcc = zenDiffService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
+                final Optional<String> fromAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
                 if (fromAcc.isPresent()) {
                     t.setOutcomeAccount(fromAcc.get());
                     t.setOutcome(opAmount);
@@ -146,7 +146,7 @@ public class PbToZenTransactionMapper {
                 }
 
                 final String cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
-                final Optional<String> toAcc = zenDiffService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
+                final Optional<String> toAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
                 if (toAcc.isPresent()) {
                     t.setIncome(opAmount);
                     t.setOutcome(opAmount);
@@ -175,10 +175,10 @@ public class PbToZenTransactionMapper {
         if (opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency)) {
             if (opAmount > EMPTY_AMOUNT) {
                 t.setOpIncome(abs(opAmount));
-                t.setOpIncomeInstrument(zenDiffService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
+                t.setOpIncomeInstrument(zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
             } else {
                 t.setOutcome(abs(opAmount));
-                t.setOpOutcomeInstrument(zenDiffService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
+                t.setOpOutcomeInstrument(zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
             }
             final String exchangeInfo = opAmount + SPACE + opCurrency + RATE
                     + currencyService.convertDivide(cardAmount, opAmount) + SPACE;

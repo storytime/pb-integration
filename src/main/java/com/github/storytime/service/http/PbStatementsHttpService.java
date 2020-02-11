@@ -1,4 +1,4 @@
-package com.github.storytime.service.exchange;
+package com.github.storytime.service.http;
 
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
@@ -49,9 +49,9 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.right;
 
 @Service
-public class PbStatementsService {
+public class PbStatementsHttpService {
 
-    private static final Logger LOGGER = LogManager.getLogger(PbStatementsService.class);
+    private static final Logger LOGGER = LogManager.getLogger(PbStatementsHttpService.class);
 
     private final RestTemplate restTemplate;
     private final DateService dateService;
@@ -64,15 +64,15 @@ public class PbStatementsService {
     private final Executor cfThreadPool;
 
     @Autowired
-    public PbStatementsService(final RestTemplate restTemplate,
-                               final CustomConfig customConfig,
-                               final PbStatementMapper pbStatementMapper,
-                               final MerchantService merchantService,
-                               final Timer pbRequestTimeTimer,
-                               final Executor cfThreadPool,
-                               final PbRequestBuilder statementRequestBuilder,
-                               final AdditionalCommentService additionalCommentService,
-                               final DateService dateService) {
+    public PbStatementsHttpService(final RestTemplate restTemplate,
+                                   final CustomConfig customConfig,
+                                   final PbStatementMapper pbStatementMapper,
+                                   final MerchantService merchantService,
+                                   final Timer pbRequestTimeTimer,
+                                   final Executor cfThreadPool,
+                                   final PbRequestBuilder statementRequestBuilder,
+                                   final AdditionalCommentService additionalCommentService,
+                                   final DateService dateService) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
         this.pbStatementMapper = pbStatementMapper;

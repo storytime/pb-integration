@@ -1,4 +1,4 @@
-package com.github.storytime.service.exchange;
+package com.github.storytime.service.http;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.db.AppUser;
@@ -23,16 +23,16 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.springframework.http.HttpMethod.GET;
 
 @Service
-public class YnabExchangeService {
+public class YnabExchangeHttpService {
 
-    private static final Logger LOGGER = getLogger(YnabExchangeService.class);
+    private static final Logger LOGGER = getLogger(YnabExchangeHttpService.class);
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
 
 
     @Autowired
-    public YnabExchangeService(final RestTemplate restTemplate,
-                               final CustomConfig customConfig) {
+    public YnabExchangeHttpService(final RestTemplate restTemplate,
+                                   final CustomConfig customConfig) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
     }

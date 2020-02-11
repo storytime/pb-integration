@@ -17,10 +17,9 @@ import com.github.storytime.service.DateService;
 import com.github.storytime.service.ReconcileTableService;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.access.UserService;
-import com.github.storytime.service.exchange.PbAccountsService;
-import com.github.storytime.service.exchange.YnabExchangeService;
-import com.github.storytime.service.exchange.ZenDiffService;
-import org.apache.commons.lang3.tuple.Pair;
+import com.github.storytime.service.http.PbAccountsHttpService;
+import com.github.storytime.service.http.YnabExchangeHttpService;
+import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,39 +49,39 @@ public class ReconcileService {
 
     private static final Logger LOGGER = LogManager.getLogger(ReconcileService.class);
 
-    private final ZenDiffService zenDiffService;
+    private final ZenDiffHttpService zenDiffHttpService;
     private final UserService userService;
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
     private final Executor cfThreadPool;
-    private final YnabExchangeService ynabExchangeService;
+    private final YnabExchangeHttpService ynabExchangeHttpService;
     private final MerchantService merchantService;
-    private final PbAccountsService pbAccountsService;
+    private final PbAccountsHttpService pbAccountsHttpService;
     private final ZenCommonMapper zenCommonMapper;
     private final YnabCommonMapper ynabCommonMapper;
     private final DateService dateService;
     private final ReconcileTableService reconcileTableService;
 
     @Autowired
-    public ReconcileService(final ZenDiffService zenDiffService,
+    public ReconcileService(final ZenDiffHttpService zenDiffHttpService,
                             final UserService userService,
                             final Executor cfThreadPool,
                             final MerchantService merchantService,
                             final ZenCommonMapper zenCommonMapper,
-                            final YnabExchangeService ynabExchangeService,
-                            final PbAccountsService pbAccountsService,
+                            final YnabExchangeHttpService ynabExchangeHttpService,
+                            final PbAccountsHttpService pbAccountsHttpService,
                             final DateService dateService,
                             final YnabCommonMapper ynabCommonMapper,
                             final ReconcileTableService reconcileTableService,
                             final ZenDiffLambdaHolder zenDiffLambdaHolder) {
-        this.zenDiffService = zenDiffService;
+        this.zenDiffHttpService = zenDiffHttpService;
         this.userService = userService;
         this.cfThreadPool = cfThreadPool;
         this.merchantService = merchantService;
-        this.ynabExchangeService = ynabExchangeService;
+        this.ynabExchangeHttpService = ynabExchangeHttpService;
         this.zenCommonMapper = zenCommonMapper;
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
         this.ynabCommonMapper = ynabCommonMapper;
-        this.pbAccountsService = pbAccountsService;
+        this.pbAccountsHttpService = pbAccountsHttpService;
         this.reconcileTableService = reconcileTableService;
         this.dateService = dateService;
     }
@@ -107,7 +106,7 @@ public class ReconcileService {
                 final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
                 final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
 
-                var pbAccs =  pbAccountsService.getPbAsyncAccounts(appUser, ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList()));
+                var pbAccs =  pbAccountsHttpService.getPbAsyncAccounts(appUser, ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList()));
                 var ynabBudget = getBudget(appUser, budgetName);
                 var ynabAccs = getYnabAccounts(appUser, ynabBudget);
                 var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
@@ -168,10 +167,11 @@ public class ReconcileService {
                 .collect(toUnmodifiableList());
     }
 
+    //TODO: move to another service?
     private Optional<ZenResponse> getZenDiff(AppUser appUser, long startDate) {
         return supplyAsync(() -> {
             LOGGER.debug("Fetching ZEN accounts, for user: [{}]", appUser.getId());
-            return zenDiffService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate));
+            return zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate));
         }, cfThreadPool).join();
     }
 
@@ -193,14 +193,14 @@ public class ReconcileService {
 
     private List<YnabCategories> getYnabCategories(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
         return ynabBudget
-                .map(budgets -> supplyAsync(() -> ynabExchangeService.getCategories(appUser, budgets.getId()), cfThreadPool).join())
+                .map(budgets -> supplyAsync(() -> ynabExchangeHttpService.getCategories(appUser, budgets.getId()), cfThreadPool).join())
                 .map(ynabCommonMapper::mapYnabCategoriesFromResponse)
                 .orElse(emptyList());
     }
 
     private List<YnabAccounts> mapYnabAccounts(final AppUser appUser, final YnabBudgets budgets) {
         LOGGER.debug("Fetching Ynab accounts, for user: [{}]", appUser.getId());
-        return supplyAsync(() -> ynabExchangeService.getAccounts(appUser, budgets.getId()), cfThreadPool)
+        return supplyAsync(() -> ynabExchangeHttpService.getAccounts(appUser, budgets.getId()), cfThreadPool)
                 .join()
                 .flatMap(yc -> ofNullable(yc.getYnabAccountData().getAccounts()))
                 .orElse(emptyList());
@@ -208,7 +208,7 @@ public class ReconcileService {
 
     private Optional<YnabBudgets> mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
         LOGGER.debug("Fetching Ynab budgets, for user: [{}]", appUser.getId());
-        return supplyAsync(() -> ynabExchangeService.getBudget(appUser), cfThreadPool)
+        return supplyAsync(() -> ynabExchangeHttpService.getBudget(appUser), cfThreadPool)
                 .join()
                 .flatMap(ynabBudgetResponse -> ynabBudgetResponse
                         .getYnabBudgetData()
@@ -222,7 +222,7 @@ public class ReconcileService {
 
     private List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {
         LOGGER.debug("Fetching Ynab transactions, for user: [{}]", appUser.getId());
-        return supplyAsync(() -> ynabExchangeService.getYnabTransactions(appUser, budgetToReconcile), cfThreadPool)
+        return supplyAsync(() -> ynabExchangeHttpService.getYnabTransactions(appUser, budgetToReconcile), cfThreadPool)
                 .join()
                 .map(ynabBudgetResponse -> ynabBudgetResponse
                         .getData()

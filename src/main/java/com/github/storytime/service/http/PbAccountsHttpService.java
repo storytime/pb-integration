@@ -1,4 +1,4 @@
-package com.github.storytime.service.exchange;
+package com.github.storytime.service.http;
 
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
@@ -32,9 +32,9 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.right;
 
 @Service
-public class PbAccountsService {
+public class PbAccountsHttpService {
 
-    private static final Logger LOGGER = LogManager.getLogger(PbAccountsService.class);
+    private static final Logger LOGGER = LogManager.getLogger(PbAccountsHttpService.class);
 
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
@@ -44,12 +44,12 @@ public class PbAccountsService {
     private final Executor cfThreadPool;
 
     @Autowired
-    public PbAccountsService(final RestTemplate restTemplate,
-                             final CustomConfig customConfig,
-                             final PbStatementMapper pbStatementMapper,
-                             final Timer pbRequestTimeTimer,
-                             final Executor cfThreadPool,
-                             final PbRequestBuilder pbRequestBuilder) {
+    public PbAccountsHttpService(final RestTemplate restTemplate,
+                                 final CustomConfig customConfig,
+                                 final PbStatementMapper pbStatementMapper,
+                                 final Timer pbRequestTimeTimer,
+                                 final Executor cfThreadPool,
+                                 final PbRequestBuilder pbRequestBuilder) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
         this.pbStatementMapper = pbStatementMapper;
@@ -59,7 +59,7 @@ public class PbAccountsService {
     }
 
     public List<PbAccountBalance> getPbAsyncAccounts(final AppUser appUser, final List<MerchantInfo> merchantInfos) {
-        LOGGER.debug("Fetching Ynab accounts, for user: [{}]", appUser.getId());
+        LOGGER.debug("Fetching PB accounts, for user: [{}]", appUser.getId());
         final List<CompletableFuture<PbAccountBalance>> pbAccountCf = merchantInfos
                 .stream()
                 .map(merchantInfo -> getPbAsyncAccounts(appUser, merchantInfo))
