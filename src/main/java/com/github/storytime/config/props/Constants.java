@@ -61,6 +61,7 @@ public class Constants {
     public static final String CLEARED = "cleared";
     public static final String YNAB_IGNORE = "#";
     public static final String YNAB_PUSH_UNKNOWN_ERROR = "Unknown Ynab sync error";
+    public static final String UNCATEGORIZED = "Uncategorized";
 
     private Constants() {
     }

@@ -326,37 +326,28 @@ public class YnabSyncService {
                                                    final YnabZenSyncObject sameAccount,
                                                    final AppUser user) {
         final YnabTransactions ynabTransactions = new YnabTransactions();
-        try {
-            var zTag = ofNullable(zenRawTr.getTag())
-                    .orElse(emptyList())
-                    .stream()
-                    .filter(not(String::isEmpty))
-                    .findFirst()
-                    .orElse("Uncategorized");
+        var zTag = ofNullable(zenRawTr.getTag())
+                .orElse(emptyList())
+                .stream()
+                .filter(not(String::isEmpty))
+                .findFirst()
+                .orElse(UNCATEGORIZED);
 
-            LOGGER.debug("zenRawTr.getTag(): {}", zTag);
+        final String ynabTagId = sameTags
+                .findByZenId(zTag)
+                .map(YnabZenSyncObject::getYnabId)
+                .orElseThrow(() -> new RuntimeException("No Ynab category ID"));
 
-            final String ynabTagId = sameTags
-                    .findByZenId(zTag)
-                    .map(YnabZenSyncObject::getYnabId)
-                    .orElse(null);
+        mapTransactionType(zenRawTr, ynabTransactions, zTag);
 
-            LOGGER.debug("ynabTagId: {}", ynabTagId);
-
-            mapTransactionType(zenRawTr, ynabTransactions, zTag);
-
-            ynabTransactions.setAccountId(sameAccount.getYnabId());
-            ynabTransactions.setDate(dateService.secsToIsoFormat(zenRawTr.getCreated(), user));
-            ynabTransactions.setMemo(zenRawTr.getComment());
-            ynabTransactions.setCategoryId(ynabTagId);
-            ynabTransactions.setPayeeName(zenRawTr.getPayee());
-            ynabTransactions.setCleared(CLEARED);
-            ynabTransactions.setApproved(true);
-            ynabTransactions.setImportId(zenRawTr.getId());
-        } catch (Exception e) {
-            LOGGER.debug("e", e);
-        }
-
+        ynabTransactions.setAccountId(sameAccount.getYnabId());
+        ynabTransactions.setDate(dateService.secsToIsoFormat(zenRawTr.getCreated(), user));
+        ynabTransactions.setMemo(zenRawTr.getComment());
+        ynabTransactions.setCategoryId(ynabTagId);
+        ynabTransactions.setPayeeName(zenRawTr.getPayee());
+        ynabTransactions.setCleared(CLEARED);
+        ynabTransactions.setApproved(true);
+        ynabTransactions.setImportId(zenRawTr.getId());
         return ynabTransactions;
     }
 
@@ -382,15 +373,14 @@ public class YnabSyncService {
 
         if (outcome != EMPTY_AMOUNT && income != EMPTY_AMOUNT) {
             // transfer
-            if (ynabTransfer.getOrDefault(zTag, true)) {
+            if (ynabTransfer.get(zTag) == null) {
                 ynabTransaction.setAmount((int) (income * YNAB_AMOUNT_CONST));
-                ynabTransfer.put(zTag, false);
+                ynabTransfer.clear();
             } else {
                 ynabTransaction.setAmount(-(int) (outcome * YNAB_AMOUNT_CONST));
             }
 
             ynabTransaction.setFlagColor(BLUE);
-
         }
     }
 
@@ -402,7 +392,7 @@ public class YnabSyncService {
                 .filter(not(TransactionItem::isDeleted))
                 .filter(not(zt -> ofNullable(zt.getComment()).orElse(EMPTY).trim().startsWith(YNAB_IGNORE)))
                 .filter(zt -> zt.getCreated() < EPOCH_MILLI_FIX)
-                .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new transactions
+                .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new
                 .filter(zt -> sameAccounts.isExistsByZenId(zt.getIncomeAccount()) || sameAccounts.isExistsByZenId(zt.getOutcomeAccount()))
                 .sorted(comparing(TransactionItem::getCreated))
                 .collect(toUnmodifiableList());
