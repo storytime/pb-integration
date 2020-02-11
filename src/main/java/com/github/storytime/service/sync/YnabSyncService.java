@@ -1,6 +1,5 @@
 package com.github.storytime.service.sync;
 
-
 import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.mapper.YnabCommonMapper;
 import com.github.storytime.mapper.ZenCommonMapper;
@@ -45,6 +44,7 @@ import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_INNER_TAGS;
 import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_PARENT_TAGS;
 import static com.github.storytime.model.ynab.transaction.YnabTransactionColour.*;
+import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
@@ -106,7 +106,7 @@ public class YnabSyncService {
                 return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
             }
 
-            if (appUser.getYnabSyncEnabled().equals(TRUE)) {
+            if (appUser.getYnabSyncEnabled().equals(FALSE)) {
                 LOGGER.warn("YNAB sync is stopped for user:[{}], not YNAB sync enabled", userId);
                 return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
             }
