@@ -6,7 +6,6 @@ import com.github.storytime.model.ynab.category.YnabCategories;
 import com.github.storytime.model.ynab.category.YnabCategoryResponse;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.service.DateService;
-import com.github.storytime.service.info.ReconcileService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static com.github.storytime.config.props.Constants.*;
-import static com.github.storytime.service.ReconcileTableService.BALANCE_AFTER_DIGITS;
+import static com.github.storytime.config.props.Constants.CURRENCY_SCALE;
+import static com.github.storytime.config.props.Constants.EMPTY;
 import static java.lang.Math.abs;
 import static java.lang.String.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
@@ -65,14 +64,7 @@ public class YnabCommonMapper {
     }
 
     public BigDecimal parseYnabBal(final String balStr) {
-
-        if (balStr.equals(YNAB_ZERO_BALANCE))
-            return new BigDecimal(0);
-
-        var endIndex = balStr.length() - BALANCE_AFTER_DIGITS;
-        var beforeDot = balStr.substring(START_POS, endIndex);
-        var afterDot = balStr.substring(endIndex);
-        return BigDecimal.valueOf(Float.parseFloat(beforeDot + DOT + afterDot)).setScale(CURRENCY_SCALE, HALF_DOWN);
+        return BigDecimal.valueOf(Float.parseFloat(balStr) / 1000).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
     private Map<String, DoubleSummaryStatistics> getYnabExtendedSummaryByCategory(final AppUser appUser,
