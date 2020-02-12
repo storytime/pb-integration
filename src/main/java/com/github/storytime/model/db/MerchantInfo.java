@@ -42,6 +42,7 @@ public class MerchantInfo extends BaseEntity {
     @Enumerated(STRING)
     private SyncPriority syncPriority;
 
+    @NotNull
     @Column(length = 128)
     private String shortDesc;
 

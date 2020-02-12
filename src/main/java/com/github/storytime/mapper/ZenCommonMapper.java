@@ -68,8 +68,8 @@ public class ZenCommonMapper {
     }
 
     public TreeMap<String, BigDecimal> getZenTagsSummaryByCategory(long startDate,
-                                                               long endDate,
-                                                               final Optional<ZenResponse> maybeZr) {
+                                                                   long endDate,
+                                                                   final Optional<ZenResponse> maybeZr) {
 
 
         final List<TransactionItem> transactionItems = this.getZenTransactions(maybeZr);

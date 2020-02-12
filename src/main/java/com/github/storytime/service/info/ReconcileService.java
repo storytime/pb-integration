@@ -4,6 +4,7 @@ import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.mapper.YnabCommonMapper;
 import com.github.storytime.mapper.ZenCommonMapper;
 import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.budget.YnabBudgets;
@@ -13,6 +14,7 @@ import com.github.storytime.model.ynab.common.ZenYnabTagReconcileProxyObject;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
+import com.github.storytime.repository.YnabSyncServiceRepository;
 import com.github.storytime.service.DateService;
 import com.github.storytime.service.ReconcileTableService;
 import com.github.storytime.service.access.MerchantService;
@@ -30,6 +32,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.service.ReconcileTableService.X;
@@ -60,6 +63,7 @@ public class ReconcileService {
     private final YnabCommonMapper ynabCommonMapper;
     private final DateService dateService;
     private final ReconcileTableService reconcileTableService;
+    private final YnabSyncServiceRepository ynabSyncServiceRepository;
 
     @Autowired
     public ReconcileService(final ZenDiffHttpService zenDiffHttpService,
@@ -72,6 +76,7 @@ public class ReconcileService {
                             final DateService dateService,
                             final YnabCommonMapper ynabCommonMapper,
                             final ReconcileTableService reconcileTableService,
+                            final YnabSyncServiceRepository ynabSyncServiceRepository,
                             final ZenDiffLambdaHolder zenDiffLambdaHolder) {
         this.zenDiffHttpService = zenDiffHttpService;
         this.userService = userService;
@@ -83,6 +88,7 @@ public class ReconcileService {
         this.ynabCommonMapper = ynabCommonMapper;
         this.pbAccountsHttpService = pbAccountsHttpService;
         this.reconcileTableService = reconcileTableService;
+        this.ynabSyncServiceRepository = ynabSyncServiceRepository;
         this.dateService = dateService;
     }
 
@@ -98,6 +104,27 @@ public class ReconcileService {
         }
     }
 
+    public String reconcileTableAll(final long userId) {
+        try {
+            var appUser = userService.findUserById(userId).orElseThrow(() -> new RuntimeException("Cannot find user"));
+            int year = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getYear();
+            int month = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getMonthValue();
+
+            return ynabSyncServiceRepository
+                    .findAllByEnabledIsTrueAndUserId(appUser.getId())
+                    .orElse(emptyList())
+                    .stream()
+                    .map(YnabSyncConfig::getBudgetName)
+                    .collect(toUnmodifiableList())
+                    .stream()
+                    .map(budgetName -> reconcileTableByDate(userId, budgetName, year, month))
+                    .collect(Collectors.joining());
+        } catch (Exception e) {
+            LOGGER.error("Cannot build reconcile table for user [{}], error [{}] for default dates", userId, e.getCause());
+            return EMPTY;
+        }
+    }
+
     public String reconcileTableByDate(final long userId, final String budgetName, int year, int mouth) {
         var table = new StringBuilder(EMPTY);
         try {
@@ -106,9 +133,14 @@ public class ReconcileService {
                 final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
                 final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
 
-                var pbAccs =  pbAccountsHttpService.getPbAsyncAccounts(appUser, ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList()));
                 var ynabBudget = getBudget(appUser, budgetName);
                 var ynabAccs = getYnabAccounts(appUser, ynabBudget);
+                var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants())
+                        .orElse(emptyList())
+                        .stream()
+                        .filter(m -> ynabAccs.stream().anyMatch(ynabAccount -> ynabAccount.getName().equals(ofNullable(m.getShortDesc()).orElse(EMPTY))))
+                        .collect(toUnmodifiableList());
+                var pbAccs = pbAccountsHttpService.getPbAsyncAccounts(appUser, merchantInfos);
                 var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
                 var ynabCategories = getYnabCategories(appUser, ynabBudget);
                 var maybeZr = getZenDiff(appUser, startDate);
@@ -137,6 +169,9 @@ public class ReconcileService {
             return table.toString();
         }
         LOGGER.debug("Finish building reconcile table, for user: [{}]", userId);
+        reconcileTableService.addEmptyLine(table);
+        reconcileTableService.addEmptyLine(table);
+        reconcileTableService.addEmptyLine(table);
         return table.toString();
     }
 
