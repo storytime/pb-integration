@@ -339,7 +339,7 @@ public class YnabSyncService {
         final String ynabTagId = sameTags
                 .findByZenId(zTag)
                 .map(YnabZenSyncObject::getYnabId)
-                .orElseThrow(() -> new RuntimeException("No Ynab category ID"));
+                .orElse(EMPTY);
 
         mapTransactionType(zenRawTr, ynabTransactions, zTag);
 
