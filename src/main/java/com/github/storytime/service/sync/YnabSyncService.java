@@ -339,7 +339,7 @@ public class YnabSyncService {
         final String ynabTagId = sameTags
                 .findByZenId(zTag)
                 .map(YnabZenSyncObject::getYnabId)
-                .orElse(EMPTY);
+                .orElse(null);
 
         mapTransactionType(zenRawTr, ynabTransactions, zTag);
 
