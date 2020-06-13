@@ -94,6 +94,9 @@ public class TransactionItem {
     @JsonProperty("changed")
     private int changed;
 
+    @JsonProperty("viewed")
+    private boolean viewed;
+
     public String getDate() {
         return date;
     }
@@ -344,6 +347,14 @@ public class TransactionItem {
     public TransactionItem setChanged(int changed) {
         this.changed = changed;
         return this;
+    }
+
+    public boolean isViewed() {
+        return viewed;
+    }
+
+    public void setViewed(boolean viewed) {
+        this.viewed = viewed;
     }
 
     @Override

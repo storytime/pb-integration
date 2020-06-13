@@ -25,18 +25,18 @@ public class PbSyncSchedulerExecutor {
     @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
     public void firstPrioritySync() {
         LOGGER.debug("Starting first priority sync");
-        pbSyncService.sync(merchantService -> merchantService.getAllEnabledMerchantsBySyncPriority(FIRST));
+      //  pbSyncService.sync(merchantService -> merchantService.getAllEnabledMerchantsBySyncPriority(FIRST));
     }
 
     @Scheduled(fixedRateString = "${sync.second.priority.period.millis}", initialDelayString = "${sync.second.priority.delay.millis}")
     public void secondPrioritySync() {
         LOGGER.debug("Starting second priority sync");
-        pbSyncService.sync(merchantService -> merchantService.getAllEnabledMerchantsBySyncPriority(SECOND));
+      //  pbSyncService.sync(merchantService -> merchantService.getAllEnabledMerchantsBySyncPriority(SECOND));
     }
 
     @Scheduled(fixedRateString = "${sync.general.priority.period.millis}", initialDelayString = "${sync.general.priority.delay.millis}")
     public void generalPrioritySync() {
         LOGGER.debug("Starting general priority sync");
-        pbSyncService.sync(MerchantService::getAllEnabledMerchantsWithPriority);
+       // pbSyncService.sync(MerchantService::getAllEnabledMerchantsWithPriority);
     }
 }

@@ -12,16 +12,17 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.github.storytime.config.props.Constants.EMPTY;
 import static com.github.storytime.config.props.Constants.*;
 import static java.lang.Double.valueOf;
 import static java.lang.Math.abs;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -65,19 +66,32 @@ public class PbToZenTransactionMapper {
                 .collect(toUnmodifiableList());
     }
 
+    private String createIdForZeb(final long userId, final Statement s, final String trDate) {
+       final var userIdBytes = Long.toString(userId).getBytes();
+       final var trDateBytes = trDate.getBytes();
+       final var trAmountByes = s.getAmount().getBytes();
+       final var idBytes = ByteBuffer.allocate(userIdBytes.length + trDateBytes.length + trAmountByes.length)
+                .put(userIdBytes)
+                .put(trDateBytes)
+                .put(trAmountByes)
+                .array();
+
+        return UUID.nameUUIDFromBytes(idBytes).toString();
+    }
+
     public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser u, final Statement s) {
         final var t = new TransactionItem();
         final var transactionDesc = regExpService.normalizeDescription(s.getDescription());
         final var opAmount = valueOf(substringBefore(s.getAmount(), SPACE));
         final String opCurrency = substringAfter(s.getAmount(), SPACE);
-        final var cardAmount = valueOf(substringBefore(s.getCardamount(), SPACE));
+        final var cardAmount = Double.parseDouble(substringBefore(s.getCardamount(), SPACE));
         final String cardCurrency = substringAfter(s.getCardamount(), SPACE);
         final String accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, s.getCard());
         final Integer currency = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
-
+        final String trDate = dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone());
         setAppCode(s, t, cardAmount);
 
-        t.setId(randomUUID().toString());
+        t.setId(createIdForZeb(u.getId(), s, trDate));
         t.setChanged(NOT_CHANGED);
         t.setCreated(dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond());
         t.setUser(zenDiff
@@ -89,13 +103,14 @@ public class PbToZenTransactionMapper {
         t.setPayee(customPayeeService.getNicePayee(transactionDesc));
         t.setOriginalPayee(transactionDesc);
         t.setComment(s.getCustomComment());
-        t.setDate(dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone()));
+        t.setDate(trDate);
         t.setIncomeAccount(accountId);
         t.setIncome(cardAmount > EMPTY_AMOUNT ? cardAmount : EMPTY_AMOUNT);
         t.setOutcomeAccount(accountId);
         t.setOutcome(cardAmount < EMPTY_AMOUNT ? -cardAmount : EMPTY_AMOUNT);
         t.setIncomeInstrument(currency);
         t.setOutcomeInstrument(currency);
+        t.setViewed(false);
 
         // transaction in different currency
         handleTransactionInDifferentCurrency(zenDiff, t, opAmount, opCurrency, cardAmount, cardCurrency);
