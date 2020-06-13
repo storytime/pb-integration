@@ -40,20 +40,17 @@ public class PbAccountsHttpService {
     private final CustomConfig customConfig;
     private final PbRequestBuilder pbRequestBuilder;
     private final PbStatementMapper pbStatementMapper;
-    private final Timer pbRequestTimeTimer;
     private final Executor cfThreadPool;
 
     @Autowired
     public PbAccountsHttpService(final RestTemplate restTemplate,
                                  final CustomConfig customConfig,
                                  final PbStatementMapper pbStatementMapper,
-                                 final Timer pbRequestTimeTimer,
                                  final Executor cfThreadPool,
                                  final PbRequestBuilder pbRequestBuilder) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
         this.pbStatementMapper = pbStatementMapper;
-        this.pbRequestTimeTimer = pbRequestTimeTimer;
         this.cfThreadPool = cfThreadPool;
         this.pbRequestBuilder = pbRequestBuilder;
     }
@@ -105,7 +102,6 @@ public class PbAccountsHttpService {
             final Optional<ResponseEntity<String>> response = of(restTemplate.postForEntity(pbAccountsUrl, requestToBank, String.class));
             st.stop();
             LOGGER.debug("Receive bank account response, execution time:[{}] sec", st.getTotalTimeSeconds());
-            pbRequestTimeTimer.record(st.getTotalTimeMillis(), TimeUnit.MILLISECONDS);
             return response;
         } catch (Exception e) {
             LOGGER.error("Cannot do bank request:[{}]", e.getMessage());

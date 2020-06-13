@@ -55,7 +55,7 @@ dependencies {
     compile("org.apache.commons:commons-lang3:$commonsVersion")
     compile("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
     compile("org.flywaydb:flyway-core:$flywayVersion")
-    compile('io.micrometer:micrometer-registry-prometheus:latest.release')
+//    compile('io.micrometer:micrometer-registry-prometheus:latest.release')
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile("com.sun.xml.bind:jaxb-impl:$jaxbImplVersion")
     compile("com.sun.xml.bind:jaxb-core:$jaxbCoreVersion")
