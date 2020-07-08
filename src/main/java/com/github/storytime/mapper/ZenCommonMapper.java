@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 @Component
 public class ZenCommonMapper {
 
-
     public TransactionItem flatToParentCategory(final List<TagItem> zenTags, final TransactionItem zt) {
         final String innerTagId = ofNullable(zt.getTag()).orElse(emptyList())
                 .stream()
