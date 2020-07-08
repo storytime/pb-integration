@@ -85,7 +85,7 @@ public class ZenDiffHttpService {
     public String findMerchantByNicePayee(final ZenResponse zenDiff, final String nicePayee) {
         return ofNullable(zenDiff.getMerchant()).orElse(emptyList())
                 .stream()
-                .filter(a -> ofNullable(a.getTitle()).orElse(EMPTY).contains(nicePayee))
+                .filter(a -> ofNullable(a.getTitle()).orElse(EMPTY).equals(nicePayee))
                 .findFirst()
                 .map(MerchantItem::getId)
                 .orElse(null);
