@@ -124,9 +124,11 @@ public class PbToZenTransactionMapper {
         final var isOutcome = isAnotherCurrency && opAmount <= EMPTY_AMOUNT;
         final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
 
-        t.setOpIncome(isIncome ? abs(opAmount) : EMPTY_AMOUNT);
+        LOGGER.debug("isAnotherCurrency:[{}], currencyIdByShortLetter:[{}], isIncome: [{}], isOutcome[{}]", isAnotherCurrency, currencyIdByShortLetter, isIncome, isOutcome);
+
+        t.setOpIncome(isIncome ? abs(opAmount) : null);
         t.setOpIncomeInstrument(currencyIdByShortLetter);
-        t.setOutcome(isOutcome ? abs(opAmount): EMPTY_AMOUNT);
+        t.setOutcome(isOutcome ? abs(opAmount) : null);
         t.setOpOutcomeInstrument(currencyIdByShortLetter);
         t.setComment(newComment);
 
