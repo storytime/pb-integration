@@ -84,12 +84,12 @@ public class PbToZenTransactionMapper {
         final var t = new TransactionItem();
         final var transactionDesc = regExpService.normalizeDescription(s.getDescription());
         final var opAmount = valueOf(substringBefore(s.getAmount(), SPACE));
-        final String opCurrency = substringAfter(s.getAmount(), SPACE);
+        final var opCurrency = substringAfter(s.getAmount(), SPACE);
         final var cardAmount = Double.parseDouble(substringBefore(s.getCardamount(), SPACE));
-        final String cardCurrency = substringAfter(s.getCardamount(), SPACE);
-        final String accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, s.getCard());
-        final Integer currency = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
-        final String trDate = dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone());
+        final var cardCurrency = substringAfter(s.getCardamount(), SPACE);
+        final var accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, s.getCard());
+        final var currency = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
+        final var trDate = dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone());
         final var appCode = Optional.ofNullable(s.getAppcode()).orElse(EMPTY);
         final var createdTime = dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
         final var idTr = createIdForZen(u.getId(), s.getAmount(), trDate);
@@ -116,7 +116,19 @@ public class PbToZenTransactionMapper {
         t.setViewed(false);
 
         // transaction in different currency
-        handleTransactionInDifferentCurrency(zenDiff, t, opAmount, opCurrency, cardAmount, cardCurrency);
+        //handleTransactionInDifferentCurrency(zenDiff, t, opAmount, opCurrency, cardAmount, cardCurrency);
+
+        final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
+        final var currencyIdByShortLetter = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency);
+        final var isIncome = isAnotherCurrency && opAmount > EMPTY_AMOUNT;
+        final var isOutcome = isAnotherCurrency && opAmount < EMPTY_AMOUNT;
+        final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
+
+        t.setOpIncome(isIncome ? abs(opAmount) : EMPTY_AMOUNT);
+        t.setOpIncomeInstrument(currencyIdByShortLetter);
+        t.setOutcome(isOutcome ? abs(opAmount): EMPTY_AMOUNT);
+        t.setOpOutcomeInstrument(currencyIdByShortLetter);
+        t.setComment(newComment);
 
         // cash withdrawal
         if (regExpService.isCashWithdrawal(transactionDesc)) {
@@ -184,25 +196,25 @@ public class PbToZenTransactionMapper {
         return t;
     }
 
-    private void handleTransactionInDifferentCurrency(final ZenResponse zenDiff,
-                                                      final TransactionItem t,
-                                                      final Double opAmount,
-                                                      final String opCurrency,
-                                                      final Double cardAmount,
-                                                      final String cardCurrency) {
-        if (opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency)) {
-            if (opAmount > EMPTY_AMOUNT) {
-                t.setOpIncome(abs(opAmount));
-                t.setOpIncomeInstrument(zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
-            } else {
-                t.setOutcome(abs(opAmount));
-                t.setOpOutcomeInstrument(zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
-            }
-
-            final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
-            t.setComment(newComment);
-        }
-    }
+//    private void handleTransactionInDifferentCurrency(final ZenResponse zenDiff,
+//                                                      final TransactionItem t,
+//                                                      final Double opAmount,
+//                                                      final String opCurrency,
+//                                                      final Double cardAmount,
+//                                                      final String cardCurrency) {
+//
+//        final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
+//        final var currencyIdByShortLetter = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency);
+//        final var isIncome = isAnotherCurrency && opAmount > EMPTY_AMOUNT;
+//        final var isOutcome = isAnotherCurrency && opAmount < EMPTY_AMOUNT;
+//        final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
+//
+//        t.setOpIncome(isIncome ? abs(opAmount) : EMPTY_AMOUNT);
+//        t.setOpIncomeInstrument(currencyIdByShortLetter);
+//        t.setOutcome(isOutcome ? abs(opAmount): EMPTY_AMOUNT);
+//        t.setOpOutcomeInstrument(currencyIdByShortLetter);
+//        t.setComment(newComment);
+//    }
 
     private Consumer<AccountItem> updateIncomeIfCashWithdrawal(final TransactionItem t, final Double opAmount) {
         return a -> {

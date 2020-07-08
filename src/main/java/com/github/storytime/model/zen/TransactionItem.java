@@ -367,6 +367,7 @@ public class TransactionItem {
                 .add("payee = " + payee)
                 .add("cr = " + created)
                 .add("com = " + comment)
+                .add("\n")
                 .toString();
     }
 
