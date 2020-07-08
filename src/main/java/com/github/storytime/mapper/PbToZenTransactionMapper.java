@@ -121,7 +121,7 @@ public class PbToZenTransactionMapper {
         final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
         final var currencyIdByShortLetter = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency);
         final var isIncome = isAnotherCurrency && opAmount > EMPTY_AMOUNT;
-        final var isOutcome = isAnotherCurrency && opAmount < EMPTY_AMOUNT;
+        final var isOutcome = isAnotherCurrency && opAmount <= EMPTY_AMOUNT;
         final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
 
         t.setOpIncome(isIncome ? abs(opAmount) : EMPTY_AMOUNT);
