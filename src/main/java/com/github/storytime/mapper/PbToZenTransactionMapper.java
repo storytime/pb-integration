@@ -126,9 +126,9 @@ public class PbToZenTransactionMapper {
 
         LOGGER.debug("isAnotherCurrency:[{}], currencyIdByShortLetter:[{}], isIncome: [{}], isOutcome[{}]", isAnotherCurrency, currencyIdByShortLetter, isIncome, isOutcome);
 
-        t.setOpIncome(isIncome ? abs(opAmount) : null);
+        t.setOpIncome(isIncome ? abs(opAmount) : 0);
         t.setOpIncomeInstrument(currencyIdByShortLetter);
-        t.setOutcome(isOutcome ? abs(opAmount) : null);
+        t.setOutcome(isOutcome ? abs(opAmount) : 0);
         t.setOpOutcomeInstrument(currencyIdByShortLetter);
         t.setComment(newComment);
 
