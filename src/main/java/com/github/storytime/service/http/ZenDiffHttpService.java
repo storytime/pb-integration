@@ -88,7 +88,7 @@ public class ZenDiffHttpService {
                 .filter(a -> ofNullable(a.getTitle()).orElse(EMPTY).contains(nicePayee))
                 .findFirst()
                 .map(MerchantItem::getId)
-                .orElse(EMPTY);
+                .orElse(null);
     }
 
     public Integer findCurrencyIdByShortLetter(final ZenResponse zenDiff, final String shortLetter) {
