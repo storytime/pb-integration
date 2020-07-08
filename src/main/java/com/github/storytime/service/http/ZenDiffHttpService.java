@@ -2,10 +2,7 @@ package com.github.storytime.service.http;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.db.AppUser;
-import com.github.storytime.model.zen.AccountItem;
-import com.github.storytime.model.zen.InstrumentItem;
-import com.github.storytime.model.zen.ZenDiffRequest;
-import com.github.storytime.model.zen.ZenResponse;
+import com.github.storytime.model.zen.*;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -82,6 +79,15 @@ public class ZenDiffHttpService {
                 .filter(a -> ofNullable(a.getSyncID()).orElse(emptyList()).contains(carLastDigits))
                 .findFirst()
                 .map(AccountItem::getId)
+                .orElse(EMPTY);
+    }
+
+    public String findMerchantByNicePayee(final ZenResponse zenDiff, final String nicePayee) {
+        return zenDiff.getMerchant()
+                .stream()
+                .filter(a -> ofNullable(a.getTitle()).orElse(EMPTY).contains(nicePayee))
+                .findFirst()
+                .map(MerchantItem::getId)
                 .orElse(EMPTY);
     }
 

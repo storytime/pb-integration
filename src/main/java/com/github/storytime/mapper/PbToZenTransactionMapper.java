@@ -95,6 +95,7 @@ public class PbToZenTransactionMapper {
         final var idTr = createIdForZen(u.getId(), s.getAmount(), trDate);
         final var userId = zenCommonMapper.getUserId(zenDiff);
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
+        final var merchantId = zenDiffHttpService.findMerchantByNicePayee(zenDiff, nicePayee);
 
         t.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
         t.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
@@ -114,6 +115,7 @@ public class PbToZenTransactionMapper {
         t.setIncomeInstrument(currency);
         t.setOutcomeInstrument(currency);
         t.setViewed(false);
+        t.setMerchant(merchantId);
 
         // transaction in different currency
         handleTransactionInDifferentCurrency(zenDiff, t, opAmount, opCurrency, cardAmount, cardCurrency);
