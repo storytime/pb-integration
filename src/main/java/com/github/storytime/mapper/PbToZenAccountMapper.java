@@ -33,10 +33,13 @@ public class PbToZenAccountMapper {
 
     private static final Logger LOGGER = LogManager.getLogger(PbToZenAccountMapper.class);
     private final ZenInstrumentsMapper zenInstrumentsMapper;
+    private final ZenCommonMapper zenCommonMapper;
 
     @Autowired
-    public PbToZenAccountMapper(ZenInstrumentsMapper zenInstrumentsMapper) {
+    public PbToZenAccountMapper(final ZenInstrumentsMapper zenInstrumentsMapper,
+                                final ZenCommonMapper zenCommonMapper) {
         this.zenInstrumentsMapper = zenInstrumentsMapper;
+        this.zenCommonMapper = zenCommonMapper;
     }
 
     public Boolean mapPbAccountToZen(final List<Statement> statementList, final ZenResponse zenDiff) {
@@ -57,11 +60,6 @@ public class PbToZenAccountMapper {
     private AccountItem createNewZenAccount(final List<Statement> statementList,
                                             final ZenResponse zenDiff,
                                             final List<String> cardsFromBank) {
-        final int zenUserId = zenDiff
-                .getUser()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Error not zen user")).getId();
 
         final Integer accountCurrency = statementList
                 .stream()
@@ -71,7 +69,7 @@ public class PbToZenAccountMapper {
 
         final AccountItem newZenAccount = new AccountItem()
                 .setId(randomUUID().toString())
-                .setUser(zenUserId)
+                .setUser(zenCommonMapper.getUserId(zenDiff))
                 .setInstrument(accountCurrency)
                 .setType(ZEN_ACCOUNT_TYPE)
                 .setRole(null)

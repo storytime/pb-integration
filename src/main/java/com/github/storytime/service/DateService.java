@@ -76,12 +76,8 @@ public class DateService {
         return isoDateTimeFormatter.format(zonedDateTime);
     }
 
-    public ZonedDateTime xmlDateTimeToZoned(final XMLGregorianCalendar d,
-                                            final XMLGregorianCalendar t,
-                                            final String timeZone) {
-
-        return of(d.getYear(), d.getMonth(), d.getDay(), t.getHour(), t.getMinute(), t.getSecond())
-                .atZone(ZoneId.of(timeZone));
+    public ZonedDateTime xmlDateTimeToZoned(final XMLGregorianCalendar d, final XMLGregorianCalendar t, final String timeZone) {
+        return of(d.getYear(), d.getMonth(), d.getDay(), t.getHour(), t.getMinute(), t.getSecond()).atZone(ZoneId.of(timeZone));
     }
 
     public Long zenStringToZonedSeconds(final String dateString, final String timeZone) {

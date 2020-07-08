@@ -61,4 +61,8 @@ public class AdditionalCommentService {
                     s.setCustomComment(ofNullable(s.getCustomComment()).orElse(EMPTY) + comment.toString());
                 });
     }
+
+    public String exchangeInfoComment(final Double opAmount, final String opCurrency, final Double cardAmount) {
+        return opAmount + SPACE + opCurrency + RATE + currencyService.convertDivide(cardAmount, opAmount) + SPACE;
+    }
 }

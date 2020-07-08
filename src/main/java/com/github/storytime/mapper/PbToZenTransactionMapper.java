@@ -1,6 +1,5 @@
 package com.github.storytime.mapper;
 
-import com.github.storytime.error.exception.ZenUserNotFoundException;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
@@ -34,24 +33,27 @@ public class PbToZenTransactionMapper {
 
     private final DateService dateService;
     private final ZenDiffHttpService zenDiffHttpService;
-    private final CurrencyService currencyService;
     private final RegExpService regExpService;
     private final PbInternalTransferInfoService transferInfoService;
     private final CustomPayeeService customPayeeService;
+    private final ZenCommonMapper zenCommonMapper;
+    private final AdditionalCommentService additionalCommentService;
 
     @Autowired
     public PbToZenTransactionMapper(final PbInternalTransferInfoService pbInternalTransferInfoService,
                                     final DateService dateService,
-                                    final CurrencyService currencyService,
                                     final RegExpService regExpService,
                                     final CustomPayeeService customPayeeService,
-                                    final ZenDiffHttpService zenDiffHttpService) {
+                                    final ZenDiffHttpService zenDiffHttpService,
+                                    final ZenCommonMapper zenCommonMapper,
+                                    final AdditionalCommentService additionalCommentService) {
         this.dateService = dateService;
         this.transferInfoService = pbInternalTransferInfoService;
-        this.currencyService = currencyService;
         this.regExpService = regExpService;
         this.zenDiffHttpService = zenDiffHttpService;
         this.customPayeeService = customPayeeService;
+        this.zenCommonMapper = zenCommonMapper;
+        this.additionalCommentService = additionalCommentService;
     }
 
 
@@ -66,16 +68,15 @@ public class PbToZenTransactionMapper {
                 .collect(toUnmodifiableList());
     }
 
-    private String createIdForZeb(final long userId, final Statement s, final String trDate) {
-       final var userIdBytes = Long.toString(userId).getBytes();
-       final var trDateBytes = trDate.getBytes();
-       final var trAmountByes = s.getAmount().getBytes();
-       final var idBytes = ByteBuffer.allocate(userIdBytes.length + trDateBytes.length + trAmountByes.length)
+    private String createIdForZen(final long userId, final String amount, final String trDate) {
+        final var userIdBytes = Long.toString(userId).getBytes();
+        final var trDateBytes = trDate.getBytes();
+        final var trAmountByes = amount.getBytes();
+        final var idBytes = ByteBuffer.allocate(userIdBytes.length + trDateBytes.length + trAmountByes.length)
                 .put(userIdBytes)
                 .put(trDateBytes)
                 .put(trAmountByes)
                 .array();
-
         return UUID.nameUUIDFromBytes(idBytes).toString();
     }
 
@@ -89,18 +90,20 @@ public class PbToZenTransactionMapper {
         final String accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, s.getCard());
         final Integer currency = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
         final String trDate = dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone());
-        setAppCode(s, t, cardAmount);
+        final var appCode = Optional.ofNullable(s.getAppcode()).orElse(EMPTY);
+        final var createdTime = dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
+        final var idTr = createIdForZen(u.getId(), s.getAmount(), trDate);
+        final var userId = zenCommonMapper.getUserId(zenDiff);
+        final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
 
-        t.setId(createIdForZeb(u.getId(), s, trDate));
+        t.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
+        t.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
+        t.setId(idTr);
         t.setChanged(NOT_CHANGED);
-        t.setCreated(dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond());
-        t.setUser(zenDiff
-                .getUser()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ZenUserNotFoundException("Zen User not found")).getId());
+        t.setCreated(createdTime);
+        t.setUser(userId);
         t.setDeleted(false);
-        t.setPayee(customPayeeService.getNicePayee(transactionDesc));
+        t.setPayee(nicePayee);
         t.setOriginalPayee(transactionDesc);
         t.setComment(s.getCustomComment());
         t.setDate(trDate);
@@ -195,9 +198,9 @@ public class PbToZenTransactionMapper {
                 t.setOutcome(abs(opAmount));
                 t.setOpOutcomeInstrument(zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency));
             }
-            final String exchangeInfo = opAmount + SPACE + opCurrency + RATE
-                    + currencyService.convertDivide(cardAmount, opAmount) + SPACE;
-            t.setComment(exchangeInfo + t.getComment());
+
+            final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
+            t.setComment(newComment);
         }
     }
 
@@ -208,15 +211,21 @@ public class PbToZenTransactionMapper {
         };
     }
 
-    private void setAppCode(final Statement s, final TransactionItem t, final Double cardAmount) {
-        final String appCode = s.getAppcode();
-        if (appCode != null) {
-            if (cardAmount > EMPTY_AMOUNT) {
-                t.setIncomeBankID(appCode);
-            } else {
-                t.setOutcomeBankID(appCode);
-            }
-        }
-    }
+//    private void setAppCode(final Statement s, final TransactionItem t, final Double cardAmount) {
+//        final String appCode = s.getAppcode();
+//        if (appCode != null) {
+//            if (cardAmount > EMPTY_AMOUNT) {
+//                t.setIncomeBankID(appCode);
+//            } else {
+//                t.setOutcomeBankID(appCode);
+//            }
+//        }
+//    }
+
+//    private void setAppCode(final Statement s, final TransactionItem t, final Double cardAmount) {
+//        var appCode = Optional.ofNullable(s.getAppcode()).orElse(EMPTY);
+//        t.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
+//        t.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
+//    }
 
 }

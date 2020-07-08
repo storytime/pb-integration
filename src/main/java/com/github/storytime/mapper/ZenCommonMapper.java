@@ -1,5 +1,6 @@
 package com.github.storytime.mapper;
 
+import com.github.storytime.error.exception.ZenUserNotFoundException;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TagItem;
 import com.github.storytime.model.zen.TransactionItem;
@@ -23,13 +24,13 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 public class ZenCommonMapper {
 
 
-    public TransactionItem flatToParentCategory(final List<TagItem> zenTags,
-                                                final TransactionItem zt) {
+    public TransactionItem flatToParentCategory(final List<TagItem> zenTags, final TransactionItem zt) {
         final String innerTagId = ofNullable(zt.getTag()).orElse(emptyList())
                 .stream()
                 .filter(not(s -> s.startsWith(PROJECT_TAG)))
                 .findFirst()
                 .orElse(EMPTY);
+
         final String parentTag = zenTags
                 .stream()
                 .filter(tagItem -> tagItem.getId().equalsIgnoreCase(innerTagId))
@@ -50,21 +51,15 @@ public class ZenCommonMapper {
     }
 
     public List<TagItem> getTags(final Optional<ZenResponse> maybeZr) {
-        return maybeZr
-                .flatMap(zr -> ofNullable(zr.getTag()))
-                .orElse(emptyList());
+        return maybeZr.flatMap(zr -> ofNullable(zr.getTag())).orElse(emptyList());
     }
 
     public List<AccountItem> getZenAccounts(final Optional<ZenResponse> maybeZr) {
-        return maybeZr
-                .flatMap(zr -> ofNullable(zr.getAccount()))
-                .orElse(emptyList());
+        return maybeZr.flatMap(zr -> ofNullable(zr.getAccount())).orElse(emptyList());
     }
 
     public List<TransactionItem> getZenTransactions(final Optional<ZenResponse> maybeZr) {
-        return maybeZr
-                .flatMap(zr -> ofNullable(zr.getTransaction()))
-                .orElse(emptyList());
+        return maybeZr.flatMap(zr -> ofNullable(zr.getTransaction())).orElse(emptyList());
     }
 
     public TreeMap<String, BigDecimal> getZenTagsSummaryByCategory(long startDate,
@@ -78,7 +73,7 @@ public class ZenCommonMapper {
                 .filter(not(t -> t.getTitle().startsWith(PROJECT_TAG)))
                 .collect(toUnmodifiableList());
 
-        var zenTr = transactionItems
+        final var zenTr = transactionItems
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
                 .filter(zTr -> zTr.getCreated() >= startDate && zTr.getCreated() < endDate)
@@ -98,6 +93,14 @@ public class ZenCommonMapper {
         groupByTags.forEach((zenTagId, summary) -> zenSummary.put(this.getTagNameByTagId(zenTags, zenTagId), BigDecimal.valueOf(summary.getSum())));
 
         return zenSummary;
+    }
+
+    public int getUserId(final ZenResponse zenDiff) {
+        return zenDiff
+                .getUser()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ZenUserNotFoundException("Zen User not found")).getId();
     }
 
 }

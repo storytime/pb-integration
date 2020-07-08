@@ -1,6 +1,5 @@
 package com.github.storytime.service;
 
-import com.github.storytime.mapper.PbToZenTransactionMapper;
 import com.github.storytime.model.db.CustomPayee;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,8 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 @Service
 public class CustomPayeeService {
 
-    private final Set<CustomPayee> customPayeeValues;
     private static final Logger LOGGER = getLogger(CustomPayeeService.class);
+    private final Set<CustomPayee> customPayeeValues;
 
     @Autowired
     public CustomPayeeService(final Set<CustomPayee> customPayeeValues) {
@@ -33,7 +32,6 @@ public class CustomPayeeService {
                 .orElse(originalPayee).trim();
 
         LOGGER.debug("Nice payee is: [{}] for original: [{}]", nicePayee, originalPayee);
-
         return nicePayee;
     }
 }
