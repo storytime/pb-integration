@@ -68,11 +68,12 @@ public class PbToZenTransactionMapper {
                 .collect(toUnmodifiableList());
     }
 
-    private String createIdForZen(final long userId, final String amount, final String trDate) {
+    private String createIdForZen(final long userId, final Double amount, final String trDate) {
         final var userIdBytes = Long.toString(userId).getBytes();
         final var trDateBytes = trDate.getBytes();
-        final var trAmountByes = amount.getBytes();
-        final var idBytes = ByteBuffer.allocate(userIdBytes.length + trDateBytes.length + trAmountByes.length)
+        final var trAmountByes = String.valueOf(amount).getBytes();
+        int capacity = userIdBytes.length + trDateBytes.length + trAmountByes.length;
+        final var idBytes = ByteBuffer.allocate(capacity)
                 .put(userIdBytes)
                 .put(trDateBytes)
                 .put(trAmountByes)
@@ -92,7 +93,7 @@ public class PbToZenTransactionMapper {
         final var trDate = dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone());
         final var appCode = Optional.ofNullable(s.getAppcode()).orElse(EMPTY);
         final var createdTime = dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
-        final var idTr = createIdForZen(u.getId(), s.getAmount(), trDate);
+        final var idTr = createIdForZen(u.getId(), Math.abs(opAmount), trDate);
         final var userId = zenCommonMapper.getUserId(zenDiff);
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
         final var merchantId = zenDiffHttpService.findMerchantByNicePayee(zenDiff, nicePayee);
