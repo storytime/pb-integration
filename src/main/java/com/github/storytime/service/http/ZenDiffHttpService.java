@@ -56,9 +56,9 @@ public class ZenDiffHttpService {
         }
     }
 
-    public Optional<ZenResponse> getZenDiffByUser(final Supplier<HttpEntity> function) {
+    public Optional<ZenResponse> getZenDiffByUser(final Supplier<HttpEntity<ZenSyncRequest>> function) {
         try {
-            final HttpEntity httpEntity = function.get();
+            final HttpEntity<ZenSyncRequest> httpEntity = function.get();
             final StopWatch st = new StopWatch();
             st.start();
             final Optional<ZenResponse> body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), httpEntity, ZenResponse.class).getBody());

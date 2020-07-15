@@ -62,6 +62,10 @@ public class Constants {
     public static final String YNAB_IGNORE = "#";
     public static final String YNAB_PUSH_UNKNOWN_ERROR = "Unknown Ynab sync error";
     public static final String UNCATEGORIZED = "Uncategorized";
+    public static final long INITIAL_TIMESTAMP = 0L;
+    public static final String ACCOUNT = "account";
+    public static final String INSTRUMENT = "instrument";
+    public static final String TAG = "tag";
 
     private Constants() {
     }

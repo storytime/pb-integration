@@ -1,5 +1,6 @@
 package com.github.storytime.function;
 
+import com.github.storytime.config.props.Constants;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.zen.ZenSyncRequest;
@@ -16,10 +17,6 @@ import static java.time.Instant.now;
 @Component
 public class ZenDiffLambdaHolder {
 
-    private static final long INITIAL_TIMESTAMP = 0L;
-    private static final String ACCOUNT = "account";
-    private static final String INSTRUMENT = "instrument";
-    private static final String TAG = "tag";
     private final Set<String> zenSyncForceFetchItems;
 
     @Autowired
@@ -28,15 +25,15 @@ public class ZenDiffLambdaHolder {
         this.zenSyncForceFetchItems = zenSyncForceFetchItems;
     }
 
-    public Supplier<HttpEntity> getInitialFunction(final AppUser u) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getInitialFunction(final AppUser u) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(now().getEpochSecond());
             final Long zenLastSyncTimestamp = u.getZenLastSyncTimestamp();
 
-            if (zenLastSyncTimestamp == null || zenLastSyncTimestamp == INITIAL_TIMESTAMP) {
+            if (zenLastSyncTimestamp == null || zenLastSyncTimestamp == Constants.INITIAL_TIMESTAMP) {
                 //fetch all data
                 zenSyncRequest.setForceFetch(null);
-                zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
+                zenSyncRequest.setServerTimestamp(Constants.INITIAL_TIMESTAMP);
             } else {
                 zenSyncRequest.setForceFetch(zenSyncForceFetchItems);
                 zenSyncRequest.setServerTimestamp(zenLastSyncTimestamp);
@@ -46,33 +43,33 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-    public Supplier<HttpEntity> getYnabFunction(final AppUser user,
-                                                final long clientSyncTime,
-                                                final YnabSyncConfig ynabSyncConfig) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getYnabFunction(final AppUser user,
+                                                                final long clientSyncTime,
+                                                                final YnabSyncConfig ynabSyncConfig) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(clientSyncTime);
-            zenSyncRequest.setForceFetch(Set.of(TAG, ACCOUNT));
+            zenSyncRequest.setForceFetch(Set.of(Constants.TAG, Constants.ACCOUNT));
             zenSyncRequest.setServerTimestamp(ynabSyncConfig.getLastSync());
             return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
         };
     }
 
-    public Supplier<HttpEntity> getSavingsFunction(final AppUser u) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getSavingsFunction(final AppUser u) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(now().getEpochSecond())
-                    .setForceFetch(Set.of(ACCOUNT, INSTRUMENT));
+                    .setForceFetch(Set.of(Constants.ACCOUNT, Constants.INSTRUMENT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
 
-    public Supplier<HttpEntity> getAccount(final AppUser u, long startDate) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getAccount(final AppUser u, long startDate) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(startDate)
-                    .setForceFetch(Set.of(TAG, ACCOUNT));
+                    .setForceFetch(Set.of(Constants.TAG, Constants.ACCOUNT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }

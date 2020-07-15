@@ -5,7 +5,10 @@ import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.In
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
-import com.github.storytime.service.*;
+import com.github.storytime.service.AdditionalCommentService;
+import com.github.storytime.service.CustomPayeeService;
+import com.github.storytime.service.DateService;
+import com.github.storytime.service.RegExpService;
 import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,28 +37,24 @@ public class PbToZenTransactionMapper {
     private final DateService dateService;
     private final ZenDiffHttpService zenDiffHttpService;
     private final RegExpService regExpService;
-    private final PbInternalTransferInfoService transferInfoService;
     private final CustomPayeeService customPayeeService;
     private final ZenCommonMapper zenCommonMapper;
     private final AdditionalCommentService additionalCommentService;
 
     @Autowired
-    public PbToZenTransactionMapper(final PbInternalTransferInfoService pbInternalTransferInfoService,
-                                    final DateService dateService,
+    public PbToZenTransactionMapper(final DateService dateService,
                                     final RegExpService regExpService,
                                     final CustomPayeeService customPayeeService,
                                     final ZenDiffHttpService zenDiffHttpService,
                                     final ZenCommonMapper zenCommonMapper,
                                     final AdditionalCommentService additionalCommentService) {
         this.dateService = dateService;
-        this.transferInfoService = pbInternalTransferInfoService;
         this.regExpService = regExpService;
         this.zenDiffHttpService = zenDiffHttpService;
         this.customPayeeService = customPayeeService;
         this.zenCommonMapper = zenCommonMapper;
         this.additionalCommentService = additionalCommentService;
     }
-
 
     public List<TransactionItem> mapPbTransactionToZen(final List<Statement> statementList,
                                                        final ZenResponse zenDiff,
@@ -77,21 +76,23 @@ public class PbToZenTransactionMapper {
                 .put(trDateBytes)
                 .put(trAmountByes)
                 .array();
+
         return UUID.nameUUIDFromBytes(idBytes).toString();
     }
 
-    public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser u, final Statement s) {
+    public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser u, final Statement pbTr) {
         final var newZenTr = new TransactionItem();
-        final var transactionDesc = regExpService.normalizeDescription(s.getDescription());
-        final var opAmount = valueOf(substringBefore(s.getAmount(), SPACE));
-        final var opCurrency = substringAfter(s.getAmount(), SPACE);
-        final var cardAmount = Double.parseDouble(substringBefore(s.getCardamount(), SPACE));
-        final var cardCurrency = substringAfter(s.getCardamount(), SPACE);
-        final var accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, s.getCard());
+        final var transactionDesc = regExpService.normalizeDescription(pbTr.getDescription());
+        final var opAmount = valueOf(substringBefore(pbTr.getAmount(), SPACE));
+        final var opCurrency = substringAfter(pbTr.getAmount(), SPACE);
+        final var cardAmount = Double.parseDouble(substringBefore(pbTr.getCardamount(), SPACE));
+        final var cardCurrency = substringAfter(pbTr.getCardamount(), SPACE);
+        final var pbCard = pbTr.getCard();
+        final var accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, pbCard);
         final var currency = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
-        final var trDate = dateService.toZenFormat(s.getTrandate(), s.getTrantime(), u.getTimeZone());
-        final var appCode = Optional.ofNullable(s.getAppcode()).orElse(EMPTY);
-        final var createdTime = dateService.xmlDateTimeToZoned(s.getTrandate(), s.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
+        final var trDate = dateService.toZenFormat(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone());
+        final var appCode = Optional.ofNullable(pbTr.getAppcode()).orElse(EMPTY);
+        final var createdTime = dateService.xmlDateTimeToZoned(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
         final var idTr = createIdForZen(u.getId(), Math.abs(opAmount), trDate.getBytes());
         final var userId = zenCommonMapper.getUserId(zenDiff);
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
@@ -106,7 +107,7 @@ public class PbToZenTransactionMapper {
         newZenTr.setDeleted(false);
         newZenTr.setPayee(nicePayee);
         newZenTr.setOriginalPayee(transactionDesc);
-        newZenTr.setComment(s.getCustomComment());
+        newZenTr.setComment(pbTr.getCustomComment());
         newZenTr.setDate(trDate);
         newZenTr.setIncomeAccount(accountId);
         newZenTr.setIncome(cardAmount > EMPTY_AMOUNT ? cardAmount : EMPTY_AMOUNT);
@@ -134,57 +135,26 @@ public class PbToZenTransactionMapper {
             return newZenTr;
         }
 
-        // parse transfer
+        // parse transfer between own cards
         if (regExpService.isInternalTransfer(transactionDesc)) {
             newZenTr.setPayee(EMPTY);
             newZenTr.setOriginalPayee(EMPTY);
 
-            if (regExpService.isInternalFrom(transactionDesc)) {
-                final String id = transferInfoService.generateIdForFromTransfer(u, s, opAmount, transactionDesc);
-                if (transferInfoService.isAlreadyHandled(id)) {
-                    LOGGER.info("FROM transfer id:[{}] that is already handled", id);
-                    return null;
-                }
+            final var cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
+            final var maybeAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, pbCard);
+            final var isAccountExists = maybeAcc.isPresent();
 
-                final String cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
-                final Optional<String> fromAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
-                if (fromAcc.isPresent()) {
-                    newZenTr.setOutcomeAccount(fromAcc.get());
-                    newZenTr.setOutcome(opAmount);
-                    newZenTr.setIncomeBankID(null);
-                    transferInfoService.save(id);
-                    LOGGER.info("FROM transfer storage id:[{}], account id:[{}]", id, fromAcc.get());
-
-                } else {
-                    LOGGER.info("FROM transfer storage id:[{}], without account", id);
-                    newZenTr.setComment("Перевод <-- " + regExpService.getCardDigits(transactionDesc));
-                    transferInfoService.save(id);
-                    return newZenTr;
-                }
+            if (regExpService.isInternalFrom(transactionDesc) && isAccountExists) {
+                newZenTr.setOutcome(opAmount);
+                newZenTr.setIncomeBankID(null);
+                newZenTr.setOutcomeAccount(maybeAcc.get());
             }
 
-            if (regExpService.isInternalTo(transactionDesc)) {
-                final String id = transferInfoService.generateIdForToTransfer(u, s, opAmount, transactionDesc);
-                if (transferInfoService.isAlreadyHandled(id)) {
-                    LOGGER.info("TO transfer id:[{}] that is already handled", id);
-                    return null;
-                }
-
-                final String cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
-                final Optional<String> toAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
-                if (toAcc.isPresent()) {
-                    newZenTr.setIncome(opAmount);
-                    newZenTr.setOutcome(opAmount);
-                    newZenTr.setOutcomeBankID(null);
-                    newZenTr.setIncomeAccount(toAcc.get());
-                    transferInfoService.save(id);
-                    LOGGER.info("TO transfer storage id:[{}], account id:[{}]", id, toAcc.get());
-                } else {
-                    LOGGER.info("TO transfer storage id:[{}], without account", id);
-                    newZenTr.setComment("Перевод --> " + regExpService.getCardDigits(transactionDesc));
-                    transferInfoService.save(id);
-                    return newZenTr;
-                }
+            if (regExpService.isInternalTo(transactionDesc) && isAccountExists) {
+                newZenTr.setIncome(opAmount);
+                newZenTr.setOutcome(opAmount);
+                newZenTr.setOutcomeBankID(null);
+                newZenTr.setIncomeAccount(maybeAcc.get());
             }
         }
 
