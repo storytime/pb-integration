@@ -58,59 +58,8 @@ services:
       restart_policy:
         condition: on-failure
 
-  prometheus:
-    image: prom/prometheus:latest
-    volumes:
-    - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    - prometheus-vol:/prometheus
-    depends_on:
-    - pb-integration
-    networks:
-    - backend
-    #    ports:
-    #    - 9090:9090
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 100MB
-      restart_policy:
-        condition: on-failure
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-    - 3000:3000
-    volumes:
-    - grafana-vol:/var/lib/grafana
-    depends_on:
-    - prometheus
-    networks:
-    - backend
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 100MB
-      restart_policy:
-        condition: on-failure
-
 #PLEASE NOTE!  dirs for volumes must be created
 volumes:
-  prometheus-vol:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/appuser/pb-integration/prometheus
-      o: bind
-
-  grafana-vol:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/appuser/pb-integration/grafana
-      o: bind
-
   pb-log-vol:
     driver: local
     driver_opts:

@@ -52,16 +52,6 @@ Swarm commands:
 ### How to insert custom comment generator 
 `INSERT INTO MERCHANT_INFO_ADDITIONAL_COMMENT ( MERCHANT_INFO_ID , ADDITIONAL_COMMENT ) VALUES ( 1, 'NBU_PREV_MOUTH_LAST_BUSINESS_DAY')` 
 
-
-## Grafana
-- Deployed to host:3000
-
-- Dashboard located: mics\App dashboard*.json
-
-Dashboard example: 
-
-![Dashboard](https://i.imgur.com/eCMLFJ1.png)
-
 ## Links
 1. [How configure ssh auto deploy via pipeline](https://community.atlassian.com/t5/Bitbucket-questions/How-do-I-set-up-ssh-public-key-authentication-so-that-I-can-use/qaq-p/171671) 
 2. [Top-like interface for container metrics](https://github.com/bcicen/ctop) 

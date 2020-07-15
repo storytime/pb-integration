@@ -23,10 +23,10 @@ buildscript {
 }
 
 plugins {
-    id "org.sonarqube" version "2.6.2"
-    id 'com.adarshr.test-logger' version '1.5.0'
-    id "org.hidetake.ssh" version "2.9.0" //ssh.gradle
-    id 'net.nemerosa.versioning' version '2.8.2' // utils.gradle
+    id "org.sonarqube" version "3.0"
+    id 'com.adarshr.test-logger' version '2.1.0'
+    id "org.hidetake.ssh" version "2.10.1" //ssh.gradle
+    id 'net.nemerosa.versioning' version '2.14.0' // utils.gradle
 }
 
 apply from: 'gradle/ssh.gradle'
@@ -48,22 +48,22 @@ repositories {
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile("org.springframework.boot:spring-boot-starter-data-jpa")
-    compile("org.postgresql:postgresql:$postgresqlVersion")
-    compile("org.zalando:logbook-spring-boot-starter:$logBookVersion")
-    compile("org.apache.httpcomponents:httpclient:$httpApacheClientVersion")
-    compile("org.apache.commons:commons-lang3:$commonsVersion")
-    compile("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
-    compile("org.flywaydb:flyway-core:$flywayVersion")
-    compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile("com.sun.xml.bind:jaxb-impl:$jaxbImplVersion")
-    compile("com.sun.xml.bind:jaxb-core:$jaxbCoreVersion")
-    compile("javax.validation:validation-api:$validationVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.postgresql:postgresql:$postgresqlVersion")
+    implementation("org.zalando:logbook-spring-boot-starter:$logBookVersion")
+    implementation("org.apache.httpcomponents:httpclient:$httpApacheClientVersion")
+    implementation("org.apache.commons:commons-lang3:$commonsVersion")
+    implementation("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    implementation("com.sun.xml.bind:jaxb-impl:$jaxbImplVersion")
+    implementation("com.sun.xml.bind:jaxb-core:$jaxbCoreVersion")
+    implementation("javax.validation:validation-api:$validationVersion")
 
-    testCompile("org.springframework.boot:spring-boot-starter-test")
-    testCompile("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
-    testCompile("io.codearte.jfairy:jfairy:$jfairyVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
+    testImplementation("io.codearte.jfairy:jfairy:$jfairyVersion")
 }
 
 

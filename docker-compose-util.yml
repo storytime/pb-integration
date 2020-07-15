@@ -17,21 +17,6 @@ services:
           memory: 50MB
       restart_policy:
         condition: on-failure
-  watchtower:
-    image: v2tec/watchtower
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /root/.docker/config.json:/config.json
-    command: --interval 30
-    networks:
-    - util
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 25MB
-      restart_policy:
-        condition: on-failure
 
 networks:
   util:

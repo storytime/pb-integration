@@ -38,6 +38,7 @@ public class PbStatementMapper {
         this.jaxbStatementErrorUnmarshaller = jaxbStatementErrorUnmarshaller;
         this.jaxbAccountOkUnmarshaller = jaxbAccountOkUnmarshaller;
         this.customConfig = customConfig;
+
         this.jaxbStatementOkUnmarshaller = jaxbStatementOkUnmarshaller;
     }
 
