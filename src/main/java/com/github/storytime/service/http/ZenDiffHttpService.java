@@ -32,7 +32,6 @@ public class ZenDiffHttpService {
     private final RestTemplate restTemplate;
     private final CustomConfig customConfig;
 
-
     @Autowired
     public ZenDiffHttpService(final RestTemplate restTemplate,
                               final CustomConfig customConfig) {
@@ -100,11 +99,10 @@ public class ZenDiffHttpService {
                 .orElse(DEFAULT_CURRENCY_ZEN);
     }
 
-    public Optional<AccountItem> isCashAccountInCurrencyExists(final ZenResponse zenDiff, final String shortLetter) {
-        final Integer id = findCurrencyIdByShortLetter(zenDiff, shortLetter);
+    public Optional<AccountItem> isCashAccountInCurrencyExists(final ZenResponse zenDiff, final Integer curId) {
         return zenDiff.getAccount()
                 .stream()
-                .filter(a -> a.getType().equalsIgnoreCase(CASH) && a.getInstrument() == id)
+                .filter(a -> a.getType().equalsIgnoreCase(CASH) && a.getInstrument() == curId)
                 .findFirst();
     }
 

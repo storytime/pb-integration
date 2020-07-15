@@ -63,7 +63,7 @@ public class PbToZenTransactionMapper {
 
         return statementList
                 .stream()
-                .map(s -> parseTransactionItem(zenDiff, u, s))
+                .map(pbStatement -> parseTransactionItem(zenDiff, u, pbStatement))
                 .filter(Objects::nonNull)
                 .collect(toUnmodifiableList());
     }
@@ -81,7 +81,7 @@ public class PbToZenTransactionMapper {
     }
 
     public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser u, final Statement s) {
-        final var t = new TransactionItem();
+        final var newZenTr = new TransactionItem();
         final var transactionDesc = regExpService.normalizeDescription(s.getDescription());
         final var opAmount = valueOf(substringBefore(s.getAmount(), SPACE));
         final var opCurrency = substringAfter(s.getAmount(), SPACE);
@@ -97,56 +97,47 @@ public class PbToZenTransactionMapper {
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
         final var merchantId = zenDiffHttpService.findMerchantByNicePayee(zenDiff, nicePayee);
 
-        t.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
-        t.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
-        t.setId(idTr);
-        t.setChanged(NOT_CHANGED);
-        t.setCreated(createdTime);
-        t.setUser(userId);
-        t.setDeleted(false);
-        t.setPayee(nicePayee);
-        t.setOriginalPayee(transactionDesc);
-        t.setComment(s.getCustomComment());
-        t.setDate(trDate);
-        t.setIncomeAccount(accountId);
-        t.setIncome(cardAmount > EMPTY_AMOUNT ? cardAmount : EMPTY_AMOUNT);
-        t.setOutcomeAccount(accountId);
-        t.setOutcome(cardAmount < EMPTY_AMOUNT ? -cardAmount : EMPTY_AMOUNT);
-        t.setIncomeInstrument(currency);
-        t.setOutcomeInstrument(currency);
-        t.setViewed(false);
-        t.setMerchant(merchantId);
+        newZenTr.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
+        newZenTr.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
+        newZenTr.setId(idTr);
+        newZenTr.setChanged(NOT_CHANGED);
+        newZenTr.setCreated(createdTime);
+        newZenTr.setUser(userId);
+        newZenTr.setDeleted(false);
+        newZenTr.setPayee(nicePayee);
+        newZenTr.setOriginalPayee(transactionDesc);
+        newZenTr.setComment(s.getCustomComment());
+        newZenTr.setDate(trDate);
+        newZenTr.setIncomeAccount(accountId);
+        newZenTr.setIncome(cardAmount > EMPTY_AMOUNT ? cardAmount : EMPTY_AMOUNT);
+        newZenTr.setOutcomeAccount(accountId);
+        newZenTr.setOutcome(cardAmount < EMPTY_AMOUNT ? -cardAmount : EMPTY_AMOUNT);
+        newZenTr.setIncomeInstrument(currency);
+        newZenTr.setOutcomeInstrument(currency);
+        newZenTr.setViewed(false);
+        newZenTr.setMerchant(merchantId);
 
         // transaction in different currency
-        handleTransactionInDifferentCurrency(zenDiff, t, opAmount, opCurrency, cardAmount, cardCurrency);
-//
-//        final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
-//        final var currencyIdByShortLetter = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency);
-//        final var isIncome = isAnotherCurrency && opAmount > EMPTY_AMOUNT;
-//        final var isOutcome = isAnotherCurrency && opAmount <= EMPTY_AMOUNT;
-//        final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
-//
-//        LOGGER.debug("isAnotherCurrency:[{}], currencyIdByShortLetter:[{}], isIncome: [{}], isOutcome[{}]", isAnotherCurrency, currencyIdByShortLetter, isIncome, isOutcome);
-//
-//        t.setOpIncome(isIncome ? abs(opAmount) : 0);
-//        t.setOpIncomeInstrument(currencyIdByShortLetter);
-//        t.setOutcome(isOutcome ? abs(opAmount) : 0);
-//        t.setOpOutcomeInstrument(currencyIdByShortLetter);
-//        t.setComment(newComment);
+        final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
+        final var currencyIdByShortLetter = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency);
+        if (isAnotherCurrency) {
+            mapDifferentCurrency(newZenTr, opAmount, currencyIdByShortLetter);
+            final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + newZenTr.getComment();
+            newZenTr.setComment(newComment);
+        }
 
         // cash withdrawal
         if (regExpService.isCashWithdrawal(transactionDesc)) {
-            zenDiffHttpService.isCashAccountInCurrencyExists(zenDiff, opCurrency)
-                    .ifPresent(updateIncomeIfCashWithdrawal(t, opAmount));
-            //todo improve comment and separate bank tax
+            final var maybeCashCurrency = zenDiffHttpService.isCashAccountInCurrencyExists(zenDiff, currencyIdByShortLetter);
+            maybeCashCurrency.ifPresent(updateIncomeIfCashWithdrawal(newZenTr, opAmount));
             LOGGER.info("Cash withdrawal transaction");
-            return t;
+            return newZenTr;
         }
 
         // parse transfer
         if (regExpService.isInternalTransfer(transactionDesc)) {
-            t.setPayee(EMPTY);
-            t.setOriginalPayee(EMPTY);
+            newZenTr.setPayee(EMPTY);
+            newZenTr.setOriginalPayee(EMPTY);
 
             if (regExpService.isInternalFrom(transactionDesc)) {
                 final String id = transferInfoService.generateIdForFromTransfer(u, s, opAmount, transactionDesc);
@@ -158,17 +149,17 @@ public class PbToZenTransactionMapper {
                 final String cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
                 final Optional<String> fromAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
                 if (fromAcc.isPresent()) {
-                    t.setOutcomeAccount(fromAcc.get());
-                    t.setOutcome(opAmount);
-                    t.setIncomeBankID(null);
+                    newZenTr.setOutcomeAccount(fromAcc.get());
+                    newZenTr.setOutcome(opAmount);
+                    newZenTr.setIncomeBankID(null);
                     transferInfoService.save(id);
                     LOGGER.info("FROM transfer storage id:[{}], account id:[{}]", id, fromAcc.get());
 
                 } else {
                     LOGGER.info("FROM transfer storage id:[{}], without account", id);
-                    t.setComment("Перевод <-- " + regExpService.getCardDigits(transactionDesc));
+                    newZenTr.setComment("Перевод <-- " + regExpService.getCardDigits(transactionDesc));
                     transferInfoService.save(id);
-                    return t;
+                    return newZenTr;
                 }
             }
 
@@ -182,44 +173,33 @@ public class PbToZenTransactionMapper {
                 final String cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
                 final Optional<String> toAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, s.getCard());
                 if (toAcc.isPresent()) {
-                    t.setIncome(opAmount);
-                    t.setOutcome(opAmount);
-                    t.setOutcomeBankID(null);
-                    t.setIncomeAccount(toAcc.get());
+                    newZenTr.setIncome(opAmount);
+                    newZenTr.setOutcome(opAmount);
+                    newZenTr.setOutcomeBankID(null);
+                    newZenTr.setIncomeAccount(toAcc.get());
                     transferInfoService.save(id);
                     LOGGER.info("TO transfer storage id:[{}], account id:[{}]", id, toAcc.get());
                 } else {
                     LOGGER.info("TO transfer storage id:[{}], without account", id);
-                    t.setComment("Перевод --> " + regExpService.getCardDigits(transactionDesc));
+                    newZenTr.setComment("Перевод --> " + regExpService.getCardDigits(transactionDesc));
                     transferInfoService.save(id);
-                    return t;
+                    return newZenTr;
                 }
             }
         }
 
-        return t;
+        return newZenTr;
     }
 
-    private void handleTransactionInDifferentCurrency(final ZenResponse zenDiff,
-                                                      final TransactionItem t,
-                                                      final Double opAmount,
-                                                      final String opCurrency,
-                                                      final Double cardAmount,
-                                                      final String cardCurrency) {
-        final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
-        final var currencyIdByShortLetter = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency);
-
-        if (isAnotherCurrency) {
-            if (opAmount > EMPTY_AMOUNT) {
-                t.setOpIncome(abs(opAmount));
-                t.setOpIncomeInstrument(currencyIdByShortLetter);
-            } else {
-                t.setOutcome(abs(opAmount));
-                t.setOpOutcomeInstrument(currencyIdByShortLetter);
-            }
-
-            final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + t.getComment();
-            t.setComment(newComment);
+    private void mapDifferentCurrency(final TransactionItem t,
+                                      final Double opAmount,
+                                      final Integer currencyIdByShortLetter) {
+        if (opAmount > EMPTY_AMOUNT) {
+            t.setOpIncome(abs(opAmount));
+            t.setOpIncomeInstrument(currencyIdByShortLetter);
+        } else {
+            t.setOutcome(abs(opAmount));
+            t.setOpOutcomeInstrument(currencyIdByShortLetter);
         }
     }
 
@@ -229,22 +209,4 @@ public class PbToZenTransactionMapper {
             t.setIncomeAccount(a.getId());
         };
     }
-
-//    private void setAppCode(final Statement s, final TransactionItem t, final Double cardAmount) {
-//        final String appCode = s.getAppcode();
-//        if (appCode != null) {
-//            if (cardAmount > EMPTY_AMOUNT) {
-//                t.setIncomeBankID(appCode);
-//            } else {
-//                t.setOutcomeBankID(appCode);
-//            }
-//        }
-//    }
-
-//    private void setAppCode(final Statement s, final TransactionItem t, final Double cardAmount) {
-//        var appCode = Optional.ofNullable(s.getAppcode()).orElse(EMPTY);
-//        t.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
-//        t.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
-//    }
-
 }

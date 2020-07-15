@@ -18,7 +18,6 @@ public class ZenDiffLambdaHolder {
 
     private static final long INITIAL_TIMESTAMP = 0L;
     private static final String ACCOUNT = "account";
-    private static final String TRANSACTION = "transaction";
     private static final String INSTRUMENT = "instrument";
     private static final String TAG = "tag";
     private final Set<String> zenSyncForceFetchItems;
