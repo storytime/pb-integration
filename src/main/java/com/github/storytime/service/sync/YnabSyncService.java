@@ -1,6 +1,5 @@
 package com.github.storytime.service.sync;
 
-import com.github.storytime.mapper.YnabCommonMapper;
 import com.github.storytime.mapper.YnabZenCommonMapper;
 import com.github.storytime.mapper.response.YnabResponseMapper;
 import com.github.storytime.model.api.YnabBudgetSyncStatus;
@@ -52,7 +51,6 @@ public class YnabSyncService {
     private final ZenDiffService zenDiffService;
     private final YnabResponseMapper ynabResponseMapper;
     private final YnabZenCommonMapper ynabZenCommonMapper;
-    private final YnabCommonMapper ynabCommonMapper;
     private final YnabSyncServiceRepository ynabSyncServiceRepository;
 
     @Autowired
@@ -60,7 +58,6 @@ public class YnabSyncService {
                            final YnabService ynabService,
                            final YnabZenCommonMapper ynabZenCommonMapper,
                            final YnabResponseMapper ynabResponseMapper,
-                           final YnabCommonMapper ynabCommonMapper,
                            final YnabSyncServiceRepository ynabSyncServiceRepository,
                            final UserService userService) {
         this.userService = userService;
@@ -68,7 +65,6 @@ public class YnabSyncService {
         this.ynabSyncServiceRepository = ynabSyncServiceRepository;
         this.zenDiffService = zenDiffService;
         this.ynabService = ynabService;
-        this.ynabCommonMapper = ynabCommonMapper;
         this.ynabResponseMapper = ynabResponseMapper;
     }
 
@@ -154,7 +150,7 @@ public class YnabSyncService {
                         .thenApply(ynabBudgets -> newTransactionListEmpty
                                 .stream()
                                 .map(ynabToZenSyncHolder -> ynabBudgets
-                                        .map(ynabBudgetResponse -> ynabCommonMapper.getSameBudgets(userConfigBudgetNames, ynabBudgetResponse))
+                                        .map(ynabBudgetResponse -> ynabResponseMapper.getSameBudgets(userConfigBudgetNames, ynabBudgetResponse))
                                         .orElse(emptyList())
                                         .stream()
                                         .filter(b -> ynabToZenSyncHolder.getYnabSyncConfig().getBudgetName().equalsIgnoreCase(b.getName()))

@@ -54,10 +54,13 @@ public class ZenDiffService {
                                                                        final long clientSyncTime,
                                                                        final YnabSyncConfig config) {
         LOGGER.debug("Calling ZEN diff for YNAB budget config: [{}], last sync [{}], tags method [{}]", config.getBudgetName(), config.getLastSync(), config.getTagsSyncProperties());
-        return supplyAsync(() -> {
-            Optional<ZenResponse> zenDiffByUser = zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getYnabFunction(appUser, clientSyncTime, config));
-            return new YnabToZenSyncHolder(zenDiffByUser, config);
-        }, cfThreadPool);
+        return supplyAsync(() -> getYnabToZenSyncHolder(appUser, clientSyncTime, config), cfThreadPool);
+    }
+
+    private YnabToZenSyncHolder getYnabToZenSyncHolder(final AppUser appUser,
+                                                       final long clientSyncTime,
+                                                       final YnabSyncConfig config) {
+        return new YnabToZenSyncHolder(zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getYnabFunction(appUser, clientSyncTime, config)), config);
     }
 
     public Optional<ZenResponse> pushToZen(final AppUser appUser, final ZenDiffRequest request) {

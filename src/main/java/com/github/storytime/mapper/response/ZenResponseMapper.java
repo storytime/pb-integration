@@ -7,6 +7,7 @@ import com.github.storytime.model.zen.MerchantItem;
 import com.github.storytime.model.zen.ZenResponse;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.storytime.config.props.Constants.EMPTY;
@@ -15,6 +16,7 @@ import static java.lang.String.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @Component
@@ -30,7 +32,7 @@ public class ZenResponseMapper {
 
     public String findAccountIdByPbCard(final ZenResponse zenDiff, final Long card) {
         final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
-        return zenDiff.getAccount()
+        return ofNullable(zenDiff.getAccount()).orElse(emptyList())
                 .stream()
                 .filter(a -> ofNullable(a.getSyncID()).orElse(emptyList()).contains(carLastDigits))
                 .findFirst()
@@ -57,7 +59,7 @@ public class ZenResponseMapper {
     }
 
     public Optional<AccountItem> findCashAccountByCurrencyId(final ZenResponse zenDiff, final Integer curId) {
-        return zenDiff.getAccount()
+        return ofNullable(zenDiff.getAccount()).orElse(emptyList())
                 .stream()
                 .filter(a -> a.getType().equalsIgnoreCase(CASH) && a.getInstrument() == curId)
                 .findFirst();
@@ -67,7 +69,7 @@ public class ZenResponseMapper {
                                                          final String lastTwoDigits,
                                                          final Long card) {
         final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
-        return zenDiff.getAccount()
+        return ofNullable(zenDiff.getAccount()).orElse(emptyList())
                 .stream()
                 .filter(not(a -> ofNullable(a.getSyncID())
                         .orElse(emptyList())
@@ -97,5 +99,13 @@ public class ZenResponseMapper {
                 .findFirst()
                 .map(InstrumentItem::getSymbol)
                 .orElseThrow(() -> new RuntimeException("Cannot get currency symbol"));
+    }
+
+    public List<AccountItem> getSavingsAccounts(final ZenResponse zenDiff) {
+        return ofNullable(zenDiff.getAccount()).orElse(emptyList())
+                .stream()
+                .filter(AccountItem::getSavings)
+                .filter(not(AccountItem::isArchive))
+                .collect(toUnmodifiableList());
     }
 }

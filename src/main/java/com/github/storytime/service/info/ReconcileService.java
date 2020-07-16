@@ -28,14 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
-import static java.util.concurrent.CompletableFuture.runAsync;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -46,7 +43,6 @@ public class ReconcileService {
     private static final Logger LOGGER = LogManager.getLogger(ReconcileService.class);
 
     private final UserService userService;
-    private final Executor cfThreadPool;
     private final YnabService ynabService;
     private final MerchantService merchantService;
     private final PbAccountService pbAccountService;
@@ -62,7 +58,6 @@ public class ReconcileService {
     @Autowired
     public ReconcileService(
             final UserService userService,
-            final Executor cfThreadPool,
             final MerchantService merchantService,
             final ZenCommonMapper zenCommonMapper,
             final PbAccountService pbAccountService,
@@ -76,7 +71,6 @@ public class ReconcileService {
             final YnabSyncServiceRepository ynabSyncServiceRepository) {
         this.zenDiffService = zenDiffService;
         this.userService = userService;
-        this.cfThreadPool = cfThreadPool;
         this.merchantService = merchantService;
         this.zenCommonMapper = zenCommonMapper;
         this.ynabCommonMapper = ynabCommonMapper;
@@ -126,11 +120,11 @@ public class ReconcileService {
         var table = new StringBuilder(EMPTY);
         try {
             LOGGER.debug("Building reconcile table, collecting info, for user: [{}]", userId);
-            userService.findUserById(userId).ifPresent(appUser -> runAsync(() -> {
+            userService.findUserById(userId).ifPresent(appUser -> {
                 final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
                 final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
 
-                var ynabBudget = getBudget(appUser, budgetName);
+                var ynabBudget = mapYnabBudgetData(appUser, budgetName);
                 var ynabAccs = getYnabAccounts(appUser, ynabBudget);
                 var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants())
                         .orElse(emptyList())
@@ -160,7 +154,7 @@ public class ReconcileService {
                     reconcileTableService.buildTagLastLine(table);
                 }
 
-            }, cfThreadPool).join());
+            });
         } catch (Exception e) {
             LOGGER.error("Cannot build reconcile table for user [{}], error [{}]", userId, e.getCause());
             return table.toString();
@@ -205,13 +199,10 @@ public class ReconcileService {
                 .orElse(emptyList());
     }
 
-    private Optional<YnabBudgets> getBudget(AppUser appUser, String budgetToReconcile) {
-        return supplyAsync(() -> mapYnabBudgetData(appUser, budgetToReconcile), cfThreadPool).join();
-    }
 
     private List<TransactionsItem> getYnabTransactions(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
         return ynabBudget
-                .map(budgets -> supplyAsync(() -> mapYnabTransactionsData(appUser, budgets.getId()), cfThreadPool).join()) // todo no need async
+                .map(budgets -> mapYnabTransactionsData(appUser, budgets.getId()))
                 .orElse(emptyList());
     }
 
@@ -234,27 +225,14 @@ public class ReconcileService {
         LOGGER.debug("Fetching Ynab budgets, for user: [{}]", appUser.getId());
         return ynabService.getYnabBudget(appUser)
                 .join()
-                .flatMap(ynabBudgetResponse -> ynabBudgetResponse
-                        .getYnabBudgetData()
-                        .getBudgets()
-                        .stream()
-                        .filter(budget -> budgetToReconcile.equalsIgnoreCase(budget.getName()))
-                        .collect(toUnmodifiableList())
-                        .stream()
-                        .findFirst());
+                .flatMap(ynabBudgetResponse -> ynabResponseMapper.mapBudgets(budgetToReconcile, ynabBudgetResponse));
     }
 
     private List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {
         LOGGER.debug("Fetching Ynab transactions, for user: [{}]", appUser.getId());
         return ynabService.getYnabTransactions(appUser, budgetToReconcile)
                 .join()
-                .map(ynabBudgetResponse -> ynabBudgetResponse
-                        .getData()
-                        .getTransactions()
-                        .stream()
-                        .filter(not(TransactionsItem::isDeleted))
-                        .collect(toUnmodifiableList()))
+                .map(ynabResponseMapper::mapTransactionsFromResponse)
                 .orElse(emptyList());
     }
-
 }

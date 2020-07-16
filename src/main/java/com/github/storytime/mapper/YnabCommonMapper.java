@@ -2,8 +2,6 @@ package com.github.storytime.mapper;
 
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.ynab.YnabTransactionProxyObject;
-import com.github.storytime.model.ynab.budget.YnabBudgetResponse;
-import com.github.storytime.model.ynab.budget.YnabBudgets;
 import com.github.storytime.model.ynab.category.YnabCategories;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.service.DateService;
@@ -97,15 +95,5 @@ public class YnabCommonMapper {
                 .filter(ynabCategoriesPredicate)
                 .map(YnabCategories::getName)
                 .collect(toUnmodifiableSet());
-    }
-
-    public List<YnabBudgets> getSameBudgets(final Set<String> budgetNames,
-                                            final YnabBudgetResponse ynabBudgetResponse) {
-        return ynabBudgetResponse
-                .getYnabBudgetData()
-                .getBudgets()
-                .stream()
-                .filter(budget -> budgetNames.contains(budget.getName()))
-                .collect(toUnmodifiableList());
     }
 }

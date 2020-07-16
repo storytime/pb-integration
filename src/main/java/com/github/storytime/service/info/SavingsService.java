@@ -5,7 +5,6 @@ import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.zen.AccountItem;
-import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.CurrencyService;
 import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.UserService;
@@ -28,8 +27,6 @@ import static java.math.BigDecimal.ZERO;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.math.RoundingMode.HALF_UP;
-import static java.util.Collections.emptyList;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -104,34 +101,28 @@ public class SavingsService {
     }
 
     private List<SavingsInfo> getUserSavings(final AppUser appUser) {
-        return zenDiffService.zenDiffByUserForSavings(appUser)
-                .map(zenResponse -> zenResponse.getAccount()
-                        .stream()
-                        .filter(AccountItem::getSavings)
-                        .filter(not(AccountItem::isArchive))
-                        .collect(toUnmodifiableList())
-                        .stream()
-                        .map(accountItem -> buildSavingsInfo(accountItem, zenResponse))
-                        .collect(toUnmodifiableList()))
-                .orElse(emptyList());
+        final var zenDiff = zenDiffService.zenDiffByUserForSavings(appUser)
+                .orElseThrow(() -> new RuntimeException("Cannot get zen diff to map"));
+        return zenResponseMapper.getSavingsAccounts(zenDiff)
+                .stream()
+                .collect(toUnmodifiableList())
+                .stream()
+                .map(a -> buildSavingsInfo(a, zenResponseMapper.getZenCurrencySymbol(zenDiff, a.getInstrument())))
+                .collect(toUnmodifiableList());
     }
 
-    private SavingsInfo buildSavingsInfo(final AccountItem accountItem, final ZenResponse zenDiffByUserId) {
+    private SavingsInfo buildSavingsInfo(final AccountItem accountItem,
+                                         final String zenCurrencySymbol) {
         final var instrument = accountItem.getInstrument();
-        var inUah = valueOf(accountItem.getBalance());
-        final ZonedDateTime startDate = ZonedDateTime.now(ZoneId.systemDefault()).with(LocalTime.MIN);
-
-        if (instrument == USD_ID) {
-            inUah = currencyService.pbUsdCashDayRates(startDate, USD)
-                    .map(cr -> valueOf(accountItem.getBalance()).multiply(cr.getSellRate())).orElse(inUah);
-        } else if (instrument == EUR_ID) {
-            inUah = currencyService.pbUsdCashDayRates(startDate, EUR)
-                    .map(cr -> valueOf(accountItem.getBalance()).multiply(cr.getSellRate())).orElse(inUah);
-        }
+        final var balance = accountItem.getBalance();
+        final var startDate = ZonedDateTime.now(ZoneId.systemDefault()).with(LocalTime.MIN);
+        final var bal = valueOf(balance);
+        final var inUah = instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
+                instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) : bal;
 
         return new SavingsInfo()
-                .setBalance(valueOf(accountItem.getBalance()).setScale(ZERO_SCALE, HALF_DOWN))
-                .setCurrencySymbol(zenResponseMapper.getZenCurrencySymbol(zenDiffByUserId, instrument))
+                .setBalance(bal.setScale(ZERO_SCALE, HALF_DOWN))
+                .setCurrencySymbol(zenCurrencySymbol)
                 .setTitle(accountItem.getTitle().trim())
                 .setInUah(inUah.setScale(ZERO_SCALE, HALF_DOWN));
     }
