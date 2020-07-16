@@ -42,19 +42,22 @@ public class YnabService {
         return supplyAsync(() -> ynabHttpService.getCategories(user, budgetToSync), cfThreadPool);
     }
 
-    public CompletableFuture<Optional<YnabAccountResponse>> getYnabAccounts(final AppUser user,
+    public CompletableFuture<Optional<YnabAccountResponse>> getYnabAccounts(final AppUser appUser,
                                                                             final String budgetToSync) {
-        return supplyAsync(() -> ynabHttpService.getAccounts(user, budgetToSync), cfThreadPool);
+        LOGGER.debug("Fetching Ynab accounts, for user: [{}]", appUser.getId());
+        return supplyAsync(() -> ynabHttpService.getAccounts(appUser, budgetToSync), cfThreadPool);
     }
 
 
-    public CompletableFuture<Optional<TransactionsFormYnab>> getYnabTransactions(final AppUser user,
+    public CompletableFuture<Optional<TransactionsFormYnab>> getYnabTransactions(final AppUser appUser,
                                                                                  final String budgetToReconcile) {
-        return supplyAsync(() -> ynabHttpService.getYnabTransactions(user, budgetToReconcile), cfThreadPool);
+        LOGGER.debug("Fetching Ynab transactions, for user: [{}]", appUser.getId());
+        return supplyAsync(() -> ynabHttpService.getYnabTransactions(appUser, budgetToReconcile), cfThreadPool);
     }
 
 
     public CompletableFuture<Optional<YnabBudgetResponse>> getYnabBudget(final AppUser appUser) {
+        LOGGER.debug("Fetching Ynab budgets, for user: [{}]", appUser.getId());
         return supplyAsync(() -> ynabHttpService.getBudget(appUser), cfThreadPool);
     }
 

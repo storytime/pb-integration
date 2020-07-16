@@ -214,7 +214,6 @@ public class ReconcileService {
     }
 
     private List<YnabAccounts> mapYnabAccounts(final AppUser appUser, final YnabBudgets budgets) {
-        LOGGER.debug("Fetching Ynab accounts, for user: [{}]", appUser.getId());
         return ynabService.getYnabAccounts(appUser, budgets.getId())
                 .join()
                 .flatMap(yc -> ofNullable(yc.getYnabAccountData().getAccounts()))
@@ -222,14 +221,12 @@ public class ReconcileService {
     }
 
     private Optional<YnabBudgets> mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
-        LOGGER.debug("Fetching Ynab budgets, for user: [{}]", appUser.getId());
         return ynabService.getYnabBudget(appUser)
                 .join()
                 .flatMap(ynabBudgetResponse -> ynabResponseMapper.mapBudgets(budgetToReconcile, ynabBudgetResponse));
     }
 
     private List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {
-        LOGGER.debug("Fetching Ynab transactions, for user: [{}]", appUser.getId());
         return ynabService.getYnabTransactions(appUser, budgetToReconcile)
                 .join()
                 .map(ynabResponseMapper::mapTransactionsFromResponse)
