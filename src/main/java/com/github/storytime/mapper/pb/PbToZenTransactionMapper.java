@@ -1,5 +1,6 @@
-package com.github.storytime.mapper;
+package com.github.storytime.mapper.pb;
 
+import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
@@ -9,7 +10,6 @@ import com.github.storytime.service.AdditionalCommentService;
 import com.github.storytime.service.CustomPayeeService;
 import com.github.storytime.service.DateService;
 import com.github.storytime.service.RegExpService;
-import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,25 +35,22 @@ public class PbToZenTransactionMapper {
     private static final Logger LOGGER = getLogger(PbToZenTransactionMapper.class);
 
     private final DateService dateService;
-    private final ZenDiffHttpService zenDiffHttpService;
     private final RegExpService regExpService;
     private final CustomPayeeService customPayeeService;
-    private final ZenCommonMapper zenCommonMapper;
     private final AdditionalCommentService additionalCommentService;
+    private final ZenResponseMapper zenResponseMapper;
 
     @Autowired
     public PbToZenTransactionMapper(final DateService dateService,
                                     final RegExpService regExpService,
                                     final CustomPayeeService customPayeeService,
-                                    final ZenDiffHttpService zenDiffHttpService,
-                                    final ZenCommonMapper zenCommonMapper,
-                                    final AdditionalCommentService additionalCommentService) {
+                                    final AdditionalCommentService additionalCommentService,
+                                    final ZenResponseMapper zenResponseMapper) {
         this.dateService = dateService;
         this.regExpService = regExpService;
-        this.zenDiffHttpService = zenDiffHttpService;
         this.customPayeeService = customPayeeService;
-        this.zenCommonMapper = zenCommonMapper;
         this.additionalCommentService = additionalCommentService;
+        this.zenResponseMapper = zenResponseMapper;
     }
 
     public List<TransactionItem> mapPbTransactionToZen(final List<Statement> statementList,
@@ -88,15 +85,15 @@ public class PbToZenTransactionMapper {
         final var cardAmount = Double.parseDouble(substringBefore(pbTr.getCardamount(), SPACE));
         final var cardCurrency = substringAfter(pbTr.getCardamount(), SPACE);
         final var pbCard = pbTr.getCard();
-        final var accountId = zenDiffHttpService.findAccountIdByPbCard(zenDiff, pbCard);
-        final var currency = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
+        final var accountId = zenResponseMapper.findAccountIdByPbCard(zenDiff, pbCard);
+        final var currency = zenResponseMapper.findCurrencyIdByShortLetter(zenDiff, cardCurrency);
         final var trDate = dateService.toZenFormat(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone());
         final var appCode = Optional.ofNullable(pbTr.getAppcode()).orElse(EMPTY);
         final var createdTime = dateService.xmlDateTimeToZoned(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
         final var idTr = createIdForZen(u.getId(), Math.abs(opAmount), trDate.getBytes());
-        final var userId = zenCommonMapper.getUserId(zenDiff);
+        final var userId = zenResponseMapper.findUserId(zenDiff);
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
-        final var merchantId = zenDiffHttpService.findMerchantByNicePayee(zenDiff, nicePayee);
+        final var merchantId = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);
 
         newZenTr.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
         newZenTr.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
@@ -120,7 +117,7 @@ public class PbToZenTransactionMapper {
 
         // transaction in different currency
         final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
-        final var currencyIdByShortLetter = zenDiffHttpService.findCurrencyIdByShortLetter(zenDiff, opCurrency);
+        final var currencyIdByShortLetter = zenResponseMapper.findCurrencyIdByShortLetter(zenDiff, opCurrency);
         if (isAnotherCurrency) {
             mapDifferentCurrency(newZenTr, opAmount, currencyIdByShortLetter);
             final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + newZenTr.getComment();
@@ -129,7 +126,7 @@ public class PbToZenTransactionMapper {
 
         // cash withdrawal
         if (regExpService.isCashWithdrawal(transactionDesc)) {
-            final var maybeCashCurrency = zenDiffHttpService.isCashAccountInCurrencyExists(zenDiff, currencyIdByShortLetter);
+            final var maybeCashCurrency = zenResponseMapper.findCashAccountByCurrencyId(zenDiff, currencyIdByShortLetter);
             maybeCashCurrency.ifPresent(updateIncomeIfCashWithdrawal(newZenTr, opAmount));
             LOGGER.info("Cash withdrawal transaction");
             return newZenTr;
@@ -141,7 +138,7 @@ public class PbToZenTransactionMapper {
             newZenTr.setOriginalPayee(EMPTY);
 
             final var cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
-            final var maybeAcc = zenDiffHttpService.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, pbCard);
+            final var maybeAcc = zenResponseMapper.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, pbCard);
             final var isAccountExists = maybeAcc.isPresent();
 
             if (regExpService.isInternalFrom(transactionDesc) && isAccountExists) {

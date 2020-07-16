@@ -98,9 +98,7 @@ public class DateService {
     public ZonedDateTime getPrevMouthLastBusiness(final Statement s,
                                                   final String timeZone) {
         final XMLGregorianCalendar trandate = s.getTrandate();
-        //if we have transaction for May we need to getZenCurrencySymbol currency for April
-        final ZonedDateTime startDate = getPbStatementZonedDateTime(timeZone, trandate)
-                .minusMonths(1);
+        final ZonedDateTime startDate = getPbStatementZonedDateTime(timeZone, trandate).minusMonths(1);
 
         ZonedDateTime start = startDate.with(firstDayOfMonth());
         final ZonedDateTime end = startDate.with(firstDayOfNextMonth());

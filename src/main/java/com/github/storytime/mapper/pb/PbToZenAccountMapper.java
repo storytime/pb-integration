@@ -1,5 +1,6 @@
-package com.github.storytime.mapper;
+package com.github.storytime.mapper.pb;
 
+import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
@@ -32,30 +33,26 @@ import static org.apache.commons.lang3.StringUtils.right;
 public class PbToZenAccountMapper {
 
     private static final Logger LOGGER = LogManager.getLogger(PbToZenAccountMapper.class);
-    private final ZenInstrumentsMapper zenInstrumentsMapper;
-    private final ZenCommonMapper zenCommonMapper;
+    private final ZenResponseMapper zenResponseMapper;
 
     @Autowired
-    public PbToZenAccountMapper(final ZenInstrumentsMapper zenInstrumentsMapper,
-                                final ZenCommonMapper zenCommonMapper) {
-        this.zenInstrumentsMapper = zenInstrumentsMapper;
-        this.zenCommonMapper = zenCommonMapper;
+    public PbToZenAccountMapper(final ZenResponseMapper zenResponseMapper) {
+        this.zenResponseMapper = zenResponseMapper;
     }
 
-    public Boolean mapPbAccountToZen(final List<Statement> statementList, final ZenResponse zenDiff) {
+    public Boolean mapPbAccountToZen(final List<Statement> pbStatementList, final ZenResponse zenDiff) {
         final List<AccountItem> zenAccounts = zenDiff.getAccount();
-        final List<String> cardsFromBank = getCardsFromBank(statementList); // Get accounts from bank response
+        final List<String> pbCards = getCardsFromBank(pbStatementList); // Get accounts from bank response
 
-        if (cardsFromBank.isEmpty())
+        if (pbCards.isEmpty())
             return FALSE;
 
         // check if current account exists in Zen
-        return isPbAccountExistsInZen(zenAccounts, cardsFromBank)
-                .flatMap(accountItem -> of(updateExistingAccount(cardsFromBank, accountItem)))
-                .or(() -> of(zenAccounts.add(createNewZenAccount(statementList, zenDiff, cardsFromBank))))
+        return isPbAccountExistsInZen(zenAccounts, pbCards)
+                .flatMap(accountItem -> of(updateExistingAccount(pbCards, accountItem)))
+                .or(() -> of(zenAccounts.add(createNewZenAccount(pbStatementList, zenDiff, pbCards))))
                 .orElse(FALSE);
     }
-
 
     private AccountItem createNewZenAccount(final List<Statement> statementList,
                                             final ZenResponse zenDiff,
@@ -64,12 +61,12 @@ public class PbToZenAccountMapper {
         final Integer accountCurrency = statementList
                 .stream()
                 .findFirst()
-                .map(s -> zenInstrumentsMapper.getZenCurrencyFromPbTransaction(zenDiff, s.getRest()))
+                .map(s -> zenResponseMapper.getZenCurrencyFromPbTransaction(zenDiff, s.getRest()))
                 .orElse(DEFAULT_CURRENCY_ZEN);
 
         final AccountItem newZenAccount = new AccountItem()
                 .setId(randomUUID().toString())
-                .setUser(zenCommonMapper.getUserId(zenDiff))
+                .setUser(zenResponseMapper.findUserId(zenDiff))
                 .setInstrument(accountCurrency)
                 .setType(ZEN_ACCOUNT_TYPE)
                 .setRole(null)
@@ -116,31 +113,30 @@ public class PbToZenAccountMapper {
         }
     }
 
-    private Optional<AccountItem> isPbAccountExistsInZen(List<AccountItem> zenAccounts, List<String> cardsFromBank) {
+    private Optional<AccountItem> isPbAccountExistsInZen(final List<AccountItem> zenAccounts,
+                                                         final List<String> pbCards) {
         return zenAccounts
                 .stream()
-                .filter(not(za -> isAccountEmpty(cardsFromBank, za)))
+                .filter(not(za -> isAccountEmpty(za, pbCards)))
                 .findFirst();
     }
 
-    private boolean isAccountEmpty(List<String> cardsFromBank, AccountItem za) {
-        return ofNullable(za.getSyncID())
+    private boolean isAccountEmpty(final AccountItem zenAccounts,
+                                   final List<String> pbCards) {
+        return ofNullable(zenAccounts.getSyncID())
                 .orElse(emptyList())
                 .stream()
-                .filter(cardsFromBank::contains)
+                .filter(pbCards::contains)
                 .collect(toUnmodifiableList())
                 .isEmpty();
     }
 
-    private List<String> getCardsFromBank(List<Statement> statementList) {
-        return statementList
+    private List<String> getCardsFromBank(final List<Statement> pbStatementList) {
+        return pbStatementList
                 .stream()
-                .collect(collectingAndThen(toCollection(() ->
-                        new TreeSet<>(comparing(Statement::getCard))), ArrayList::new))
+                .collect(collectingAndThen(toCollection(() -> new TreeSet<>(comparing(Statement::getCard))), ArrayList::new))
                 .stream()
                 .map(s -> right(String.valueOf(s.getCard()), CARD_LAST_DIGITS))
                 .collect(toUnmodifiableList());
     }
-
-
 }

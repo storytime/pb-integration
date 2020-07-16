@@ -66,6 +66,7 @@ public class Constants {
     public static final String ACCOUNT = "account";
     public static final String INSTRUMENT = "instrument";
     public static final String TAG = "tag";
+    public static final String SLASH = "/";
 
     private Constants() {
     }

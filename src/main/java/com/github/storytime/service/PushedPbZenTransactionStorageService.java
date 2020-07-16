@@ -18,8 +18,8 @@ public class PushedPbZenTransactionStorageService {
 
     private static final Logger LOGGER = getLogger(PushedPbZenTransactionStorageService.class);
 
-    private Set<ExpiredPbStatement> pushedPbZenTransactionStorage;
-    private CustomConfig customConfig;
+    private final Set<ExpiredPbStatement> pushedPbZenTransactionStorage;
+    private final CustomConfig customConfig;
 
     @Autowired
     public PushedPbZenTransactionStorageService(final Set<ExpiredPbStatement> pushedPbZenTransactionStorage,

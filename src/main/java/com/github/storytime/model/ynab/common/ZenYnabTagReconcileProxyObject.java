@@ -7,10 +7,10 @@ import static java.math.RoundingMode.HALF_DOWN;
 
 public class ZenYnabTagReconcileProxyObject {
 
-    private String category;
-    private BigDecimal zenAmount;
-    private BigDecimal ynabAmount;
-    private String diff;
+    private final String category;
+    private final BigDecimal zenAmount;
+    private final BigDecimal ynabAmount;
+    private final String diff;
 
     public ZenYnabTagReconcileProxyObject(String category,
                                           BigDecimal zenAmount,
@@ -26,7 +26,7 @@ public class ZenYnabTagReconcileProxyObject {
     }
 
     public String getZenAmountAsString() {
-        return  String.valueOf(zenAmount.setScale(CURRENCY_SCALE, HALF_DOWN));
+        return String.valueOf(zenAmount.setScale(CURRENCY_SCALE, HALF_DOWN));
     }
 
     public String getYnabAmountAsString() {

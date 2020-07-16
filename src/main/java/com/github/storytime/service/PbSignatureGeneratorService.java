@@ -13,9 +13,9 @@ import static com.github.storytime.config.props.Constants.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
-public class SignatureGeneratorService {
+public class PbSignatureGeneratorService {
 
-    private static final Logger LOGGER = LogManager.getLogger(SignatureGeneratorService.class);
+    private static final Logger LOGGER = LogManager.getLogger(PbSignatureGeneratorService.class);
     private static final int POSITIVE = 1;
     private static final int RADIX = 16;
     private static final String FORMAT = "%02x";

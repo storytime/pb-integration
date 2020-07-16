@@ -28,7 +28,6 @@ public class ReconcileTableService {
     public static final String YNAB = "YNAB";
     public static final String ZEN_YNAB = "ZEN-YNAB";
 
-
     public static final int BALANCE_AFTER_DIGITS = 3;
     public static final String PLUS = "+";
     public static final String MINUS = "-";

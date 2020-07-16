@@ -1,6 +1,5 @@
-package com.github.storytime.mapper;
+package com.github.storytime.mapper.zen;
 
-import com.github.storytime.error.exception.ZenUserNotFoundException;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TagItem;
 import com.github.storytime.model.zen.TransactionItem;
@@ -93,13 +92,4 @@ public class ZenCommonMapper {
 
         return zenSummary;
     }
-
-    public int getUserId(final ZenResponse zenDiff) {
-        return zenDiff
-                .getUser()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ZenUserNotFoundException("Zen User not found")).getId();
-    }
-
 }

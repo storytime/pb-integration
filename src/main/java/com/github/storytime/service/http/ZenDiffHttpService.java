@@ -2,7 +2,9 @@ package com.github.storytime.service.http;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.db.AppUser;
-import com.github.storytime.model.zen.*;
+import com.github.storytime.model.zen.ZenDiffRequest;
+import com.github.storytime.model.zen.ZenResponse;
+import com.github.storytime.model.zen.ZenSyncRequest;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -14,14 +16,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.other.Utils.createHeader;
-import static java.lang.String.valueOf;
-import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
-import static java.util.function.Predicate.not;
-import static org.apache.commons.lang3.StringUtils.right;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
@@ -69,58 +66,5 @@ public class ZenDiffHttpService {
             LOGGER.error("Cannot fetch zen diff, error:[{}]", e.getMessage());
             return empty();
         }
-    }
-
-    public String findAccountIdByPbCard(final ZenResponse zenDiff, final Long card) {
-        final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
-        return zenDiff.getAccount()
-                .stream()
-                .filter(a -> ofNullable(a.getSyncID()).orElse(emptyList()).contains(carLastDigits))
-                .findFirst()
-                .map(AccountItem::getId)
-                .orElse(EMPTY);
-    }
-
-    public String findMerchantByNicePayee(final ZenResponse zenDiff, final String nicePayee) {
-        return ofNullable(zenDiff.getMerchant()).orElse(emptyList())
-                .stream()
-                .filter(a -> ofNullable(a.getTitle()).orElse(EMPTY).trim().equals(nicePayee))
-                .findFirst()
-                .map(MerchantItem::getId)
-                .orElse(null);
-    }
-
-    public Integer findCurrencyIdByShortLetter(final ZenResponse zenDiff, final String shortLetter) {
-        return zenDiff.getInstrument()
-                .stream()
-                .filter(i -> i.getShortTitle().equalsIgnoreCase(shortLetter))
-                .findFirst()
-                .map(InstrumentItem::getId)
-                .orElse(DEFAULT_CURRENCY_ZEN);
-    }
-
-    public Optional<AccountItem> isCashAccountInCurrencyExists(final ZenResponse zenDiff, final Integer curId) {
-        return zenDiff.getAccount()
-                .stream()
-                .filter(a -> a.getType().equalsIgnoreCase(CASH) && a.getInstrument() == curId)
-                .findFirst();
-    }
-
-    public Optional<String> findAccountIdByTwoCardDigits(final ZenResponse zenDiff,
-                                                         final String lastTwoDigits,
-                                                         final Long card) {
-
-        final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
-        return zenDiff.getAccount()
-                .stream()
-                .filter(not(a -> ofNullable(a.getSyncID())
-                        .orElse(emptyList())
-                        .contains(carLastDigits)))
-                .filter(a -> ofNullable(a.getSyncID())
-                        .orElse(emptyList())
-                        .stream()
-                        .anyMatch(s -> right(valueOf(s), CARD_TWO_DIGITS).equalsIgnoreCase(lastTwoDigits)))
-                .findFirst()
-                .map(AccountItem::getId);
     }
 }

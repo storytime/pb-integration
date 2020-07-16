@@ -2,13 +2,13 @@ package com.github.storytime.model.ynab.common;
 
 public class ZenYnabAccountReconcileProxyObject {
 
-    private String account;
-    private String zenAmount;
-    private String ynabAmount;
-    private String pbAmount;
-    private String pbZenDiff;
-    private String zenYnabDiff;
-    private String status;
+    private final String account;
+    private final String zenAmount;
+    private final String ynabAmount;
+    private final String pbAmount;
+    private final String pbZenDiff;
+    private final String zenYnabDiff;
+    private final String status;
 
     public ZenYnabAccountReconcileProxyObject(final String account,
                                               final String zenAmount,

@@ -2,7 +2,7 @@ package com.github.storytime.builder;
 
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.pb.jaxb.request.Request;
-import com.github.storytime.service.SignatureGeneratorService;
+import com.github.storytime.service.PbSignatureGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +13,11 @@ import static com.github.storytime.config.props.Constants.*;
 @Service
 public class PbRequestBuilder {
 
-    private final SignatureGeneratorService signatureGeneratorService;
+    private final PbSignatureGeneratorService pbSignatureGeneratorService;
 
     @Autowired
-    public PbRequestBuilder(final SignatureGeneratorService signatureGeneratorService) {
-        this.signatureGeneratorService = signatureGeneratorService;
+    public PbRequestBuilder(final PbSignatureGeneratorService pbSignatureGeneratorService) {
+        this.pbSignatureGeneratorService = pbSignatureGeneratorService;
     }
 
     private void buildAccountDataPaymentProperties(final List<Request.Data.Payment.Prop> prop,
@@ -94,7 +94,7 @@ public class PbRequestBuilder {
         final Request.Data data = buildRequestData();
         data.setPayment(payment);
 
-        final String signature = signatureGeneratorService.generateAccountSignature(card, password);
+        final String signature = pbSignatureGeneratorService.generateAccountSignature(card, password);
         final Request.Merchant merchant = buildMerchant(merchantId, signature);
 
         return buildRequestRoot(merchant, data);
@@ -113,7 +113,7 @@ public class PbRequestBuilder {
         final Request.Data data = buildRequestData();
         data.setPayment(payment);
 
-        final String signature = signatureGeneratorService.generateStatementSignature(startDate, endDate, card, password);
+        final String signature = pbSignatureGeneratorService.generateStatementSignature(startDate, endDate, card, password);
         final Request.Merchant merchant = buildMerchant(merchantId, signature);
 
         return buildRequestRoot(merchant, data);

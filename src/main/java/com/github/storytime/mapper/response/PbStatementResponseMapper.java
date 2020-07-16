@@ -1,4 +1,4 @@
-package com.github.storytime.mapper;
+package com.github.storytime.mapper.response;
 
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.error.exception.PbSignatureException;
@@ -22,27 +22,29 @@ import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
-public class PbStatementMapper {
+public class PbStatementResponseMapper {
 
-    private static final Logger LOGGER = getLogger(PbStatementMapper.class);
+    private static final Logger LOGGER = getLogger(PbStatementResponseMapper.class);
+    private static final String SIGNATURE = "signature";
+    private static final int DEFAULT_ACC_BALANCE = 0;
     private final Unmarshaller jaxbStatementErrorUnmarshaller;
     private final Unmarshaller jaxbStatementOkUnmarshaller;
     private final Unmarshaller jaxbAccountOkUnmarshaller;
     private final CustomConfig customConfig;
 
     @Autowired
-    public PbStatementMapper(final Unmarshaller jaxbStatementErrorUnmarshaller,
-                             final Unmarshaller jaxbAccountOkUnmarshaller,
-                             final CustomConfig customConfig,
-                             final Unmarshaller jaxbStatementOkUnmarshaller) {
+    public PbStatementResponseMapper(final Unmarshaller jaxbStatementErrorUnmarshaller,
+                                     final Unmarshaller jaxbAccountOkUnmarshaller,
+                                     final CustomConfig customConfig,
+                                     final Unmarshaller jaxbStatementOkUnmarshaller) {
         this.jaxbStatementErrorUnmarshaller = jaxbStatementErrorUnmarshaller;
         this.jaxbAccountOkUnmarshaller = jaxbAccountOkUnmarshaller;
         this.customConfig = customConfig;
-
         this.jaxbStatementOkUnmarshaller = jaxbStatementOkUnmarshaller;
     }
 
-    public List<Statement> mapStatementRequestBody(ResponseEntity<String> responseEntity) {
+
+    public List<Statement> mapStatementRequestBody(final ResponseEntity<String> responseEntity) {
 
         final var body = ofNullable(responseEntity.getBody()).orElse(EMPTY);
         if (body.contains(customConfig.getPbBankSignature())) {
@@ -50,14 +52,13 @@ public class PbStatementMapper {
         }
 
         try {
-            if (!body.contains("signature")) { // is error response, wrong ip etc
-                final com.github.storytime.model.pb.jaxb.statement.response.error.Response error =
-                        (com.github.storytime.model.pb.jaxb.statement.response.error.Response) jaxbStatementErrorUnmarshaller.unmarshal(new StringReader(body));
+            if (!body.contains(SIGNATURE)) { // is error response, wrong ip etc
+                final var error = (com.github.storytime.model.pb.jaxb.statement.response.error.Response) jaxbStatementErrorUnmarshaller.unmarshal(new StringReader(body));
                 LOGGER.error("Bank return response with error:[{}]", error.getData().getError().getMessage());
                 return emptyList();
             }
 
-            final com.github.storytime.model.pb.jaxb.statement.response.ok.Response parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(body));
+            final var parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(body));
             return ofNullable(parsedResponse.getData())
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data::getInfo)
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info::getStatements)
@@ -69,7 +70,7 @@ public class PbStatementMapper {
         }
     }
 
-    public BigDecimal mapAccountRequestBody(ResponseEntity<String> responseEntity) {
+    public BigDecimal mapAccountRequestBody(final ResponseEntity<String> responseEntity) {
 
         final var body = ofNullable(responseEntity.getBody()).orElse(EMPTY);
         try {
@@ -79,10 +80,10 @@ public class PbStatementMapper {
                     .map(Response.Data.Info::getCardbalance)
                     .map(Response.Data.Info.Cardbalance::getBalance)
                     .map(bal -> BigDecimal.valueOf(bal).setScale(CURRENCY_SCALE, HALF_DOWN))
-                    .orElse(BigDecimal.valueOf(0));
+                    .orElse(BigDecimal.valueOf(DEFAULT_ACC_BALANCE));
         } catch (Exception e) {
             LOGGER.error("Cannot parse bank response:[{}]", e.getMessage(), e);
-            return BigDecimal.valueOf(0);
+            return BigDecimal.valueOf(DEFAULT_ACC_BALANCE);
         }
     }
 }

@@ -1,16 +1,15 @@
 package com.github.storytime.service.sync;
 
 import com.github.storytime.function.OnSuccess;
-import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.internal.ExpiredPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.service.PbStatementsService;
+import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.access.UserService;
-import com.github.storytime.service.http.PbStatementsHttpService;
-import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -21,13 +20,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import static com.github.storytime.error.AsyncErrorHandlerUtil.getZenDiffUpdateHandler;
 import static com.github.storytime.function.FunctionUtils.logAndGetEmptyForSync;
 import static java.util.Optional.of;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.logging.log4j.Level.WARN;
@@ -39,30 +36,24 @@ public class PbSyncService {
     private static final Logger LOGGER = getLogger(PbSyncService.class);
 
     private final MerchantService merchantService;
-    private final PbStatementsHttpService pbStatementsHttpService;
+    private final PbStatementsService pbStatementsService;
     private final UserService userService;
-    private final ZenDiffHttpService zenDiffHttpService;
     private final PbToZenMapper pbToZenMapper;
-    private final Executor cfThreadPool;
+    private final ZenDiffService zenDiffService;
     private final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction;
-    private final ZenDiffLambdaHolder zenDiffLambdaHolder;
 
     @Autowired
     public PbSyncService(final MerchantService merchantService,
-                         final PbStatementsHttpService pbStatementsHttpService,
+                         final PbStatementsService pbStatementsService,
                          final UserService userService,
                          final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction,
-                         final ZenDiffHttpService zenDiffHttpService,
-                         final Executor cfThreadPool,
-                         final ZenDiffLambdaHolder zenDiffLambdaHolder,
+                         final ZenDiffService zenDiffService,
                          final PbToZenMapper pbToZenMapper) {
         this.merchantService = merchantService;
         this.userService = userService;
-        this.zenDiffHttpService = zenDiffHttpService;
-        this.cfThreadPool = cfThreadPool;
-        this.zenDiffLambdaHolder = zenDiffLambdaHolder;
+        this.zenDiffService = zenDiffService;
         this.alreadyMappedPbZenTransaction = alreadyMappedPbZenTransaction;
-        this.pbStatementsHttpService = pbStatementsHttpService;
+        this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
     }
 
@@ -72,7 +63,7 @@ public class PbSyncService {
                 .forEach(user -> selectFunction.apply(merchantService)
                         .map(merchantLists -> of(merchantLists
                                 .stream()
-                                .map(merchantInfo -> pbStatementsHttpService.getPbTransactions(user, merchantInfo)) // create async requests
+                                .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo)) // create async requests
                                 .collect(toUnmodifiableList()))
                                 .flatMap(cfList -> of(CompletableFuture.allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
                                         .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
@@ -112,11 +103,11 @@ public class PbSyncService {
                                         final List<List<Statement>> newPbData,
                                         final OnSuccess onSuccess) {
         // step by step in one thread
-        supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getInitialFunction(appUser)), cfThreadPool)
+        zenDiffService.zenDiffByUserForPb(appUser)
                 .thenApply(zenDiffResponse -> zenDiffResponse
                         .flatMap(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, appUser)))
                 .thenApply(zenDiffRequest -> zenDiffRequest
-                        .flatMap(zr -> zenDiffHttpService.pushToZen(appUser, zr)))
+                        .flatMap(zr -> zenDiffService.pushToZen(appUser, zr)))
                 .thenApply(zenResponse -> zenResponse
                         .flatMap(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp()))))
                 .thenAccept(au -> au.ifPresent(saveUserInfo -> onSuccess.commit()))

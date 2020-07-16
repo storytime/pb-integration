@@ -1,15 +1,14 @@
 package com.github.storytime.service.info;
 
 import com.github.storytime.config.props.Constants;
-import com.github.storytime.function.ZenDiffLambdaHolder;
-import com.github.storytime.mapper.ZenInstrumentsMapper;
+import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.CurrencyService;
+import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.UserService;
-import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,23 +42,20 @@ public class SavingsService {
     private static final Logger LOGGER = getLogger(SavingsService.class);
     private static final int USD_ID = 1;
     private static final int EUR_ID = 3;
-    private final ZenDiffHttpService zenDiffHttpService;
-    private final ZenInstrumentsMapper zenInstrumentsMapper;
     private final CurrencyService currencyService;
     private final UserService userService;
-    private final ZenDiffLambdaHolder zenDiffLambdaHolder;
+    private final ZenResponseMapper zenResponseMapper;
+    private final ZenDiffService zenDiffService;
 
     @Autowired
-    public SavingsService(final ZenDiffHttpService zenDiffHttpService,
-                          final CurrencyService currencyService,
+    public SavingsService(final CurrencyService currencyService,
                           final UserService userService,
-                          final ZenDiffLambdaHolder zenDiffLambdaHolder,
-                          final ZenInstrumentsMapper zenInstrumentsMapper) {
-        this.zenDiffHttpService = zenDiffHttpService;
+                          final ZenDiffService zenDiffService,
+                          final ZenResponseMapper zenResponseMapper) {
         this.currencyService = currencyService;
         this.userService = userService;
-        this.zenDiffLambdaHolder = zenDiffLambdaHolder;
-        this.zenInstrumentsMapper = zenInstrumentsMapper;
+        this.zenResponseMapper = zenResponseMapper;
+        this.zenDiffService = zenDiffService;
     }
 
     public String getAllSavingsInfo(final long userId) {
@@ -108,7 +104,7 @@ public class SavingsService {
     }
 
     private List<SavingsInfo> getUserSavings(final AppUser appUser) {
-        return zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser))
+        return zenDiffService.zenDiffByUserForSavings(appUser)
                 .map(zenResponse -> zenResponse.getAccount()
                         .stream()
                         .filter(AccountItem::getSavings)
@@ -135,7 +131,7 @@ public class SavingsService {
 
         return new SavingsInfo()
                 .setBalance(valueOf(accountItem.getBalance()).setScale(ZERO_SCALE, HALF_DOWN))
-                .setCurrencySymbol(zenInstrumentsMapper.getZenCurrencySymbol(zenDiffByUserId, instrument))
+                .setCurrencySymbol(zenResponseMapper.getZenCurrencySymbol(zenDiffByUserId, instrument))
                 .setTitle(accountItem.getTitle().trim())
                 .setInUah(inUah.setScale(ZERO_SCALE, HALF_DOWN));
     }

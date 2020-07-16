@@ -17,11 +17,11 @@ public class SignatureGeneratorServiceTest extends BaseTestConfig {
     private static final String VALID_SIGNATURE = "fe611b9f3b88425556a32b905699d2be24271c1c";
 
     @Autowired
-    private SignatureGeneratorService signatureGeneratorService;
+    private PbSignatureGeneratorService pbSignatureGeneratorService;
 
     @Test
     public void testWithValidData() {
-        final String signature = signatureGeneratorService.generateStatementSignature(START_DATE, END_DATE, CARD, PASS);
+        final String signature = pbSignatureGeneratorService.generateStatementSignature(START_DATE, END_DATE, CARD, PASS);
         assertThat(signature).as(EXPECTED_VALID_SIGN).isNotNull();
         assertThat(signature).as(EXPECTED_VALID_SIGN).isEqualTo(VALID_SIGNATURE);
     }
