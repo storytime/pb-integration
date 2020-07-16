@@ -35,7 +35,8 @@ public class YnabTransactionProxyObject {
 
         YnabTransactionProxyObject that = (YnabTransactionProxyObject) o;
 
-        if (getCategoryId() != null ? !getCategoryId().equals(that.getCategoryId()) : that.getCategoryId() != null) return false;
+        if (getCategoryId() != null ? !getCategoryId().equals(that.getCategoryId()) : that.getCategoryId() != null)
+            return false;
         return getAmount() != null ? getAmount().equals(that.getAmount()) : that.getAmount() == null;
 
     }

@@ -104,7 +104,7 @@ public class YnabSyncService {
                 .findAllByEnabledIsTrueAndUserId(appUser.getId())
                 .orElse(emptyList())
                 .stream()
-                .map(this::correctYnabSyncConfig)
+                .map(config -> config.setLastSync(config.getLastSync() <= 0 ? now().toEpochMilli() : config.getLastSync()))
                 .collect(toUnmodifiableList());
 
         //get zen data
@@ -196,14 +196,5 @@ public class YnabSyncService {
                         .flatMap(ynabTransactionsRequest1 -> ynabService.pushToYnab(user, budgetToSync.getId(), ynabTransactionsRequest1))
                 )
                 .thenApply(pushResponse -> new YnabBudgetSyncStatus(budgetToSync.getName(), pushResponse.orElse(EMPTY)));
-    }
-
-    public YnabSyncConfig correctYnabSyncConfig(final YnabSyncConfig config) {
-
-        if (config.getLastSync() <= 0) {
-            config.setLastSync(now().toEpochMilli());
-        }
-
-        return config;
     }
 }

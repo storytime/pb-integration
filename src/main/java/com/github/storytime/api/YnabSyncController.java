@@ -16,8 +16,8 @@ import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 @RestController
 public class YnabSyncController {
 
-    private final YnabSyncService ynabSyncService;
     private static final Logger LOGGER = getLogger(YnabSyncController.class);
+    private final YnabSyncService ynabSyncService;
 
     @Autowired
     public YnabSyncController(final YnabSyncService ynabSyncService) {
@@ -32,7 +32,7 @@ public class YnabSyncController {
     }
 
     @GetMapping(value = API_PREFIX + "/ynab/{userId}/sync/{startFrom}", produces = TEXT_PLAIN_VALUE)
-    public  ResponseEntity<String>  pushToYnabFrom(@PathVariable("userId") long userId, @PathVariable("startFrom") long startFrom) {
+    public ResponseEntity<String> pushToYnabFrom(@PathVariable("userId") long userId, @PathVariable("startFrom") long startFrom) {
         LOGGER.debug("Calling YNAB sync for user:[{}], with epoch time: [{}]", userId, startFrom);
         return ynabSyncService.startSync(userId, startFrom);
     }
