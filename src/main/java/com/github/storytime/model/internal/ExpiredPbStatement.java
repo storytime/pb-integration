@@ -9,19 +9,13 @@ import static java.time.Instant.now;
 
 public class ExpiredPbStatement {
 
-    private long transactionItemTime;
+    private final long transactionItemTime;
 
-    private Statement zenTransactionItem;
+    private final Statement zenTransactionItem;
 
-    public ExpiredPbStatement(Statement zenTransactionItem) {
+    public ExpiredPbStatement(final Statement zenTransactionItem) {
         this.zenTransactionItem = zenTransactionItem;
         this.transactionItemTime = now().toEpochMilli();
-    }
-
-    public ExpiredPbStatement(final long transactionItemTime,
-                              final Statement zenTransactionItem) {
-        this.transactionItemTime = transactionItemTime;
-        this.zenTransactionItem = zenTransactionItem;
     }
 
     public long getTransactionItemTime() {
@@ -36,7 +30,7 @@ public class ExpiredPbStatement {
         transactionItemTime need to be skipped during comparison
     */
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (!(o instanceof ExpiredPbStatement)) return false;
         ExpiredPbStatement that = (ExpiredPbStatement) o;

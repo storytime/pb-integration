@@ -1,6 +1,5 @@
 package com.github.storytime.service.sync;
 
-import com.github.storytime.function.OnSuccess;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
@@ -75,33 +74,36 @@ public class PbSyncService {
                                       final List<MerchantInfo> merchants,
                                       final List<List<Statement>> newPbDataList) {
 
-        final List<ExpiredPbStatement> maybePushed = newPbDataList
+        final List<ExpiredPbStatement> maybeToPush = newPbDataList
                 .stream()
                 .flatMap(Collection::stream)
                 .map(ExpiredPbStatement::new)
                 .filter(not(alreadyMappedPbZenTransaction::contains))
                 .collect(toUnmodifiableList());
 
-        if (maybePushed.isEmpty()) {
-            ifNotExists(user, merchants);
-        } else {
-            LOGGER.info("User:[{}] has:[{}] transactions sync period", user.getId(), maybePushed.size());
-            final OnSuccess onSuccess = () -> {
-                alreadyMappedPbZenTransaction.addAll(maybePushed);
-                merchantService.saveAll(merchants);
-            };
+        final Runnable onSuccess = () -> {
+            alreadyMappedPbZenTransaction.addAll(maybeToPush);
+            merchantService.saveAll(merchants);
+        };
+
+        if (maybeToPush.isEmpty())
+            ifNothingToPush(user, merchants);
+        else
             doUpdateZenInfoRequest(user, newPbDataList, onSuccess);
-        }
     }
 
-    public void ifNotExists(final AppUser user, final List<MerchantInfo> merchants) {
+    public void ifNothingToPush(final AppUser user,
+                                final List<MerchantInfo> merchants) {
         LOGGER.info("No new transaction for user:[{}] Nothing to push in current sync thread", user.getId());
         merchantService.saveAll(merchants);
     }
 
     private void doUpdateZenInfoRequest(final AppUser appUser,
                                         final List<List<Statement>> newPbData,
-                                        final OnSuccess onSuccess) {
+                                        final Runnable onSuccess) {
+
+        LOGGER.info("User:[{}] has:[{}] transactions sync period", appUser.getId(), newPbData.size());
+
         // step by step in one thread
         zenDiffService.zenDiffByUserForPb(appUser)
                 .thenApply(zenDiffResponse -> zenDiffResponse
@@ -110,8 +112,7 @@ public class PbSyncService {
                         .flatMap(zr -> zenDiffService.pushToZen(appUser, zr)))
                 .thenApply(zenResponse -> zenResponse
                         .flatMap(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp()))))
-                .thenAccept(au -> au.ifPresent(saveUserInfo -> onSuccess.commit()))
+                .thenAccept(au -> au.ifPresent(saveUserInfo -> onSuccess.run()))
                 .handle(getZenDiffUpdateHandler());
-
     }
 }

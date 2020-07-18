@@ -6,11 +6,9 @@ import com.github.storytime.model.api.YnabBudgetSyncStatus;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.ynab.YnabToZenSyncHolder;
-import com.github.storytime.model.ynab.account.YnabAccountResponse;
 import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.budget.YnabBudgets;
 import com.github.storytime.model.ynab.category.YnabCategories;
-import com.github.storytime.model.ynab.category.YnabCategoryResponse;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TagItem;
 import com.github.storytime.model.zen.TransactionItem;
@@ -26,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -69,36 +67,29 @@ public class YnabSyncService {
     }
 
 
-    public ResponseEntity<String> startSync(final long userId, final long startFrom) {
+    public ResponseEntity<String> startSync(final long userId,
+                                            final long startFrom) {
         try {
-            final AppUser appUser = userService.findUserById(userId).orElseThrow();
-            final String ynabAuthToken = appUser.getYnabAuthToken();
+            final var appUser = userService.findUserById(userId).orElseThrow();
+            Objects.requireNonNull(appUser.getYnabAuthToken(), "YNAB sync is stopped for user, token not installed");
+            final var isYnabEnabled = appUser.getYnabSyncEnabled().equals(FALSE);
 
-            if (ynabAuthToken == null) {
-                LOGGER.warn("YNAB sync is stopped for user:[{}], token not installed", userId);
-                return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
-            }
-
-            if (appUser.getYnabSyncEnabled().equals(FALSE)) {
+            // todo fix in more fk way
+            if (isYnabEnabled) {
                 LOGGER.warn("YNAB sync is stopped for user:[{}], not YNAB sync enabled", userId);
                 return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
             }
 
-            var pushToYnabResponse = pushToYnab(appUser, startFrom);
-
-            if (pushToYnabResponse.isEmpty()) {
-                return new ResponseEntity<>(NO_CONTENT);
-            } else {
-                return new ResponseEntity<>(OK);
-            }
-
+            return tryToSyncWithYnab(appUser, startFrom).isEmpty() ?
+                    new ResponseEntity<>(NO_CONTENT) :
+                    new ResponseEntity<>(OK);
         } catch (Exception e) {
             LOGGER.error("Cannot push to YNAB", e.getCause());
             return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
         }
     }
 
-    private List<YnabBudgetSyncStatus> pushToYnab(final AppUser appUser, final long startFrom) {
+    private List<YnabBudgetSyncStatus> tryToSyncWithYnab(final AppUser appUser, final long startFrom) {
 
         final List<YnabSyncConfig> ynabSyncConfigs = ynabSyncServiceRepository
                 .findAllByEnabledIsTrueAndUserId(appUser.getId())
@@ -146,7 +137,7 @@ public class YnabSyncService {
                 .collect(toUnmodifiableSet());
 
         final List<CompletableFuture<YnabBudgetSyncStatus>> listOfPushRequests =
-                ynabService.getYnabCategories(user)
+                ynabService.getYnabBudget(user)
                         .thenApply(ynabBudgets -> newTransactionListEmpty
                                 .stream()
                                 .map(ynabToZenSyncHolder -> ynabBudgets
@@ -156,7 +147,7 @@ public class YnabSyncService {
                                         .filter(b -> ynabToZenSyncHolder.getYnabSyncConfig().getBudgetName().equalsIgnoreCase(b.getName()))
                                         .map(budget -> {  //always will find one element because names in YNAB are unique
                                             final YnabSyncConfig ynabSyncConfig = ynabToZenSyncHolder.getYnabSyncConfig();
-                                            final ZenResponse zenResponse = ynabToZenSyncHolder.getZenResponse().get();
+                                            final ZenResponse zenResponse = ynabToZenSyncHolder.getZenResponse().orElseThrow();
                                             final List<AccountItem> zenAccounts = ofNullable(zenResponse.getAccount()).orElse(emptyList());
                                             final List<TagItem> zenTags = ofNullable(zenResponse.getTag()).orElse(emptyList());
                                             final List<TransactionItem> zenTransactions = ofNullable(zenResponse.getTransaction()).orElse(emptyList());
@@ -174,27 +165,23 @@ public class YnabSyncService {
 
     }
 
-
     public CompletableFuture<YnabBudgetSyncStatus> collectAllNeededYnabData(final AppUser user,
                                                                             final List<AccountItem> zenAccounts,
                                                                             final List<TagItem> zenTags,
                                                                             final List<TransactionItem> zenTransactions,
                                                                             final YnabBudgets budgetToSync,
                                                                             final YnabSyncConfig ynabSyncConfig) {
-        final CompletableFuture<Optional<YnabCategoryResponse>> yCategoriesCf =
-                ynabService.getYnabCategories(user, budgetToSync.getId());
-        final CompletableFuture<Optional<YnabAccountResponse>> yAccountsCf =
-                ynabService.getYnabAccounts(user, budgetToSync.getId());
 
+        final var yCategoriesCf = ynabService.getYnabCategories(user, budgetToSync.getId());
+        final var yAccountsCf = ynabService.getYnabAccounts(user, budgetToSync.getId());
         return yCategoriesCf
                 .thenCombine(yAccountsCf, (yMaybeCat, yMaybeAcc) -> {
                     final List<YnabAccounts> ynabAccounts = ynabResponseMapper.mapYnabAccountsFromResponse(yMaybeAcc);
                     final List<YnabCategories> ynabCategories = ynabResponseMapper.mapYnabCategoriesFromResponse(yMaybeCat);
                     return ynabZenCommonMapper.mapDataAllDataForYnab(zenAccounts, zenTags, zenTransactions, ynabCategories, ynabAccounts, ynabSyncConfig, user);
                 })
-                .thenApply(ynabTransactionsRequest -> ynabTransactionsRequest
-                        .flatMap(ynabTransactionsRequest1 -> ynabService.pushToYnab(user, budgetToSync.getId(), ynabTransactionsRequest1))
-                )
+                .thenApply(ytr -> ytr
+                        .flatMap(ytrMapped -> ynabService.pushToYnab(user, budgetToSync.getId(), ytrMapped)))
                 .thenApply(pushResponse -> new YnabBudgetSyncStatus(budgetToSync.getName(), pushResponse.orElse(EMPTY)));
     }
 }

@@ -33,10 +33,6 @@ public class YnabService {
         this.cfThreadPool = cfThreadPool;
     }
 
-    public CompletableFuture<Optional<YnabBudgetResponse>> getYnabCategories(final AppUser user) {
-        return supplyAsync(() -> ynabHttpService.getBudget(user), cfThreadPool); //todo delete
-    }
-
     public CompletableFuture<Optional<YnabCategoryResponse>> getYnabCategories(final AppUser user,
                                                                                final String budgetToSync) {
         return supplyAsync(() -> ynabHttpService.getCategories(user, budgetToSync), cfThreadPool);

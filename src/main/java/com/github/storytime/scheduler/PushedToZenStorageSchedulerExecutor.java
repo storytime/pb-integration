@@ -6,12 +6,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PushedPbZenTransactionStorageSchedulerExecutor {
+public class PushedToZenStorageSchedulerExecutor {
 
     final PushedPbZenTransactionStorageService pushedPbZenTransactionStorageService;
 
     @Autowired
-    public PushedPbZenTransactionStorageSchedulerExecutor(final PushedPbZenTransactionStorageService pushedPbZenTransactionStorageService) {
+    public PushedToZenStorageSchedulerExecutor(final PushedPbZenTransactionStorageService pushedPbZenTransactionStorageService) {
         this.pushedPbZenTransactionStorageService = pushedPbZenTransactionStorageService;
     }
 

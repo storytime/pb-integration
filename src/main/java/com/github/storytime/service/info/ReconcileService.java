@@ -85,7 +85,7 @@ public class ReconcileService {
 
     public String reconcileTableDefault(final long userId, final String budgetName) {
         try {
-            var appUser = userService.findUserById(userId).orElseThrow(() -> new RuntimeException("Cannot find user"));
+            var appUser = userService.findUserById(userId).orElseThrow();
             int year = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getYear();
             int month = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getMonthValue();
             return this.reconcileTableByDate(userId, budgetName, year, month);
@@ -97,7 +97,7 @@ public class ReconcileService {
 
     public String reconcileTableAll(final long userId) {
         try {
-            var appUser = userService.findUserById(userId).orElseThrow(() -> new RuntimeException("Cannot find user"));
+            var appUser = userService.findUserById(userId).orElseThrow();
             int year = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getYear();
             int month = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getMonthValue();
 

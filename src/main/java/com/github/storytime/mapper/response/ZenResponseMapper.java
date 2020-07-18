@@ -27,7 +27,7 @@ public class ZenResponseMapper {
                 .getUser()
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new ZenUserNotFoundException("Zen User not found")).getId();
+                .orElseThrow().getId();
     }
 
     public String findAccountIdByPbCard(final ZenResponse zenDiff, final Long card) {
@@ -98,7 +98,7 @@ public class ZenResponseMapper {
                 .filter(zenCurr -> zenCurr.getId() == id)
                 .findFirst()
                 .map(InstrumentItem::getSymbol)
-                .orElseThrow(() -> new RuntimeException("Cannot get currency symbol"));
+                .orElseThrow();
     }
 
     public List<AccountItem> getSavingsAccounts(final ZenResponse zenDiff) {
