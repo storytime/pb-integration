@@ -134,7 +134,7 @@ public class ReconcileService {
                 var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
                 var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
                 var ynabCategories = getYnabCategories(appUser, ynabBudget);
-                var maybeZr = zenDiffService.zenDiffByUserForReconcile(appUser, startDate).join();
+                var maybeZr = zenDiffService.zenDiffByUserForReconcile(appUser, startDate).join().orElseThrow();
                 var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
 
                 var allInfoForTagTable = mapInfoForTagsTable(appUser, ynabTransactions, ynabCategories, maybeZr, startDate, endDate);
@@ -169,7 +169,7 @@ public class ReconcileService {
     private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(final AppUser appUser,
                                                                      final List<TransactionsItem> ynabTransactions,
                                                                      final List<YnabCategories> ynabCategories,
-                                                                     final Optional<ZenResponse> maybeZr,
+                                                                     final ZenResponse maybeZr,
                                                                      final long startDate,
                                                                      final long endDate) {
         final TreeMap<String, BigDecimal> zenSummary =
@@ -193,21 +193,22 @@ public class ReconcileService {
                 .collect(toUnmodifiableList());
     }
 
-    public List<YnabAccounts> getYnabAccounts(final AppUser appUser, final Optional<YnabBudgets> budgetToReconcile) {
-        return budgetToReconcile
-                .map(budgets -> mapYnabAccounts(appUser, budgets))
+    public List<YnabAccounts> getYnabAccounts(final AppUser appUser,
+                                              final YnabBudgets budgetToReconcile) {
+        return Optional.of(budgetToReconcile)
+                .map(b -> mapYnabAccounts(appUser, b))
                 .orElse(emptyList());
     }
 
 
-    private List<TransactionsItem> getYnabTransactions(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
-        return ynabBudget
-                .map(budgets -> mapYnabTransactionsData(appUser, budgets.getId()))
+    private List<TransactionsItem> getYnabTransactions(final AppUser appUser, final YnabBudgets ynabBudget) {
+        return Optional.of(ynabBudget)
+                .map(b -> mapYnabTransactionsData(appUser, b.getId()))
                 .orElse(emptyList());
     }
 
-    private List<YnabCategories> getYnabCategories(final AppUser appUser, final Optional<YnabBudgets> ynabBudget) {
-        return ynabBudget
+    private List<YnabCategories> getYnabCategories(final AppUser appUser, final YnabBudgets ynabBudget) {
+        return Optional.of(ynabBudget)
                 .map(budgets -> ynabService.getYnabCategories(appUser, budgets.getId()).join())
                 .map(ynabResponseMapper::mapYnabCategoriesFromResponse)
                 .orElse(emptyList());
@@ -220,10 +221,11 @@ public class ReconcileService {
                 .orElse(emptyList());
     }
 
-    private Optional<YnabBudgets> mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
+    private YnabBudgets mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
         return ynabService.getYnabBudget(appUser)
                 .join()
-                .flatMap(ynabBudgetResponse -> ynabResponseMapper.mapBudgets(budgetToReconcile, ynabBudgetResponse));
+                .flatMap(ynabBudgetResponse -> ynabResponseMapper.mapBudgets(budgetToReconcile, ynabBudgetResponse))
+                .orElseThrow();
     }
 
     private List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {

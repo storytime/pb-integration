@@ -14,6 +14,7 @@ import static com.github.storytime.config.props.Constants.EMPTY;
 import static com.github.storytime.config.props.Constants.PROJECT_TAG;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.groupingBy;
@@ -48,21 +49,21 @@ public class ZenCommonMapper {
                 .orElse(EMPTY);
     }
 
-    public List<TagItem> getTags(final Optional<ZenResponse> maybeZr) {
-        return maybeZr.flatMap(zr -> ofNullable(zr.getTag())).orElse(emptyList());
+    public List<TagItem> getTags(final ZenResponse maybeZr) {
+        return Optional.of(maybeZr).flatMap(zr -> ofNullable(zr.getTag())).orElse(emptyList());
     }
 
-    public List<AccountItem> getZenAccounts(final Optional<ZenResponse> maybeZr) {
-        return maybeZr.flatMap(zr -> ofNullable(zr.getAccount())).orElse(emptyList());
+    public List<AccountItem> getZenAccounts(final ZenResponse maybeZr) {
+        return of(maybeZr).flatMap(zr -> ofNullable(zr.getAccount())).orElse(emptyList());
     }
 
-    public List<TransactionItem> getZenTransactions(final Optional<ZenResponse> maybeZr) {
-        return maybeZr.flatMap(zr -> ofNullable(zr.getTransaction())).orElse(emptyList());
+    public List<TransactionItem> getZenTransactions(final ZenResponse maybeZr) {
+        return Optional.of(maybeZr).flatMap(zr -> ofNullable(zr.getTransaction())).orElse(emptyList());
     }
 
     public TreeMap<String, BigDecimal> getZenTagsSummaryByCategory(long startDate,
                                                                    long endDate,
-                                                                   final Optional<ZenResponse> maybeZr) {
+                                                                   final ZenResponse maybeZr) {
 
 
         final List<TransactionItem> transactionItems = this.getZenTransactions(maybeZr);
