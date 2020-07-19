@@ -76,7 +76,7 @@ public class PbSyncService {
                                       final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccess,
                                       final Consumer<List<MerchantInfo>> onEmpty) {
 
-        final List<ExpiredPbStatement> maybeToPush = pbTransactionMapper.apply(newPbDataList);
+        final var maybeToPush = pbTransactionMapper.apply(newPbDataList);
 
         if (maybeToPush.isEmpty()) {
             LOGGER.info("No new transaction for user:[{}] Nothing to push in current sync thread", appUser.getId());

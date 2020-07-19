@@ -360,13 +360,12 @@ public class TransactionItem {
     @Override
     public String toString() {
         return new StringJoiner(" ")
-                .add("\n date = " + date)
+                .add("date = " + date)
                 .add("income = " + income)
                 .add("outcome = " + outcome)
                 .add("opayee = " + originalPayee)
                 .add("payee = " + payee)
-                .add("cr = " + created)
-                .add("com = " + comment + "\n")
+                .add("merchant = " + merchant)
                 .toString();
     }
 
