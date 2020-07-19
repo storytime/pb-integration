@@ -14,17 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.github.storytime.error.AsyncErrorHandlerUtil.getZenDiffUpdateHandler;
 import static com.github.storytime.function.FunctionUtils.logAndGetEmptyForSync;
 import static java.util.Optional.of;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.logging.log4j.Level.WARN;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -39,25 +38,25 @@ public class PbSyncService {
     private final UserService userService;
     private final PbToZenMapper pbToZenMapper;
     private final ZenDiffService zenDiffService;
-    private final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction;
 
     @Autowired
     public PbSyncService(final MerchantService merchantService,
                          final PbStatementsService pbStatementsService,
                          final UserService userService,
-                         final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction,
                          final ZenDiffService zenDiffService,
                          final PbToZenMapper pbToZenMapper) {
         this.merchantService = merchantService;
         this.userService = userService;
         this.zenDiffService = zenDiffService;
-        this.alreadyMappedPbZenTransaction = alreadyMappedPbZenTransaction;
         this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
     }
 
     @Async
-    public void sync(final Function<MerchantService, Optional<List<MerchantInfo>>> selectFunction) {
+    public void sync(final Function<MerchantService, Optional<List<MerchantInfo>>> selectFunction,
+                     final Function<List<List<Statement>>, List<ExpiredPbStatement>> pbTransactionMapper,
+                     final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccess,
+                     final Consumer<List<MerchantInfo>> onEmpty) {
         userService.findAll()
                 .forEach(user -> selectFunction.apply(merchantService)
                         .map(merchantLists -> of(merchantLists
@@ -66,53 +65,34 @@ public class PbSyncService {
                                 .collect(toUnmodifiableList()))
                                 .flatMap(cfList -> of(CompletableFuture.allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
                                         .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
-                                        .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList))))) // process all data
+                                        .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList, pbTransactionMapper, onSuccess, onEmpty))))) // process all data
                         .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync")));
     }
 
-    public void handlePbCfRequestData(final AppUser user,
+    public void handlePbCfRequestData(final AppUser appUser,
                                       final List<MerchantInfo> merchants,
-                                      final List<List<Statement>> newPbDataList) {
+                                      final List<List<Statement>> newPbDataList,
+                                      final Function<List<List<Statement>>, List<ExpiredPbStatement>> pbTransactionMapper,
+                                      final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccess,
+                                      final Consumer<List<MerchantInfo>> onEmpty) {
 
-        final List<ExpiredPbStatement> maybeToPush = newPbDataList
-                .stream()
-                .flatMap(Collection::stream)
-                .map(ExpiredPbStatement::new)
-                .filter(not(alreadyMappedPbZenTransaction::contains))
-                .collect(toUnmodifiableList());
+        final List<ExpiredPbStatement> maybeToPush = pbTransactionMapper.apply(newPbDataList);
 
-        final Runnable onSuccess = () -> {
-            alreadyMappedPbZenTransaction.addAll(maybeToPush);
-            merchantService.saveAll(merchants);
-        };
-
-        if (maybeToPush.isEmpty())
-            ifNothingToPush(user, merchants);
-        else
-            doUpdateZenInfoRequest(user, newPbDataList, onSuccess);
-    }
-
-    public void ifNothingToPush(final AppUser user,
-                                final List<MerchantInfo> merchants) {
-        LOGGER.info("No new transaction for user:[{}] Nothing to push in current sync thread", user.getId());
-        merchantService.saveAll(merchants);
-    }
-
-    private void doUpdateZenInfoRequest(final AppUser appUser,
-                                        final List<List<Statement>> newPbData,
-                                        final Runnable onSuccess) {
-
-        LOGGER.info("User:[{}] has:[{}] transactions sync period", appUser.getId(), newPbData.size());
-
-        // step by step in one thread
-        zenDiffService.zenDiffByUserForPb(appUser)
-                .thenApply(zenDiffResponse -> zenDiffResponse
-                        .flatMap(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbData, zenDiff, appUser)))
-                .thenApply(zenDiffRequest -> zenDiffRequest
-                        .flatMap(zr -> zenDiffService.pushToZen(appUser, zr)))
-                .thenApply(zenResponse -> zenResponse
-                        .flatMap(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp()))))
-                .thenAccept(au -> au.ifPresent(saveUserInfo -> onSuccess.run()))
-                .handle(getZenDiffUpdateHandler());
+        if (maybeToPush.isEmpty()) {
+            LOGGER.info("No new transaction for user:[{}] Nothing to push in current sync thread", appUser.getId());
+            onEmpty.accept(merchants);
+        } else {
+            LOGGER.info("User:[{}] has:[{}] transactions sync period", appUser.getId(), newPbDataList.size());
+            // step by step in one thread
+            zenDiffService.zenDiffByUserForPb(appUser)
+                    .thenApply(zenDiffResponse -> zenDiffResponse
+                            .flatMap(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbDataList, zenDiff, appUser)))
+                    .thenApply(zenDiffRequest -> zenDiffRequest
+                            .flatMap(zr -> zenDiffService.pushToZen(appUser, zr)))
+                    .thenApply(zenResponse -> zenResponse
+                            .flatMap(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp()))))
+                    .thenAccept(au -> au.ifPresent(saveUserInfo -> onSuccess.accept(maybeToPush, merchants)))
+                    .handle(getZenDiffUpdateHandler());
+        }
     }
 }
