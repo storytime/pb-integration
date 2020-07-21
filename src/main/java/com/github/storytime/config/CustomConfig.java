@@ -84,6 +84,9 @@ public class CustomConfig {
     @Value("${ynab.budgets.url}")
     private String ynabUrl;
 
+    @Value("${pb.invalid.signature.max.rollback.period.ms}")
+    private Long maxRollbackPeriod;
+
     public String getPbExchangeUrl() {
         return pbExchangeUrl;
     }
@@ -178,5 +181,9 @@ public class CustomConfig {
 
     public String getPbAccountsUrl() {
         return pbAccountsUrl;
+    }
+
+    public Long getMaxRollbackPeriod() {
+        return maxRollbackPeriod;
     }
 }

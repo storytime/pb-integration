@@ -7,7 +7,7 @@ import com.github.storytime.mapper.response.PbStatementResponseMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.pb.jaxb.request.Request;
-import com.github.storytime.model.pb.jaxb.statement.response.ok.Response;
+import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.http.PbStatementsHttpService;
 import org.apache.logging.log4j.LogManager;
@@ -75,7 +75,7 @@ public class PbStatementsService {
         this.pbStatementsHttpService = pbStatementsHttpService;
     }
 
-    public CompletableFuture<List<Response.Data.Info.Statements.Statement>> getPbTransactions(final AppUser u, final MerchantInfo m) {
+    public CompletableFuture<List<Statement>> getPbTransactions(final AppUser u, final MerchantInfo m) {
 
         final Duration period = ofMillis(m.getSyncPeriod());
         final ZonedDateTime startDate = dateService.millisUserDate(m.getSyncStartDate(), u);
@@ -93,7 +93,7 @@ public class PbStatementsService {
         );
 
         final Request requestToBank = pbRequestBuilder.buildStatementRequest(m, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
-        final Supplier<List<Response.Data.Info.Statements.Statement>> pullPbTransactionsSupplier = () -> pbStatementsHttpService.pullPbTransactions(requestToBank)
+        final Supplier<List<Statement>> pullPbTransactionsSupplier = () -> pbStatementsHttpService.pullPbTransactions(requestToBank)
                 .map(b -> handleResponse(u, m, startDate, endDate, b))
                 .orElse(emptyList());
 
@@ -106,34 +106,41 @@ public class PbStatementsService {
     }
 
 
-    private List<Response.Data.Info.Statements.Statement> handleResponse(final AppUser u,
-                                                                         final MerchantInfo m,
-                                                                         final ZonedDateTime startDate,
-                                                                         final ZonedDateTime endDate,
-                                                                         final ResponseEntity<String> body) {
+    private List<Statement> handleResponse(final AppUser u,
+                                           final MerchantInfo m,
+                                           final ZonedDateTime startDate,
+                                           final ZonedDateTime endDate,
+                                           final ResponseEntity<String> body) {
         try {
-            final List<Response.Data.Info.Statements.Statement> allPbTransactions = pbStatementResponseMapper.mapStatementRequestBody(body);
-            final List<Response.Data.Info.Statements.Statement> onlyNewPbTransactions = filterNewPbTransactions(startDate, endDate, allPbTransactions, u);
+            final List<Statement> allPbTransactions = pbStatementResponseMapper.mapStatementRequestBody(body);
+            final List<Statement> onlyNewPbTransactions = filterNewPbTransactions(startDate, endDate, allPbTransactions, u);
             m.setSyncStartDate(endDate.toInstant().toEpochMilli()); // later will do save to update last sync time
             return onlyNewPbTransactions;
         } catch (PbSignatureException e) {
-            // roll back for one day
-            final var rollBackStartDate = startDate.minusHours(customConfig.getPbRollBackPeriod()).toInstant().toEpochMilli();
-            LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]",
-                    ofNullable(m.getShortDesc()).orElse(EMPTY),
-                    m.getMerchantId(),
-                    dateService.millisToIsoFormat(startDate),
-                    dateService.millisToIsoFormat(rollBackStartDate, u));
-            merchantService.save(m.setSyncStartDate(rollBackStartDate));
+            // roll back for 1 hrs
+            final var rollBackStartDateMillis = startDate.minusHours(customConfig.getPbRollBackPeriod()).toInstant().toEpochMilli();
+            final var mDesc = ofNullable(m.getShortDesc()).orElse(EMPTY);
+            final var mId = m.getMerchantId();
+            final var sDate = dateService.millisToIsoFormat(startDate);
+            final var rollBackTime = dateService.millisToIsoFormat(rollBackStartDateMillis, u);
+
+            LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]", mDesc, mId, sDate, rollBackTime);
+
+            if (rollBackStartDateMillis > (now().toInstant().toEpochMilli() - customConfig.getMaxRollbackPeriod())) {
+                merchantService.save(m.setSyncStartDate(rollBackStartDateMillis));
+            } else {
+                LOGGER.error("Desc:[{}] mId:[{}] invalid signature, failed to rollback from:[{}] to:[{}] date is too big", mDesc, mId, sDate, rollBackTime);
+            }
+
             return emptyList();
         }
     }
 
 
-    public List<Response.Data.Info.Statements.Statement> filterNewPbTransactions(final ZonedDateTime start,
-                                                                                 final ZonedDateTime end,
-                                                                                 final List<Response.Data.Info.Statements.Statement> pbStatements,
-                                                                                 final AppUser appUser) {
+    public List<Statement> filterNewPbTransactions(final ZonedDateTime start,
+                                                   final ZonedDateTime end,
+                                                   final List<Statement> pbStatements,
+                                                   final AppUser appUser) {
         final Comparator<ZonedDateTime> comparator = comparing(zdt -> zdt.truncatedTo(MILLIS));
         // sometimes new transactions can be available with delay, so we need to change start time of filtering
         final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
@@ -143,10 +150,10 @@ public class PbStatementsService {
                 .collect(toUnmodifiableList());
     }
 
-    public Predicate<Response.Data.Info.Statements.Statement> getStatementComparatorPredicate(final ZonedDateTime end,
-                                                                                              final AppUser appUser,
-                                                                                              final Comparator<ZonedDateTime> comparator,
-                                                                                              final ZonedDateTime searchStartTime) {
+    public Predicate<Statement> getStatementComparatorPredicate(final ZonedDateTime end,
+                                                                final AppUser appUser,
+                                                                final Comparator<ZonedDateTime> comparator,
+                                                                final ZonedDateTime searchStartTime) {
         return t -> {
             final ZonedDateTime tTime = dateService.xmlDateTimeToZoned(t.getTrandate(), t.getTrantime(), appUser.getTimeZone());
             return comparator.compare(searchStartTime, tTime) <= 0 && comparator.compare(end, tTime) > 0;
