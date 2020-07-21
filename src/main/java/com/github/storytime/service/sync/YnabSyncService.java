@@ -145,14 +145,7 @@ public class YnabSyncService {
                                         .orElse(emptyList())
                                         .stream()
                                         .filter(b -> ynabToZenSyncHolder.getYnabSyncConfig().getBudgetName().equalsIgnoreCase(b.getName()))
-                                        .map(budget -> {  //always will find one element because names in YNAB are unique
-                                            final YnabSyncConfig ynabSyncConfig = ynabToZenSyncHolder.getYnabSyncConfig();
-                                            final ZenResponse zenResponse = ynabToZenSyncHolder.getZenResponse().orElseThrow();
-                                            final List<AccountItem> zenAccounts = ofNullable(zenResponse.getAccount()).orElse(emptyList());
-                                            final List<TagItem> zenTags = ofNullable(zenResponse.getTag()).orElse(emptyList());
-                                            final List<TransactionItem> zenTransactions = ofNullable(zenResponse.getTransaction()).orElse(emptyList());
-                                            return collectAllNeededYnabData(user, zenAccounts, zenTags, zenTransactions, budget, ynabSyncConfig);
-                                        })
+                                        .map(budget -> getYnabBudgetSyncStatusCompletableFuture(user, ynabToZenSyncHolder, budget))
                                         .collect(toUnmodifiableList()))
                                 .flatMap(Collection::stream)
                                 .collect(toUnmodifiableList())
@@ -165,13 +158,24 @@ public class YnabSyncService {
 
     }
 
-    public CompletableFuture<YnabBudgetSyncStatus> collectAllNeededYnabData(final AppUser user,
-                                                                            final List<AccountItem> zenAccounts,
-                                                                            final List<TagItem> zenTags,
-                                                                            final List<TransactionItem> zenTransactions,
-                                                                            final YnabBudgets budgetToSync,
-                                                                            final YnabSyncConfig ynabSyncConfig) {
+    //always will find one element because names in YNAB are unique
+    private CompletableFuture<YnabBudgetSyncStatus> getYnabBudgetSyncStatusCompletableFuture(final AppUser user,
+                                                                                             final YnabToZenSyncHolder ynabToZenSyncHolder,
+                                                                                             final YnabBudgets budget) {
+        final YnabSyncConfig ynabSyncConfig = ynabToZenSyncHolder.getYnabSyncConfig();
+        final ZenResponse zenResponse = ynabToZenSyncHolder.getZenResponse().orElseThrow();
+        final List<AccountItem> zenAccounts = ofNullable(zenResponse.getAccount()).orElse(emptyList());
+        final List<TagItem> zenTags = ofNullable(zenResponse.getTag()).orElse(emptyList());
+        final List<TransactionItem> zenTransactions = ofNullable(zenResponse.getTransaction()).orElse(emptyList());
+        return getAndPushAllAllDataForBudget(user, zenAccounts, zenTags, zenTransactions, budget, ynabSyncConfig);
+    }
 
+    public CompletableFuture<YnabBudgetSyncStatus> getAndPushAllAllDataForBudget(final AppUser user,
+                                                                                 final List<AccountItem> zenAccounts,
+                                                                                 final List<TagItem> zenTags,
+                                                                                 final List<TransactionItem> zenTransactions,
+                                                                                 final YnabBudgets budgetToSync,
+                                                                                 final YnabSyncConfig ynabSyncConfig) {
         final var yCategoriesCf = ynabService.getYnabCategories(user, budgetToSync.getId());
         final var yAccountsCf = ynabService.getYnabAccounts(user, budgetToSync.getId());
         return yCategoriesCf
@@ -181,7 +185,7 @@ public class YnabSyncService {
                     return ynabZenCommonMapper.mapDataAllDataForYnab(zenAccounts, zenTags, zenTransactions, ynabCategories, ynabAccounts, ynabSyncConfig, user);
                 })
                 .thenApply(ytr -> ytr
-                        .flatMap(ytrMapped -> ynabService.pushToYnab(user, budgetToSync.getId(), ytrMapped)))
+                        .flatMap(ytrMapped -> ynabService.pushToYnab(user, budgetToSync.getId(), ytrMapped).join()))
                 .thenApply(pushResponse -> new YnabBudgetSyncStatus(budgetToSync.getName(), pushResponse.orElse(EMPTY)));
     }
 }

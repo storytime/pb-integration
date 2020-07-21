@@ -57,10 +57,10 @@ public class YnabService {
         return supplyAsync(() -> ynabHttpService.getBudget(appUser), cfThreadPool);
     }
 
-    public Optional<String> pushToYnab(final AppUser appUser,
-                                       final String id,
-                                       final YnabTransactionsRequest request) {
-        return ynabHttpService.pushToYnab(appUser, id, request);
+    public CompletableFuture<Optional<String>> pushToYnab(final AppUser appUser,
+                                                          final String id,
+                                                          final YnabTransactionsRequest request) {
+        return supplyAsync(() -> ynabHttpService.pushToYnab(appUser, id, request), cfThreadPool);
     }
 
 }
