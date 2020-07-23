@@ -9,34 +9,29 @@ import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.pb.jaxb.request.Request;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.access.MerchantService;
-import com.github.storytime.service.http.PbStatementsHttpService;
+import com.github.storytime.service.async.PbAsyncService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
 import static com.github.storytime.config.props.Constants.EMPTY;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.getPbServiceAsyncHandler;
-import static java.time.Duration.between;
-import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.right;
 
@@ -46,13 +41,12 @@ public class PbStatementsService {
     private static final Logger LOGGER = LogManager.getLogger(PbStatementsService.class);
 
     private final DateService dateService;
-    private final PbStatementsHttpService pbStatementsHttpService;
     private final AdditionalCommentService additionalCommentService;
     private final CustomConfig customConfig;
     private final PbRequestBuilder pbRequestBuilder;
     private final PbStatementResponseMapper pbStatementResponseMapper;
     private final MerchantService merchantService;
-    private final Executor cfThreadPool;
+    private final PbAsyncService pbAsyncService;
 
 
     @Autowired
@@ -60,48 +54,42 @@ public class PbStatementsService {
             final CustomConfig customConfig,
             final PbStatementResponseMapper pbStatementResponseMapper,
             final MerchantService merchantService,
-            final Executor cfThreadPool,
             final PbRequestBuilder statementRequestBuilder,
             final AdditionalCommentService additionalCommentService,
             final DateService dateService,
-            final PbStatementsHttpService pbStatementsHttpService) {
+            final PbAsyncService pbAsyncService) {
         this.customConfig = customConfig;
         this.pbStatementResponseMapper = pbStatementResponseMapper;
         this.merchantService = merchantService;
-        this.cfThreadPool = cfThreadPool;
         this.pbRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
         this.dateService = dateService;
-        this.pbStatementsHttpService = pbStatementsHttpService;
+        this.pbAsyncService = pbAsyncService;
     }
 
-    public CompletableFuture<List<Statement>> getPbTransactions(final AppUser u, final MerchantInfo m) {
+    public CompletableFuture<List<Statement>> getPbTransactions(final AppUser appUser,
+                                                                final MerchantInfo merchantInfo,
+                                                                final ZonedDateTime startDate,
+                                                                final ZonedDateTime endDate) {
 
-        final Duration period = ofMillis(m.getSyncPeriod());
-        final ZonedDateTime startDate = dateService.millisUserDate(m.getSyncStartDate(), u);
-        final ZonedDateTime now = now().withZoneSameInstant(of(u.getTimeZone()));
-        final ZonedDateTime endDate = between(startDate, now).toMillis() < m.getSyncPeriod() ? now : startDate.plus(period);
-
-        LOGGER.info("Syncing u:[{}] desc:[{}] mId:[{}] mNumb:[{}] sd:[{}] lastSync:[{}] card:[{}]",
-                u.getId(),
-                ofNullable(m.getShortDesc()).orElse(EMPTY),
-                m.getId(),
-                m.getMerchantId(),
+        LOGGER.info("Syncing appUser:[{}] desc:[{}] mId:[{}] mNumb:[{}] sd:[{}] lastSync:[{}] card:[{}]",
+                appUser.getId(),
+                ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY),
+                merchantInfo.getId(),
+                merchantInfo.getMerchantId(),
                 dateService.millisToIsoFormat(startDate),
                 dateService.millisToIsoFormat(endDate),
-                right(m.getCardNumber(), CARD_LAST_DIGITS)
+                right(merchantInfo.getCardNumber(), CARD_LAST_DIGITS)
         );
 
-        final Request requestToBank = pbRequestBuilder.buildStatementRequest(m, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
-        final Supplier<List<Statement>> pullPbTransactionsSupplier = () -> pbStatementsHttpService.pullPbTransactions(requestToBank)
-                .map(b -> handleResponse(u, m, startDate, endDate, b))
-                .orElse(emptyList());
-
-        return supplyAsync(pullPbTransactionsSupplier, cfThreadPool)
-                .thenApply(sList -> sList
-                        .stream()
-                        .peek(s -> additionalCommentService.handle(s, m, u.getTimeZone()))
-                        .collect(toUnmodifiableList()))
+        final Request requestToBank = pbRequestBuilder.buildStatementRequest(merchantInfo, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
+        return pbAsyncService.pullPbTransactions(requestToBank)
+                .thenApply(Optional::orElseThrow)
+                .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
+                .thenApply(statementList ->
+                        statementList.stream()
+                                .peek(statement -> additionalCommentService.handle(statement, merchantInfo, appUser.getTimeZone()))
+                                .collect(toUnmodifiableList()))
                 .handle(getPbServiceAsyncHandler());
     }
 
@@ -126,7 +114,8 @@ public class PbStatementsService {
 
             LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]", mDesc, mId, sDate, rollBackTime);
 
-            if (rollBackStartDateMillis > (now().toInstant().toEpochMilli() - customConfig.getMaxRollbackPeriod())) {
+            final var now = now().withZoneSameInstant(of(u.getTimeZone())).toInstant().toEpochMilli();
+            if (rollBackStartDateMillis > (now - customConfig.getMaxRollbackPeriod())) {
                 merchantService.save(m.setSyncStartDate(rollBackStartDateMillis));
             } else {
                 LOGGER.error("Desc:[{}] mId:[{}] invalid signature, failed to rollback from:[{}] to:[{}] date is too big", mDesc, mId, sDate, rollBackTime);

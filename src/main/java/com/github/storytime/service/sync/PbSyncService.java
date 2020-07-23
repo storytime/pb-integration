@@ -1,5 +1,6 @@
 package com.github.storytime.service.sync;
 
+import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
@@ -14,10 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -55,17 +58,24 @@ public class PbSyncService {
     @Async
     public void sync(final Function<MerchantService, Optional<List<MerchantInfo>>> selectFunction,
                      final Function<List<List<Statement>>, List<ExpiredPbStatement>> pbTransactionMapper,
-                     final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccess,
-                     final Consumer<List<MerchantInfo>> onEmpty) {
+                     final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccessFunction,
+                     final Consumer<List<MerchantInfo>> onEmptyFunction,
+                     final BiFunction<AppUser, MerchantInfo, ZonedDateTime> startDateFunction,
+                     final TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> endDateFunction) {
+
         userService.findAll()
                 .forEach(user -> selectFunction.apply(merchantService)
                         .map(merchantLists -> of(merchantLists
                                 .stream()
-                                .map(merchantInfo -> pbStatementsService.getPbTransactions(user, merchantInfo)) // create async requests
+                                .map(merch -> {
+                                    final var startDate = startDateFunction.apply(user, merch);
+                                    final var endDate = endDateFunction.calculate(user, merch, startDate);
+                                    return pbStatementsService.getPbTransactions(user, merch, startDate, endDate);
+                                }) // create async requests
                                 .collect(toUnmodifiableList()))
                                 .flatMap(cfList -> of(CompletableFuture.allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
                                         .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
-                                        .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList, pbTransactionMapper, onSuccess, onEmpty))))) // process all data
+                                        .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList, pbTransactionMapper, onSuccessFunction, onEmptyFunction))))) // process all data
                         .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync")));
     }
 

@@ -13,9 +13,13 @@ import com.github.storytime.model.ynab.common.ZenYnabTagReconcileProxyObject;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.repository.YnabSyncServiceRepository;
-import com.github.storytime.service.*;
+import com.github.storytime.service.DateService;
+import com.github.storytime.service.PbAccountService;
+import com.github.storytime.service.ReconcileTableService;
+import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.access.UserService;
+import com.github.storytime.service.async.YnabAsyncService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +47,7 @@ public class ReconcileService {
     private static final Logger LOGGER = LogManager.getLogger(ReconcileService.class);
 
     private final UserService userService;
-    private final YnabService ynabService;
+    private final YnabAsyncService ynabAsyncService;
     private final MerchantService merchantService;
     private final PbAccountService pbAccountService;
     private final ZenCommonMapper zenCommonMapper;
@@ -64,7 +68,7 @@ public class ReconcileService {
             final DateService dateService,
             final ReconcileCommonMapper reconcileCommonMapper,
             final ZenDiffService zenDiffService,
-            final YnabService ynabService,
+            final YnabAsyncService ynabAsyncService,
             final YnabResponseMapper ynabResponseMapper,
             final YnabCommonMapper ynabCommonMapper,
             final ReconcileTableService reconcileTableService,
@@ -75,7 +79,7 @@ public class ReconcileService {
         this.zenCommonMapper = zenCommonMapper;
         this.ynabCommonMapper = ynabCommonMapper;
         this.pbAccountService = pbAccountService;
-        this.ynabService = ynabService;
+        this.ynabAsyncService = ynabAsyncService;
         this.ynabResponseMapper = ynabResponseMapper;
         this.reconcileTableService = reconcileTableService;
         this.ynabSyncServiceRepository = ynabSyncServiceRepository;
@@ -209,27 +213,27 @@ public class ReconcileService {
 
     private List<YnabCategories> getYnabCategories(final AppUser appUser, final YnabBudgets ynabBudget) {
         return Optional.of(ynabBudget)
-                .map(budgets -> ynabService.getYnabCategories(appUser, budgets.getId()).join())
+                .map(budgets -> ynabAsyncService.getYnabCategories(appUser, budgets.getId()).join())
                 .map(ynabResponseMapper::mapYnabCategoriesFromResponse)
                 .orElse(emptyList());
     }
 
     private List<YnabAccounts> mapYnabAccounts(final AppUser appUser, final YnabBudgets budgets) {
-        return ynabService.getYnabAccounts(appUser, budgets.getId())
+        return ynabAsyncService.getYnabAccounts(appUser, budgets.getId())
                 .join()
                 .flatMap(yc -> ofNullable(yc.getYnabAccountData().getAccounts()))
                 .orElse(emptyList());
     }
 
     private YnabBudgets mapYnabBudgetData(final AppUser appUser, final String budgetToReconcile) {
-        return ynabService.getYnabBudget(appUser)
+        return ynabAsyncService.getYnabBudget(appUser)
                 .join()
                 .flatMap(ynabBudgetResponse -> ynabResponseMapper.mapBudgets(budgetToReconcile, ynabBudgetResponse))
                 .orElseThrow();
     }
 
     private List<TransactionsItem> mapYnabTransactionsData(final AppUser appUser, final String budgetToReconcile) {
-        return ynabService.getYnabTransactions(appUser, budgetToReconcile)
+        return ynabAsyncService.getYnabTransactions(appUser, budgetToReconcile)
                 .join()
                 .map(ynabResponseMapper::mapTransactionsFromResponse)
                 .orElse(emptyList());

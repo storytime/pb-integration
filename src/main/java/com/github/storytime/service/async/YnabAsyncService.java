@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.async;
 
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.ynab.account.YnabAccountResponse;
@@ -19,16 +19,16 @@ import java.util.concurrent.Executor;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
-public class YnabService {
+public class YnabAsyncService {
 
-    private static final Logger LOGGER = LogManager.getLogger(YnabService.class);
+    private static final Logger LOGGER = LogManager.getLogger(YnabAsyncService.class);
 
     private final Executor cfThreadPool;
     private final YnabHttpService ynabHttpService;
 
     @Autowired
-    public YnabService(final YnabHttpService ynabHttpService,
-                       final Executor cfThreadPool) {
+    public YnabAsyncService(final YnabHttpService ynabHttpService,
+                            final Executor cfThreadPool) {
         this.ynabHttpService = ynabHttpService;
         this.cfThreadPool = cfThreadPool;
     }
