@@ -14,29 +14,27 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.github.storytime.config.props.Constants.CURRENCY_SCALE;
-import static com.github.storytime.config.props.Constants.EMPTY;
+import static com.github.storytime.config.props.Constants.*;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
-public class PbStatementResponseMapper {
+public class PbResponseMapper {
 
-    private static final Logger LOGGER = getLogger(PbStatementResponseMapper.class);
+    private static final Logger LOGGER = getLogger(PbResponseMapper.class);
     private static final String SIGNATURE = "signature";
-    private static final int DEFAULT_ACC_BALANCE = 0;
     private final Unmarshaller jaxbStatementErrorUnmarshaller;
     private final Unmarshaller jaxbStatementOkUnmarshaller;
     private final Unmarshaller jaxbAccountOkUnmarshaller;
     private final CustomConfig customConfig;
 
     @Autowired
-    public PbStatementResponseMapper(final Unmarshaller jaxbStatementErrorUnmarshaller,
-                                     final Unmarshaller jaxbAccountOkUnmarshaller,
-                                     final CustomConfig customConfig,
-                                     final Unmarshaller jaxbStatementOkUnmarshaller) {
+    public PbResponseMapper(final Unmarshaller jaxbStatementErrorUnmarshaller,
+                            final Unmarshaller jaxbAccountOkUnmarshaller,
+                            final CustomConfig customConfig,
+                            final Unmarshaller jaxbStatementOkUnmarshaller) {
         this.jaxbStatementErrorUnmarshaller = jaxbStatementErrorUnmarshaller;
         this.jaxbAccountOkUnmarshaller = jaxbAccountOkUnmarshaller;
         this.customConfig = customConfig;
@@ -71,19 +69,19 @@ public class PbStatementResponseMapper {
     }
 
     public BigDecimal mapAccountRequestBody(final ResponseEntity<String> responseEntity) {
-
         final var body = ofNullable(responseEntity.getBody()).orElse(EMPTY);
         try {
             final Response parsedResponse = (Response) jaxbAccountOkUnmarshaller.unmarshal(new StringReader(body));
-            return ofNullable(parsedResponse.getData())
+            final BigDecimal bigDecimal = ofNullable(parsedResponse.getData())
                     .map(Response.Data::getInfo)
                     .map(Response.Data.Info::getCardbalance)
                     .map(Response.Data.Info.Cardbalance::getBalance)
                     .map(bal -> BigDecimal.valueOf(bal).setScale(CURRENCY_SCALE, HALF_DOWN))
-                    .orElse(BigDecimal.valueOf(DEFAULT_ACC_BALANCE));
+                    .orElse(DEFAULT_ACC_BALANCE);
+            return bigDecimal;
         } catch (Exception e) {
             LOGGER.error("Cannot parse bank response:[{}]", e.getMessage(), e);
-            return BigDecimal.valueOf(DEFAULT_ACC_BALANCE);
+            return DEFAULT_ACC_BALANCE;
         }
     }
 }

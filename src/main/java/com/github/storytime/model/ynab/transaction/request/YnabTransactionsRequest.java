@@ -11,6 +11,10 @@ public class YnabTransactionsRequest {
     @JsonProperty("transactions")
     private List<YnabTransactions> transactions;
 
+    public YnabTransactionsRequest(List<YnabTransactions> transactions) {
+        this.transactions = transactions;
+    }
+
     public List<YnabTransactions> getTransactions() {
         return transactions;
     }

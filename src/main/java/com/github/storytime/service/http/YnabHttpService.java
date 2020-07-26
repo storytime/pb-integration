@@ -37,7 +37,6 @@ public class YnabHttpService {
         this.customConfig = customConfig;
     }
 
-
     public Optional<YnabBudgetResponse> getBudget(final AppUser user) {
         try {
             final HttpEntity<YnabBudgetResponse> httpEntity = new HttpEntity<>(createHeader(user.getYnabAuthToken()));

@@ -1,8 +1,6 @@
 package com.github.storytime.service.http;
 
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.model.currency.minfin.MinfinResponse;
-import com.github.storytime.model.currency.pb.archive.PbRatesResponse;
 import com.github.storytime.model.currency.pb.cash.CashResponse;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,26 +26,6 @@ public class CurrencyHttpService {
     public CurrencyHttpService(final RestTemplate restTemplate, final CustomConfig customConfig) {
         this.restTemplate = restTemplate;
         this.customConfig = customConfig;
-    }
-
-    public Optional<MinfinResponse> pullMinfinRatesForDate(final String lastBusinessDay) {
-        try {
-            LOGGER.info("Pulling NBU currency form external service for date:[{}]", lastBusinessDay);
-            return ofNullable(restTemplate.getForEntity(customConfig.getMinExchangeUrl() + lastBusinessDay, MinfinResponse.class).getBody());
-        } catch (Exception e) {
-            LOGGER.error("Cannot getZenCurrencySymbol NBU USD minfin rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
-            return empty();
-        }
-    }
-
-    public Optional<PbRatesResponse> pullPbRatesForDate(final String lastBusinessDay) {
-        try {
-            LOGGER.info("Pulling NBU currency form external service for date:[{}]", lastBusinessDay);
-            return ofNullable(restTemplate.getForEntity(customConfig.getPbExchangeUrl() + lastBusinessDay, PbRatesResponse.class).getBody());
-        } catch (Exception e) {
-            LOGGER.error("Cannot getZenCurrencySymbol NBU USD PB rate for date:[{}], reason:[{}]", lastBusinessDay, e.getMessage());
-            return empty();
-        }
     }
 
     public Optional<List<CashResponse>> pullPbCashRate() {

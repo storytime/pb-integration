@@ -1,6 +1,7 @@
 package com.github.storytime.service;
 
 import com.github.storytime.BaseTestConfig;
+import com.github.storytime.service.utils.RegExpService;
 import junitparams.Parameters;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

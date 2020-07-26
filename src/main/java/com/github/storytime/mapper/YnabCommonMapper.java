@@ -4,7 +4,7 @@ import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.ynab.YnabTransactionProxyObject;
 import com.github.storytime.model.ynab.category.YnabCategories;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
-import com.github.storytime.service.DateService;
+import com.github.storytime.service.utils.DateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

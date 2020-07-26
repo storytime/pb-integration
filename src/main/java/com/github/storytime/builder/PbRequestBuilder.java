@@ -2,7 +2,7 @@ package com.github.storytime.builder;
 
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.pb.jaxb.request.Request;
-import com.github.storytime.service.PbSignatureGeneratorService;
+import com.github.storytime.service.utils.PbSignatureGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

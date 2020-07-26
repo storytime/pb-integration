@@ -7,9 +7,9 @@ import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.internal.ExpiredPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.PbStatementsService;
-import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.access.UserService;
+import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -40,17 +40,17 @@ public class PbSyncService {
     private final PbStatementsService pbStatementsService;
     private final UserService userService;
     private final PbToZenMapper pbToZenMapper;
-    private final ZenDiffService zenDiffService;
+    private final ZenAsyncService zenAsyncService;
 
     @Autowired
     public PbSyncService(final MerchantService merchantService,
                          final PbStatementsService pbStatementsService,
                          final UserService userService,
-                         final ZenDiffService zenDiffService,
+                         final ZenAsyncService zenAsyncService,
                          final PbToZenMapper pbToZenMapper) {
         this.merchantService = merchantService;
         this.userService = userService;
-        this.zenDiffService = zenDiffService;
+        this.zenAsyncService = zenAsyncService;
         this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
     }
@@ -94,11 +94,11 @@ public class PbSyncService {
         } else {
             LOGGER.info("User:[{}] has:[{}] transactions sync period", appUser.getId(), newPbDataList.size());
             // step by step in one thread
-            zenDiffService.zenDiffByUserForPb(appUser)
+            zenAsyncService.zenDiffByUserForPb(appUser)
                     .thenApply(zenDiffResponse -> zenDiffResponse
                             .flatMap(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbDataList, zenDiff, appUser)))
                     .thenApply(zenDiffRequest -> zenDiffRequest
-                            .flatMap(zr -> zenDiffService.pushToZen(appUser, zr)))
+                            .flatMap(zr -> zenAsyncService.pushToZen(appUser, zr).join()))
                     .thenApply(zenResponse -> zenResponse
                             .flatMap(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp()))))
                     .thenAccept(au -> au.ifPresent(saveUserInfo -> onSuccess.accept(maybeToPush, merchants)))

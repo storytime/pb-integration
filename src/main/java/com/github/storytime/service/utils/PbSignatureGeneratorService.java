@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.utils;
 
 import com.github.storytime.error.exception.PbSignatureException;
 import org.apache.logging.log4j.LogManager;

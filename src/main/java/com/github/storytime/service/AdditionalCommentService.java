@@ -3,6 +3,7 @@ package com.github.storytime.service;
 import com.github.storytime.function.CurrencyCommentFunction;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
+import com.github.storytime.service.utils.DateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,12 +42,6 @@ public class AdditionalCommentService {
                 .forEach(ac -> {
                     final StringBuilder comment = new StringBuilder(COMMENT_SIZE);
                     switch (ac) {
-                        case NBU_PREV_MOUTH_LAST_BUSINESS_DAY:
-                            currencyService
-                                    .nbuPrevMouthLastBusinessDayRate(s, timeZone)
-                                    .ifPresent(rate -> currencyCommentFunction.generate(comment, rate, s, NBU_LAST_DAY, USD_COMMENT));
-                            break;
-
                         case PB_CURRENT_BUSINESS_DAY:
                             final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
                             currencyService

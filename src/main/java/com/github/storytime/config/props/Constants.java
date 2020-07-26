@@ -1,5 +1,7 @@
 package com.github.storytime.config.props;
 
+import java.math.BigDecimal;
+
 public class Constants {
 
     public static final int PB_WAIT = 0;
@@ -67,6 +69,7 @@ public class Constants {
     public static final String INSTRUMENT = "instrument";
     public static final String TAG = "tag";
     public static final String SLASH = "/";
+    public static final BigDecimal DEFAULT_ACC_BALANCE = BigDecimal.valueOf(0);
 
     private Constants() {
     }

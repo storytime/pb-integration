@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.async;
 
 import com.github.storytime.function.ZenDiffLambdaHolder;
 import com.github.storytime.model.db.AppUser;
@@ -19,22 +19,21 @@ import java.util.concurrent.Executor;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
-public class ZenDiffService {
+public class ZenAsyncService {
 
-    private static final Logger LOGGER = LogManager.getLogger(ZenDiffService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ZenAsyncService.class);
 
-    private final ZenDiffHttpService zenDiffHttpService;
     private final Executor cfThreadPool;
+    private final ZenDiffHttpService zenDiffHttpService;
     private final ZenDiffLambdaHolder zenDiffLambdaHolder;
 
     @Autowired
-    public ZenDiffService(final ZenDiffHttpService zenDiffHttpService,
-                          final Executor cfThreadPool,
-                          final ZenDiffLambdaHolder zenDiffLambdaHolder) {
+    public ZenAsyncService(final ZenDiffHttpService zenDiffHttpService,
+                           final ZenDiffLambdaHolder zenDiffLambdaHolder,
+                           final Executor cfThreadPool) {
         this.zenDiffHttpService = zenDiffHttpService;
         this.cfThreadPool = cfThreadPool;
         this.zenDiffLambdaHolder = zenDiffLambdaHolder;
-
     }
 
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForPb(final AppUser appUser) {
@@ -45,7 +44,8 @@ public class ZenDiffService {
         return zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser));
     }
 
-    public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForReconcile(final AppUser appUser, long startDate) {
+    public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForReconcile(final AppUser appUser,
+                                                                              long startDate) {
         LOGGER.debug("Fetching ZEN accounts, for user: [{}]", appUser.getId());
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate)), cfThreadPool);
     }
@@ -54,16 +54,13 @@ public class ZenDiffService {
                                                                        final long clientSyncTime,
                                                                        final YnabSyncConfig config) {
         LOGGER.debug("Calling ZEN diff for YNAB budget config: [{}], last sync [{}], tags method [{}]", config.getBudgetName(), config.getLastSync(), config.getTagsSyncProperties());
-        return supplyAsync(() -> getYnabToZenSyncHolder(appUser, clientSyncTime, config), cfThreadPool);
+        return supplyAsync(() -> {
+            final var ynabFunction = zenDiffLambdaHolder.getYnabFunction(appUser, clientSyncTime, config);
+            return new YnabToZenSyncHolder(zenDiffHttpService.getZenDiffByUser(ynabFunction), config);
+        }, cfThreadPool);
     }
 
-    private YnabToZenSyncHolder getYnabToZenSyncHolder(final AppUser appUser,
-                                                       final long clientSyncTime,
-                                                       final YnabSyncConfig config) {
-        return new YnabToZenSyncHolder(zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getYnabFunction(appUser, clientSyncTime, config)), config);
-    }
-
-    public Optional<ZenResponse> pushToZen(final AppUser appUser, final ZenDiffRequest request) {
-        return zenDiffHttpService.pushToZen(appUser, request);
+    public CompletableFuture<Optional<ZenResponse>> pushToZen(final AppUser appUser, final ZenDiffRequest request) {
+        return supplyAsync(() -> zenDiffHttpService.pushToZen(appUser, request));
     }
 }

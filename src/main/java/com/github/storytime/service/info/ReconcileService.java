@@ -13,13 +13,13 @@ import com.github.storytime.model.ynab.common.ZenYnabTagReconcileProxyObject;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.repository.YnabSyncServiceRepository;
-import com.github.storytime.service.DateService;
 import com.github.storytime.service.PbAccountService;
 import com.github.storytime.service.ReconcileTableService;
-import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.async.YnabAsyncService;
+import com.github.storytime.service.async.ZenAsyncService;
+import com.github.storytime.service.utils.DateService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class ReconcileService {
     private final DateService dateService;
     private final ReconcileTableService reconcileTableService;
     private final YnabSyncServiceRepository ynabSyncServiceRepository;
-    private final ZenDiffService zenDiffService;
+    private final ZenAsyncService zenAsyncService;
     private final ReconcileCommonMapper reconcileCommonMapper;
 
     @Autowired
@@ -67,13 +67,13 @@ public class ReconcileService {
             final PbAccountService pbAccountService,
             final DateService dateService,
             final ReconcileCommonMapper reconcileCommonMapper,
-            final ZenDiffService zenDiffService,
+            final ZenAsyncService zenAsyncService,
             final YnabAsyncService ynabAsyncService,
             final YnabResponseMapper ynabResponseMapper,
             final YnabCommonMapper ynabCommonMapper,
             final ReconcileTableService reconcileTableService,
             final YnabSyncServiceRepository ynabSyncServiceRepository) {
-        this.zenDiffService = zenDiffService;
+        this.zenAsyncService = zenAsyncService;
         this.userService = userService;
         this.merchantService = merchantService;
         this.zenCommonMapper = zenCommonMapper;
@@ -138,11 +138,11 @@ public class ReconcileService {
                 var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
                 var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
                 var ynabCategories = getYnabCategories(appUser, ynabBudget);
-                var maybeZr = zenDiffService.zenDiffByUserForReconcile(appUser, startDate).join().orElseThrow();
+                var maybeZr = zenAsyncService.zenDiffByUserForReconcile(appUser, startDate).join().orElseThrow();
                 var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
 
                 var allInfoForTagTable = mapInfoForTagsTable(appUser, ynabTransactions, ynabCategories, maybeZr, startDate, endDate);
-                var allInfoForAccountTable = reconcileCommonMapper.mapInfoForAccountTable(zenAccs, ynabAccs, pbAccs);
+                var allInfoForAccountTable = reconcileCommonMapper.mapInfoForAccountTable(zenAccs, ynabAccs, pbAccs.join());
 
                 LOGGER.debug("Combine accounts info collecting info, for user: [{}]", userId);
                 reconcileTableService.buildAccountHeader(table);

@@ -3,13 +3,14 @@ package com.github.storytime.service;
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.error.exception.PbSignatureException;
-import com.github.storytime.mapper.response.PbStatementResponseMapper;
+import com.github.storytime.mapper.response.PbResponseMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.pb.jaxb.request.Request;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.async.PbAsyncService;
+import com.github.storytime.service.utils.DateService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,22 +45,21 @@ public class PbStatementsService {
     private final AdditionalCommentService additionalCommentService;
     private final CustomConfig customConfig;
     private final PbRequestBuilder pbRequestBuilder;
-    private final PbStatementResponseMapper pbStatementResponseMapper;
+    private final PbResponseMapper pbResponseMapper;
     private final MerchantService merchantService;
     private final PbAsyncService pbAsyncService;
-
 
     @Autowired
     public PbStatementsService(
             final CustomConfig customConfig,
-            final PbStatementResponseMapper pbStatementResponseMapper,
+            final PbResponseMapper pbResponseMapper,
             final MerchantService merchantService,
             final PbRequestBuilder statementRequestBuilder,
             final AdditionalCommentService additionalCommentService,
             final DateService dateService,
             final PbAsyncService pbAsyncService) {
         this.customConfig = customConfig;
-        this.pbStatementResponseMapper = pbStatementResponseMapper;
+        this.pbResponseMapper = pbResponseMapper;
         this.merchantService = merchantService;
         this.pbRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
@@ -100,7 +100,7 @@ public class PbStatementsService {
                                            final ZonedDateTime endDate,
                                            final ResponseEntity<String> body) {
         try {
-            final List<Statement> allPbTransactions = pbStatementResponseMapper.mapStatementRequestBody(body);
+            final List<Statement> allPbTransactions = pbResponseMapper.mapStatementRequestBody(body);
             final List<Statement> onlyNewPbTransactions = filterNewPbTransactions(startDate, endDate, allPbTransactions, u);
             m.setSyncStartDate(endDate.toInstant().toEpochMilli()); // later will do save to update last sync time
             return onlyNewPbTransactions;

@@ -4,8 +4,8 @@ import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.internal.ExpiredPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.DateService;
 import com.github.storytime.service.access.MerchantService;
+import com.github.storytime.service.utils.DateService;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;

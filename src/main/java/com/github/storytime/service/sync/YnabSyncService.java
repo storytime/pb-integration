@@ -6,17 +6,15 @@ import com.github.storytime.model.api.YnabBudgetSyncStatus;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.ynab.YnabToZenSyncHolder;
-import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.budget.YnabBudgets;
-import com.github.storytime.model.ynab.category.YnabCategories;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TagItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.repository.YnabSyncServiceRepository;
-import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.async.YnabAsyncService;
+import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,13 +44,13 @@ public class YnabSyncService {
     private static final Logger LOGGER = getLogger(YnabSyncService.class);
     private final UserService userService;
     private final YnabAsyncService ynabAsyncService;
-    private final ZenDiffService zenDiffService;
+    private final ZenAsyncService zenAsyncService;
     private final YnabResponseMapper ynabResponseMapper;
     private final YnabZenCommonMapper ynabZenCommonMapper;
     private final YnabSyncServiceRepository ynabSyncServiceRepository;
 
     @Autowired
-    public YnabSyncService(final ZenDiffService zenDiffService,
+    public YnabSyncService(final ZenAsyncService zenAsyncService,
                            final YnabAsyncService ynabAsyncService,
                            final YnabZenCommonMapper ynabZenCommonMapper,
                            final YnabResponseMapper ynabResponseMapper,
@@ -61,7 +59,7 @@ public class YnabSyncService {
         this.userService = userService;
         this.ynabZenCommonMapper = ynabZenCommonMapper;
         this.ynabSyncServiceRepository = ynabSyncServiceRepository;
-        this.zenDiffService = zenDiffService;
+        this.zenAsyncService = zenAsyncService;
         this.ynabAsyncService = ynabAsyncService;
         this.ynabResponseMapper = ynabResponseMapper;
     }
@@ -101,7 +99,7 @@ public class YnabSyncService {
         //get zen data
         final List<CompletableFuture<YnabToZenSyncHolder>> collect = ynabSyncConfigs
                 .stream()
-                .map(ynabSyncConfig -> zenDiffService.zenDiffByUserForYnab(appUser, startFrom, ynabSyncConfig))
+                .map(ynabSyncConfig -> zenAsyncService.zenDiffByUserForYnab(appUser, startFrom, ynabSyncConfig))
                 .collect(toUnmodifiableList());
 
         final List<YnabBudgetSyncStatus> pushToYnabResponse = allOf(collect.toArray(new CompletableFuture[collect.size()]))
@@ -126,6 +124,7 @@ public class YnabSyncService {
     public List<YnabBudgetSyncStatus> pushZenTransactionToYnab(final AppUser user, final List<YnabToZenSyncHolder> budgetsToSync) {
 
         final List<YnabToZenSyncHolder> newTransactionListEmpty = ynabZenCommonMapper.isNewTransactionListEmpty(budgetsToSync);
+
         if (newTransactionListEmpty.isEmpty()) {
             LOGGER.warn("No new zen transactions, since last push nothing to push to YNAB for user:[{}]", user.id);
             return emptyList();
@@ -180,8 +179,8 @@ public class YnabSyncService {
         final var yAccountsCf = ynabAsyncService.getYnabAccounts(user, budgetToSync.getId());
         return yCategoriesCf
                 .thenCombine(yAccountsCf, (yMaybeCat, yMaybeAcc) -> {
-                    final List<YnabAccounts> ynabAccounts = ynabResponseMapper.mapYnabAccountsFromResponse(yMaybeAcc);
-                    final List<YnabCategories> ynabCategories = ynabResponseMapper.mapYnabCategoriesFromResponse(yMaybeCat);
+                    final var ynabAccounts = ynabResponseMapper.mapYnabAccountsFromResponse(yMaybeAcc);
+                    final var ynabCategories = ynabResponseMapper.mapYnabCategoriesFromResponse(yMaybeCat);
                     return ynabZenCommonMapper.mapDataAllDataForYnab(zenAccounts, zenTags, zenTransactions, ynabCategories, ynabAccounts, ynabSyncConfig, user);
                 })
                 .thenApply(ytr -> ytr

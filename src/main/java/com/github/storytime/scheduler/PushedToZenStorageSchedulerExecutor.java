@@ -1,6 +1,6 @@
 package com.github.storytime.scheduler;
 
-import com.github.storytime.service.PushedPbZenTransactionStorageService;
+import com.github.storytime.service.access.PushedPbZenTransactionStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

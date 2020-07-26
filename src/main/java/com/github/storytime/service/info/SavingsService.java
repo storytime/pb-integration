@@ -6,8 +6,8 @@ import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.service.CurrencyService;
-import com.github.storytime.service.ZenDiffService;
 import com.github.storytime.service.access.UserService;
+import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,17 +42,17 @@ public class SavingsService {
     private final CurrencyService currencyService;
     private final UserService userService;
     private final ZenResponseMapper zenResponseMapper;
-    private final ZenDiffService zenDiffService;
+    private final ZenAsyncService zenAsyncService;
 
     @Autowired
     public SavingsService(final CurrencyService currencyService,
                           final UserService userService,
-                          final ZenDiffService zenDiffService,
+                          final ZenAsyncService zenAsyncService,
                           final ZenResponseMapper zenResponseMapper) {
         this.currencyService = currencyService;
         this.userService = userService;
         this.zenResponseMapper = zenResponseMapper;
-        this.zenDiffService = zenDiffService;
+        this.zenAsyncService = zenAsyncService;
     }
 
     public String getAllSavingsInfo(final long userId) {
@@ -101,7 +101,7 @@ public class SavingsService {
     }
 
     private List<SavingsInfo> getUserSavings(final AppUser appUser) {
-        final var zenDiff = zenDiffService.zenDiffByUserForSavings(appUser)
+        final var zenDiff = zenAsyncService.zenDiffByUserForSavings(appUser)
                 .orElseThrow(() -> new RuntimeException("Cannot get zen diff to map"));
         return zenResponseMapper.getSavingsAccounts(zenDiff)
                 .stream()

@@ -2,6 +2,7 @@ package com.github.storytime.service;
 
 import com.github.storytime.BaseTestConfig;
 import com.github.storytime.model.db.CustomPayee;
+import com.github.storytime.service.utils.CustomPayeeService;
 import junitparams.Parameters;
 import org.junit.Before;
 import org.junit.Test;

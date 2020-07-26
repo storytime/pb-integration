@@ -3,7 +3,6 @@ package com.github.storytime.mapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
-import com.github.storytime.model.db.inner.YnabTagsSyncProperties;
 import com.github.storytime.model.ynab.YnabToZenSyncHolder;
 import com.github.storytime.model.ynab.YnabZenHolder;
 import com.github.storytime.model.ynab.YnabZenSyncObject;
@@ -14,7 +13,7 @@ import com.github.storytime.model.ynab.transaction.request.YnabTransactionsReque
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TagItem;
 import com.github.storytime.model.zen.TransactionItem;
-import com.github.storytime.service.DateService;
+import com.github.storytime.service.utils.DateService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,8 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import static com.github.storytime.config.props.Constants.*;
-import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_INNER_TAGS;
-import static com.github.storytime.model.db.inner.YnabTagsSyncProperties.MATCH_PARENT_TAGS;
 import static com.github.storytime.model.ynab.transaction.YnabTransactionColour.*;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
@@ -174,24 +171,12 @@ public class YnabZenCommonMapper {
                                                                    final YnabSyncConfig ynabSyncConfig,
                                                                    final AppUser user) {
 
-
-        final YnabTagsSyncProperties ynabTagsSyncProperty = ofNullable(ynabSyncConfig.getTagsSyncProperties()).orElse(emptyList())
-                .stream()
-                .findFirst()
-                .orElse(MATCH_PARENT_TAGS);
-
         final YnabZenHolder sameAccounts = this.mapYnabZenSameAccounts(zenAccounts, ynabAccounts);
         final YnabZenHolder sameTags = this.mapYnabZenSameTags(zenTags, ynabCategories);
-        List<TransactionItem> zenTransaction = emptyList();
-
-        if (ynabTagsSyncProperty.equals(MATCH_INNER_TAGS)) {
-            zenTransaction = this.selectZenNotSyncedTransactions(zenTransactions, sameAccounts, ynabSyncConfig);
-        } else if (ynabTagsSyncProperty.equals(MATCH_PARENT_TAGS)) {
-            zenTransaction = this.selectZenNotSyncedTransactions(zenTransactions, sameAccounts, ynabSyncConfig)
-                    .stream()
-                    .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
-                    .collect(toUnmodifiableList());
-        }
+        final List<TransactionItem> zenTransaction = this.selectZenNotSyncedTransactions(zenTransactions, sameAccounts, ynabSyncConfig)
+                .stream()
+                .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
+                .collect(toUnmodifiableList());
 
         final List<YnabTransactions> ynabTransactions = zenTransaction
                 .stream()
@@ -212,11 +197,7 @@ public class YnabZenCommonMapper {
             return empty();
         }
 
-        ynabTransactions.forEach(yTr -> LOGGER.debug("Going to push to YNAB: [{}], payee: [{}], date: [{}], catI: [{}]", yTr.getAmount(), yTr.getPayeeName(), yTr.getDate(), yTr.getCategoryId()));
-
-        final YnabTransactionsRequest ynabTransactionsRequest = new YnabTransactionsRequest();
-        ynabTransactionsRequest.setTransactions(ynabTransactions);
-        return of(ynabTransactionsRequest);
+        return of(new YnabTransactionsRequest(ynabTransactions));
     }
 
 

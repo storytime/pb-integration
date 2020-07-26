@@ -77,4 +77,5 @@ public class YnabResponseMapper {
                 .filter(not(TransactionsItem::isDeleted))
                 .collect(toUnmodifiableList());
     }
+
 }
