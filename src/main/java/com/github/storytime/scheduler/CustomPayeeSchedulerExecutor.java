@@ -8,7 +8,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static com.github.storytime.config.props.Constants.*;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
@@ -31,6 +33,11 @@ public class CustomPayeeSchedulerExecutor {
         customPayeeValues.clear();
         customPayeeValues.addAll(customPayeeRepository.findAll());
         LOGGER.debug("Updating custom payee values from DB, new count: [{}]", customPayeeValues.size());
-    }
 
+        final var cpv = customPayeeValues.stream().collect(Collectors.groupingBy(CustomPayee::getPayee));
+        cpv.keySet().forEach(k -> {
+            final var v = cpv.get(k).stream().map(CustomPayee::getContainsValue).collect(Collectors.joining(SPLITTER, PR, SUF));
+            LOGGER.debug("Custom payee values from DB for key: [{}] is next: [{}]", k, v);
+        });
+    }
 }
