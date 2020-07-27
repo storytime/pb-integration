@@ -70,6 +70,9 @@ public class Constants {
     public static final String TAG = "tag";
     public static final String SLASH = "/";
     public static final BigDecimal DEFAULT_ACC_BALANCE = BigDecimal.valueOf(0);
+    public static final String SPLITTER = ", ";
+    public static final String PR = "[";
+    public static final String SUF = "]";
 
     private Constants() {
     }
