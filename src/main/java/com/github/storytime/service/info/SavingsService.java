@@ -8,6 +8,9 @@ import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.service.CurrencyService;
 import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.async.ZenAsyncService;
+import one.util.streamex.IntStreamEx;
+import one.util.streamex.StreamEx;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,30 +77,47 @@ public class SavingsService {
                         );
 
                         LOGGER.debug("Finish get savings info for user: [{}]", userId);
-                        return getNiceText(savingsInfoList, totalAmountInUah);
+                        final var niceSavingsText = getNiceSavings(savingsInfoList);
+                        final var niceTotal = formatAmount(totalAmountInUah);
+                        return niceSavingsText.append(TOTAL).append(niceTotal).append(SPACE).append(UAH).toString();
                     })
                     .orElse(EMPTY);
         } catch (Exception e) {
             //todo return server error
-            LOGGER.error("Cannot collect saving info for user [{}] request:[{}]", userId, e.getCause());
+            LOGGER.error("Cannot collect saving info for user: [{}] request:[{}]", userId, e.getCause());
             return EMPTY;
         }
     }
 
-    public String getNiceText(final List<SavingsInfo> savingsInfoList, final BigDecimal totalAmountInUah) {
-        final var response = new StringBuilder();
-        savingsInfoList
+    public String formatAmount(final BigDecimal totalAmountInUah) {
+        final String[] totalAsArray = totalAmountInUah.toPlainString().split(SPLITTER_EMPTY);
+        final StreamEx<String> values = StreamEx.ofReversed(totalAsArray);
+        final IntStreamEx indexes = IntStreamEx.range(START_INCLUSIVE, totalAsArray.length);
+
+        final String formattedTotal = values.zipWith(indexes)
+                .map(z -> z.getValue() % FORMATTER_SPLITTER == Constants.ZERO ? SPACE + z.getKey() : z.getKey())
+                .collect(Collectors.joining());
+
+        return StringUtils.reverse(formattedTotal);
+    }
+
+    public StringBuilder getNiceSavings(final List<SavingsInfo> savingsInfoList) {
+        return new StringBuilder().append(savingsInfoList
                 .stream()
                 .sorted(Comparator.comparing(SavingsInfo::getPercent))
                 .collect(Collectors.toUnmodifiableList())
-                .forEach(si -> response
-                        .append(rightPad(si.getTitle() + DOTS + SPACE, SAVINGS_STRING_SIZE))
-                        .append(rightPad(si.getBalance() + SPACE + si.getCurrencySymbol() + SLASH_SEPARATOR, SAVINGS_STRING_SIZE))
-                        .append(rightPad(si.getInUah() + SPACE + UAH + SLASH_SEPARATOR, SAVINGS_STRING_SIZE))
-                        .append(rightPad(si.getPercent() + SPACE + PERCENT, SAVINGS_PERCENT_SIZE))
-                        .append(LF));
-        response.append(TOTAL).append(totalAmountInUah).append(SPACE).append(UAH);
-        return response.toString();
+                .stream()
+                .map(this::mapToNiceSavingsString)
+        );
+    }
+
+    private StringBuilder mapToNiceSavingsString(final SavingsInfo si) {
+        return new StringBuilder()
+                .append(rightPad(si.getTitle() + DOTS + SPACE, SAVINGS_STRING_SIZE))
+                .append(rightPad(formatAmount(si.getBalance()) + SPACE + si.getCurrencySymbol() + SLASH_SEPARATOR, SAVINGS_STRING_SIZE))
+                .append(rightPad(formatAmount(si.getInUah()) + SPACE + UAH + SLASH_SEPARATOR, SAVINGS_STRING_SIZE))
+                .append(rightPad(si.getPercent() + SPACE + PERCENT, SAVINGS_PERCENT_SIZE))
+                .append(LF);
     }
 
     private List<SavingsInfo> getUserSavings(final AppUser appUser) {

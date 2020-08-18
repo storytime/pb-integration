@@ -12,9 +12,6 @@ public class Constants {
     public static final String CMT = "cmt";
     public static final int TEST = 0;
     public static final int XML_VERSION = 1;
-    public static final int PASSWORD_LENGTH = 32;
-    public static final String CARD_REG_EXP = "^\\d{16}$";
-    public static final String DATE_REG_EXP = "\\d{2}.\\d{2}.\\d{4}";
     public static final String MD5 = "MD5";
     public static final String SHA_1 = "SHA-1";
     public static final String N_A = "N/A";
@@ -32,9 +29,7 @@ public class Constants {
     public static final String CASH = "cash";
     public static final int CURRENCY_SCALE = 2;
     public static final String UAH_STR = "UAH";
-    public static final String USD_STR = "USD";
     public static final int COMMENT_SIZE = 50;
-    public static final String NBU_LAST_DAY = "In: ";
     public static final String USD_COMMENT = "$ ";
     public static final String BANK_RATE = "";
     public static final int EMPTY_AMOUNT = 0;
@@ -44,7 +39,7 @@ public class Constants {
     public static final int SAVINGS_STRING_SIZE = 10;
     public static final int SAVINGS_PERCENT_SIZE = 7;
     public static final String UAH = "₴";
-    public static final String TOTAL = "Всего ~";
+    public static final String TOTAL = "Всего ~ ";
     public static final String DOTS = ":";
     public static final String PERCENT = "%";
     public static final String SLASH_SEPARATOR = " / ";
@@ -54,15 +49,12 @@ public class Constants {
     public static final String RECONCILE_OK = "OK";
     public static final String RECONCILE_NOT_OK = "Not OK!";
     public static final long ZERO_DIIF = 0l;
-    public static final int START_POS = 0;
     public static final String CARDNUM = "cardnum";
     public static final String COUNTRY = "country";
     public static final String UA = "UA";
-    public static final String YNAB_ZERO_BALANCE = "0";
     public static final long EPOCH_MILLI_FIX = 2146078276;
     public static final String CLEARED = "cleared";
     public static final String YNAB_IGNORE = "#";
-    public static final String YNAB_PUSH_UNKNOWN_ERROR = "Unknown Ynab sync error";
     public static final String UNCATEGORIZED = "Uncategorized";
     public static final long INITIAL_TIMESTAMP = 0L;
     public static final String ACCOUNT = "account";
@@ -70,9 +62,14 @@ public class Constants {
     public static final String TAG = "tag";
     public static final String SLASH = "/";
     public static final BigDecimal DEFAULT_ACC_BALANCE = BigDecimal.valueOf(0);
-    public static final String SPLITTER = ", ";
+    public static final String SPLITTER = "; ";
     public static final String PR = "[";
     public static final String SUF = "]";
+    public static final String SPLITTER_EMPTY = "(?<=.)";
+    public static final int START_INCLUSIVE = 0;
+    public static final int ZERO = 0;
+    public static final int FORMATTER_SPLITTER = 3;
+    public static final double EMPTY_BAL = 0d;
 
     private Constants() {
     }

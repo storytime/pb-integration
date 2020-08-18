@@ -106,6 +106,7 @@ public class ZenResponseMapper {
                 .stream()
                 .filter(AccountItem::getSavings)
                 .filter(not(AccountItem::isArchive))
+                .filter(ai -> ai.getBalance() > EMPTY_BAL)
                 .collect(toUnmodifiableList());
     }
 }

@@ -13,6 +13,7 @@ buildscript {
         jaxbImplVersion = '2.3.2'
         jaxbCoreVersion = '2.3.0.1'
         validationVersion = '2.0.1.Final'
+        streamExVersion = '0.7.3'
     }
     repositories {
         mavenCentral()
@@ -60,6 +61,7 @@ dependencies {
     implementation("com.sun.xml.bind:jaxb-impl:$jaxbImplVersion")
     implementation("com.sun.xml.bind:jaxb-core:$jaxbCoreVersion")
     implementation("javax.validation:validation-api:$validationVersion")
+    implementation("one.util:streamex:$streamExVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
