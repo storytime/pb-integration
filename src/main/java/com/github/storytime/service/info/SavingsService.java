@@ -89,8 +89,8 @@ public class SavingsService {
         }
     }
 
-    public String formatAmount(final BigDecimal totalAmountInUah) {
-        final String[] totalAsArray = totalAmountInUah.toPlainString().split(SPLITTER_EMPTY);
+    public String formatAmount(final BigDecimal amount) {
+        final String[] totalAsArray = amount.toPlainString().split(SPLITTER_EMPTY);
         final StreamEx<String> values = StreamEx.ofReversed(totalAsArray);
         final IntStreamEx indexes = IntStreamEx.range(START_INCLUSIVE, totalAsArray.length);
 
@@ -98,17 +98,16 @@ public class SavingsService {
                 .map(z -> z.getValue() % FORMATTER_SPLITTER == Constants.ZERO ? SPACE + z.getKey() : z.getKey())
                 .collect(Collectors.joining());
 
-        return StringUtils.reverse(formattedTotal);
+        return StringUtils.reverse(formattedTotal.trim());
     }
 
     public StringBuilder getNiceSavings(final List<SavingsInfo> savingsInfoList) {
-        return new StringBuilder().append(savingsInfoList
+        final String mapped = savingsInfoList
                 .stream()
                 .sorted(Comparator.comparing(SavingsInfo::getPercent))
-                .collect(Collectors.toUnmodifiableList())
-                .stream()
                 .map(this::mapToNiceSavingsString)
-        );
+                .collect(Collectors.joining());
+        return new StringBuilder().append(mapped);
     }
 
     private StringBuilder mapToNiceSavingsString(final SavingsInfo si) {
