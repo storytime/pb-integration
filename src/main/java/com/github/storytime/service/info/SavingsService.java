@@ -3,6 +3,7 @@ package com.github.storytime.service.info;
 import com.github.storytime.config.props.Constants;
 import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
+import com.github.storytime.model.api.SavingsInfoAsJson;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.service.CurrencyService;
@@ -13,6 +14,7 @@ import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,6 +36,8 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 
 @Service
 public class SavingsService {
@@ -58,7 +62,38 @@ public class SavingsService {
         this.zenAsyncService = zenAsyncService;
     }
 
-    public String getAllSavingsInfo(final long userId) {
+    public String getAllSavingsAsTable(final long userId) {
+        try {
+            LOGGER.debug("Calling get savings info as table for user: [{}]", userId);
+            return userService.findUserById(userId)
+                    .map(appUser -> {
+                        //todo maybe async?
+                        final List<SavingsInfo> savingsInfoList = getUserSavings(appUser);
+                        final BigDecimal totalAmountInUah = savingsInfoList.stream()
+                                .map(SavingsInfo::getInUah)
+                                .reduce(ZERO, BigDecimal::add)
+                                .setScale(ZERO_SCALE, HALF_DOWN);
+
+                        savingsInfoList.forEach(sa -> sa.setPercent(sa.getInUah()
+                                .multiply(ONE_HUNDRED)
+                                .divide(totalAmountInUah, CURRENCY_SCALE, HALF_UP)
+                                .setScale(CURRENCY_SCALE, HALF_DOWN))
+                        );
+
+                        LOGGER.debug("Finish get savings info as table for user: [{}]", userId);
+                        final var niceSavingsText = getNiceSavings(savingsInfoList);
+                        final var niceTotalInUah = formatAmount(totalAmountInUah);
+                        return niceSavingsText.append(TOTAL).append(niceTotalInUah).append(SPACE).append(UAH).toString();
+                    })
+                    .orElse(EMPTY);
+        } catch (Exception e) {
+            //todo return server error
+            LOGGER.error("Cannot collect saving info as table for user: [{}] request:[{}]", userId, e.getCause());
+            return EMPTY;
+        }
+    }
+
+    public ResponseEntity<SavingsInfoAsJson> getAllSavingsJson(final long userId) {
         try {
             LOGGER.debug("Calling get savings info for user: [{}]", userId);
             return userService.findUserById(userId)
@@ -77,15 +112,19 @@ public class SavingsService {
                         );
 
                         LOGGER.debug("Finish get savings info for user: [{}]", userId);
-                        final var niceSavingsText = getNiceSavings(savingsInfoList);
-                        final var niceTotal = formatAmount(totalAmountInUah);
-                        return niceSavingsText.append(TOTAL).append(niceTotal).append(SPACE).append(UAH).toString();
+                        final var niceTotalInUah = formatAmount(totalAmountInUah);
+
+                        final var resp = new SavingsInfoAsJson()
+                                .setSavings(savingsInfoList)
+                                .setTotal(niceTotalInUah);
+
+                        return new ResponseEntity<>(resp, OK);
                     })
-                    .orElse(EMPTY);
+                    .orElse(new ResponseEntity<>(NO_CONTENT));
         } catch (Exception e) {
             //todo return server error
             LOGGER.error("Cannot collect saving info for user: [{}] request:[{}]", userId, e.getCause());
-            return EMPTY;
+            return new ResponseEntity<>(NO_CONTENT);
         }
     }
 
@@ -143,6 +182,8 @@ public class SavingsService {
                 .setBalance(bal.setScale(ZERO_SCALE, HALF_DOWN))
                 .setCurrencySymbol(zenCurrencySymbol)
                 .setTitle(accountItem.getTitle().trim())
-                .setInUah(inUah.setScale(ZERO_SCALE, HALF_DOWN));
+                .setInUah(inUah.setScale(ZERO_SCALE, HALF_DOWN))
+                .setInUahStr(formatAmount(inUah.setScale(ZERO_SCALE, HALF_DOWN)))
+                .setBalanceStr(formatAmount(bal.setScale(ZERO_SCALE, HALF_DOWN)));
     }
 }

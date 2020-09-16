@@ -5,8 +5,10 @@ import java.math.BigDecimal;
 public class SavingsInfo {
 
     private BigDecimal balance;
+    private String balanceStr;
     private String currencySymbol;
     private BigDecimal inUah;
+    private String inUahStr;
     private String title;
     private BigDecimal percent;
 
@@ -55,4 +57,21 @@ public class SavingsInfo {
         return this;
     }
 
+    public String getInUahStr() {
+        return inUahStr;
+    }
+
+    public SavingsInfo setInUahStr(final String inUahStr) {
+        this.inUahStr = inUahStr;
+        return this;
+    }
+
+    public String getBalanceStr() {
+        return balanceStr;
+    }
+
+    public SavingsInfo setBalanceStr(final String balanceStr) {
+        this.balanceStr = balanceStr;
+        return this;
+    }
 }
