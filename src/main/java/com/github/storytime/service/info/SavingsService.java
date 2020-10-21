@@ -67,22 +67,13 @@ public class SavingsService {
             LOGGER.debug("Calling get savings info as table for user: [{}]", userId);
             return userService.findUserById(userId)
                     .map(appUser -> {
-                        //todo maybe async?
-                        final List<SavingsInfo> savingsInfoList = getUserSavings(appUser);
-                        final BigDecimal totalAmountInUah = savingsInfoList.stream()
-                                .map(SavingsInfo::getInUah)
-                                .reduce(ZERO, BigDecimal::add)
-                                .setScale(ZERO_SCALE, HALF_DOWN);
-
-                        savingsInfoList.forEach(sa -> sa.setPercent(sa.getInUah()
-                                .multiply(ONE_HUNDRED)
-                                .divide(totalAmountInUah, CURRENCY_SCALE, HALF_UP)
-                                .setScale(CURRENCY_SCALE, HALF_DOWN))
-                        );
+                        final List<SavingsInfo> savingsInfo = getUserSavings(appUser);
+                        final BigDecimal totalAmountInUah = getTotalInUah(savingsInfo);
+                        final List<SavingsInfo> savingsInfoNew = updateSavingsInfoList(totalAmountInUah, savingsInfo);
+                        final var niceSavingsText = getNiceSavings(savingsInfoNew);
+                        final var niceTotalInUah = formatAmount(totalAmountInUah);
 
                         LOGGER.debug("Finish get savings info as table for user: [{}]", userId);
-                        final var niceSavingsText = getNiceSavings(savingsInfoList);
-                        final var niceTotalInUah = formatAmount(totalAmountInUah);
                         return niceSavingsText.append(TOTAL).append(niceTotalInUah).append(SPACE).append(UAH).toString();
                     })
                     .orElse(EMPTY);
@@ -93,39 +84,43 @@ public class SavingsService {
         }
     }
 
+
     public ResponseEntity<SavingsInfoAsJson> getAllSavingsJson(final long userId) {
         try {
-            LOGGER.debug("Calling get savings info for user: [{}]", userId);
+            LOGGER.debug("Calling get savings info as JSON for user: [{}]", userId);
             return userService.findUserById(userId)
                     .map(appUser -> {
-                        //todo maybe async?
-                        final List<SavingsInfo> savingsInfoList = getUserSavings(appUser);
-                        final BigDecimal totalAmountInUah = savingsInfoList.stream()
-                                .map(SavingsInfo::getInUah)
-                                .reduce(ZERO, BigDecimal::add)
-                                .setScale(ZERO_SCALE, HALF_DOWN);
-
-                        savingsInfoList.forEach(sa -> sa.setPercent(sa.getInUah()
-                                .multiply(ONE_HUNDRED)
-                                .divide(totalAmountInUah, CURRENCY_SCALE, HALF_UP)
-                                .setScale(CURRENCY_SCALE, HALF_DOWN))
-                        );
-
-                        LOGGER.debug("Finish get savings info for user: [{}]", userId);
+                        final List<SavingsInfo> savingsInfo = getUserSavings(appUser);
+                        final BigDecimal totalAmountInUah = getTotalInUah(savingsInfo);
+                        final List<SavingsInfo> savingsInfoNew = updateSavingsInfoList(totalAmountInUah, savingsInfo);
                         final var niceTotalInUah = formatAmount(totalAmountInUah);
+                        final var response = new SavingsInfoAsJson().setSavings(savingsInfoNew).setTotal(niceTotalInUah);
 
-                        final var resp = new SavingsInfoAsJson()
-                                .setSavings(savingsInfoList)
-                                .setTotal(niceTotalInUah);
-
-                        return new ResponseEntity<>(resp, OK);
+                        LOGGER.debug("Finish get savings info as JSON for user: [{}]", userId);
+                        return new ResponseEntity<>(response, OK);
                     })
                     .orElse(new ResponseEntity<>(NO_CONTENT));
         } catch (Exception e) {
             //todo return server error
-            LOGGER.error("Cannot collect saving info for user: [{}] request:[{}]", userId, e.getCause());
+            LOGGER.error("Cannot collect saving info as JSON for user: [{}] request:[{}]", userId, e.getCause());
             return new ResponseEntity<>(NO_CONTENT);
         }
+    }
+
+    private List<SavingsInfo> updateSavingsInfoList(final BigDecimal totalAmountInUah, final List<SavingsInfo> savingsInfoList) {
+        return savingsInfoList.stream()
+                .map(sa -> sa.setPercent(sa.getInUah()
+                        .multiply(ONE_HUNDRED)
+                        .divide(totalAmountInUah, CURRENCY_SCALE, HALF_UP)
+                        .setScale(CURRENCY_SCALE, HALF_DOWN)))
+                .collect(toUnmodifiableList());
+    }
+
+    private BigDecimal getTotalInUah(final List<SavingsInfo> savingsInfoList) {
+        return savingsInfoList.stream()
+                .map(SavingsInfo::getInUah)
+                .reduce(ZERO, BigDecimal::add)
+                .setScale(ZERO_SCALE, HALF_DOWN);
     }
 
     public String formatAmount(final BigDecimal amount) {
