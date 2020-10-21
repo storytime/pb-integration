@@ -42,9 +42,9 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Component
-public class ReconcileService {
+public class ReconcileYnabService {
 
-    private static final Logger LOGGER = LogManager.getLogger(ReconcileService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ReconcileYnabService.class);
 
     private final UserService userService;
     private final YnabAsyncService ynabAsyncService;
@@ -60,7 +60,7 @@ public class ReconcileService {
     private final ReconcileCommonMapper reconcileCommonMapper;
 
     @Autowired
-    public ReconcileService(
+    public ReconcileYnabService(
             final UserService userService,
             final MerchantService merchantService,
             final ZenCommonMapper zenCommonMapper,
