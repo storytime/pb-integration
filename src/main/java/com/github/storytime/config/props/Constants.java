@@ -70,6 +70,8 @@ public class Constants {
     public static final int ZERO = 0;
     public static final int FORMATTER_SPLITTER = 3;
     public static final double EMPTY_BAL = 0d;
+    public static final int USD_ID = 1;
+    public static final int EUR_ID = 3;
 
     private Constants() {
     }
