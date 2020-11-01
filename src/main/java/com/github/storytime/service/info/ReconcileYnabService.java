@@ -36,6 +36,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static java.time.ZoneId.of;
+import static java.time.ZonedDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
@@ -128,9 +130,11 @@ public class ReconcileYnabService {
         try {
             LOGGER.debug("Building pb/zen json, collecting info, for user: [{}]", userId);
             return userService.findUserById(userId).map(appUser -> {
+
                 var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
                 var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
-                var maybeZr = zenAsyncService.zenDiffByUserForReconcile(appUser, 0).join().orElseThrow();
+                var startDate = now().withZoneSameInstant(of(appUser.getTimeZone())).toInstant().toEpochMilli();
+                var maybeZr = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate).join().orElseThrow();
                 var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
 
                 LOGGER.debug("Combine pb/zen info collecting info, for user: [{}]", userId);

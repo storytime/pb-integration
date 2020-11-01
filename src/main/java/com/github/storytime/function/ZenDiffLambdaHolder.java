@@ -64,12 +64,22 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getAccount(final AppUser u, long startDate) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getAccountAndTags(final AppUser u, long startDate) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(startDate)
                     .setForceFetch(Set.of(Constants.TAG, Constants.ACCOUNT));
+            return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
+        };
+    }
+
+    public Supplier<HttpEntity<ZenSyncRequest>> getAccount(final AppUser u, long startDate) {
+        return () -> {
+            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
+                    .setCurrentClientTimestamp(now().getEpochSecond())
+                    .setServerTimestamp(startDate)
+                    .setForceFetch(Set.of(Constants.ACCOUNT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }

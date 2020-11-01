@@ -46,6 +46,12 @@ public class ZenAsyncService {
 
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForReconcile(final AppUser appUser,
                                                                               long startDate) {
+        LOGGER.debug("Fetching ZEN accounts/tags ynab, for user: [{}]", appUser.getId());
+        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccountAndTags(appUser, startDate)), cfThreadPool);
+    }
+
+    public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForPbAccReconcile(final AppUser appUser,
+                                                                                   long startDate) {
         LOGGER.debug("Fetching ZEN accounts, for user: [{}]", appUser.getId());
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate)), cfThreadPool);
     }
