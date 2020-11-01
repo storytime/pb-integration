@@ -4,6 +4,7 @@ import com.github.storytime.mapper.ReconcileCommonMapper;
 import com.github.storytime.mapper.YnabCommonMapper;
 import com.github.storytime.mapper.response.YnabResponseMapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
+import com.github.storytime.model.api.PbZenReconcileJson;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.ynab.account.YnabAccounts;
@@ -23,6 +24,7 @@ import com.github.storytime.service.utils.DateService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -40,6 +42,8 @@ import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 
 @Component
 public class ReconcileYnabService {
@@ -117,6 +121,26 @@ public class ReconcileYnabService {
         } catch (Exception e) {
             LOGGER.error("Cannot build reconcile table for user [{}], error [{}] for default dates", userId, e.getCause());
             return EMPTY;
+        }
+    }
+
+    public ResponseEntity<PbZenReconcileJson> reconcilePbJson(final long userId) {
+        try {
+            LOGGER.debug("Building pb/zen json, collecting info, for user: [{}]", userId);
+            return userService.findUserById(userId).map(appUser -> {
+                var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
+                var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
+                var maybeZr = zenAsyncService.zenDiffByUserForReconcile(appUser, 0).join().orElseThrow();
+                var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
+
+                LOGGER.debug("Combine pb/zen info collecting info, for user: [{}]", userId);
+                var pbZenReconcile = reconcileCommonMapper.mapInfoForAccountJson(zenAccs, pbAccs.join());
+                LOGGER.debug("All is ready pb/zen, for user: [{}]", userId);
+                return new ResponseEntity<>(new PbZenReconcileJson(pbZenReconcile), OK);
+            }).orElse(new ResponseEntity<>(NO_CONTENT));
+        } catch (Exception e) {
+            LOGGER.error("Cannot build pb/zen json for user [{}], error [{}]", userId, e.getCause());
+            return new ResponseEntity<>(NO_CONTENT);
         }
     }
 

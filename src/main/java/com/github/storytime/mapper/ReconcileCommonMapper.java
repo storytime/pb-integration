@@ -1,5 +1,6 @@
 package com.github.storytime.mapper;
 
+import com.github.storytime.model.api.PbZenReconcile;
 import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.common.ZenYnabAccountReconcileProxyObject;
@@ -42,7 +43,7 @@ public class ReconcileCommonMapper {
                         .filter(yA -> yA.getName().equalsIgnoreCase(zenAcc.getTitle()))
                         .collect(toUnmodifiableList())
                         .stream()
-                        .map(yAcc -> this.mapSimpleRepresentation(pbAccs, zenAcc, zenAcc.getTitle(), yAcc))
+                        .map(yAcc -> this.mapToZenYnabPbAcc(pbAccs, zenAcc, zenAcc.getTitle(), yAcc))
                         .collect(toUnmodifiableList()))
                 .collect(toUnmodifiableList())
                 .stream()
@@ -52,10 +53,31 @@ public class ReconcileCommonMapper {
     }
 
 
-    public ZenYnabAccountReconcileProxyObject mapSimpleRepresentation(final List<PbAccountBalance> pbAccs,
-                                                                      final AccountItem zenAcc,
-                                                                      final String zenAccTitle,
-                                                                      final YnabAccounts yAcc) {
+    public List<PbZenReconcile> mapInfoForAccountJson(final List<AccountItem> zenAccs,
+                                                      final List<PbAccountBalance> pbAccs) {
+        return zenAccs.stream().map(za -> pbAccs.stream()
+                .filter(pa -> pa.getAccount().equals(za.getTitle()))
+                .collect(toUnmodifiableList())
+                .stream()
+                .map(x -> mapToZenPbAcc(za, x)).collect(toUnmodifiableList()))
+                .collect(toUnmodifiableList())
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(toUnmodifiableList());
+    }
+
+    private PbZenReconcile mapToZenPbAcc(final AccountItem za, final PbAccountBalance x) {
+        final String accountName = x.getAccount();
+        final BigDecimal bankBal = x.getBalance();
+        final BigDecimal zenBal = BigDecimal.valueOf(za.getBalance());
+        final var diff = bankBal.subtract(zenBal).setScale(CURRENCY_SCALE, HALF_DOWN).toString();
+        return new PbZenReconcile(accountName, bankBal.toString(), zenBal.toString(), diff);
+    }
+
+    public ZenYnabAccountReconcileProxyObject mapToZenYnabPbAcc(final List<PbAccountBalance> pbAccs,
+                                                                final AccountItem zenAcc,
+                                                                final String zenAccTitle,
+                                                                final YnabAccounts yAcc) {
         var ynabBal = ynabCommonMapper.parseYnabBal(valueOf(yAcc.getBalance()));
         var zenBal = BigDecimal.valueOf(zenAcc.getBalance());
         var zenYnabDiff = zenBal.subtract(ynabBal).setScale(CURRENCY_SCALE, HALF_DOWN);

@@ -3,7 +3,7 @@ package com.github.storytime.service.info;
 import com.github.storytime.mapper.SavingsInfoMapper;
 import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
-import com.github.storytime.model.api.SavingsInfoAsJson;
+import com.github.storytime.model.api.SavingsInfoJson;
 import com.github.storytime.model.db.AppUser;
 import com.github.storytime.service.SavingsInfoFormatter;
 import com.github.storytime.service.access.UserService;
@@ -71,7 +71,7 @@ public class SavingsService {
         }
     }
 
-    public ResponseEntity<SavingsInfoAsJson> getAllSavingsJson(final long userId) {
+    public ResponseEntity<SavingsInfoJson> getAllSavingsJson(final long userId) {
         try {
             LOGGER.debug("Calling get savings info as JSON for user: [{}]", userId);
             return userService.findUserById(userId)
@@ -80,12 +80,11 @@ public class SavingsService {
                         final BigDecimal totalAmountInUah = savingsInfoMapper.getTotalInUah(savingsInfo);
                         final List<SavingsInfo> savingsInfoNew = savingsInfoMapper.updateSavingsInfoList(totalAmountInUah, savingsInfo);
                         final var niceTotalInUah = savingsInfoFormatter.formatAmount(totalAmountInUah);
-                        final var response = new SavingsInfoAsJson().setSavings(savingsInfoNew).setTotal(niceTotalInUah);
+                        final var response = new SavingsInfoJson().setSavings(savingsInfoNew).setTotal(niceTotalInUah);
 
                         LOGGER.debug("Finish get savings info as JSON for user: [{}]", userId);
                         return new ResponseEntity<>(response, OK);
-                    })
-                    .orElse(new ResponseEntity<>(NO_CONTENT));
+                    }).orElse(new ResponseEntity<>(NO_CONTENT));
         } catch (Exception e) {
             //todo return server error
             LOGGER.error("Cannot collect saving info as JSON for user: [{}] request:[{}]", userId, e.getCause());
