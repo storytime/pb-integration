@@ -32,12 +32,12 @@ public class CustomPayeeSchedulerExecutor {
         LOGGER.debug("Updating custom payee values from DB, count: [{}]", customPayeeValues.size());
         customPayeeValues.clear();
         customPayeeValues.addAll(customPayeeRepository.findAll());
-        LOGGER.debug("Updating custom payee values from DB, new count: [{}]", customPayeeValues.size());
+        LOGGER.debug("Updated custom payee values from DB, new count: [{}]", customPayeeValues.size());
 
-        final var cpv = customPayeeValues.stream().collect(Collectors.groupingBy(CustomPayee::getPayee));
-        cpv.keySet().forEach(k -> {
-            final var v = cpv.get(k).stream().map(CustomPayee::getContainsValue).collect(Collectors.joining(SPLITTER, PR, SUF));
-            LOGGER.debug("Custom payee values from DB for key: [{}] is next: [{}]", k, v);
-        });
+//        final var cpv = customPayeeValues.stream().collect(Collectors.groupingBy(CustomPayee::getPayee));
+//        cpv.keySet().forEach(k -> {
+//            final var v = cpv.get(k).stream().map(CustomPayee::getContainsValue).collect(Collectors.joining(SPLITTER, PR, SUF));
+//            LOGGER.debug("Custom payee values from DB for key: [{}] is next: [{}]", k, v);
+//        });
     }
 }
