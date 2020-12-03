@@ -159,7 +159,7 @@ public class ReconcileYnabService {
 
                         LOGGER.debug("Combine pb/zen info collecting info, for user: [{}]", userId);
                         var pbZenReconcile = reconcileCommonMapper.mapInfoForAccountJson(zenAccs, pbAccs.join());
-                        LOGGER.debug("Building pb/zen json, for user: [{}], time: [{}] - finish", userId, getTime(st));
+                        LOGGER.debug("Building pb/zen json, for user: [{}] - finish", userId);
                         return new ResponseEntity<>(new PbZenReconcileResponse(pbZenReconcile), OK);
                     }).whenComplete((r, e) -> LOGGER.debug("Building YNAB reconcile all user: [{}], time: [{}] - finish", userId, getTime(st), e));
         } catch (Exception e) {

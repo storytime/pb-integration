@@ -64,14 +64,22 @@ public class PbToZenTransactionMapper {
                 .collect(toUnmodifiableList());
     }
 
-    private String createIdForZen(final long userId, final Double amount, final byte[] trDateBytes) {
+    private String createIdForZen(final long userId,
+                                  final Double amount,
+                                  final byte[] trDateBytes,
+                                  final Long card,
+                                  final String appcode) {
         final var userIdBytes = Long.toString(userId).getBytes();
         final var trAmountByes = String.valueOf(amount).getBytes();
-        final var capacity = userIdBytes.length + trDateBytes.length + trAmountByes.length;
+        final var cardBytes = Long.toString(card).getBytes();
+        final var appCodeBytes = appcode.getBytes();
+        final var capacity = userIdBytes.length + trDateBytes.length + trAmountByes.length + cardBytes.length + appCodeBytes.length;
         final var idBytes = ByteBuffer.allocate(capacity)
                 .put(userIdBytes)
                 .put(trDateBytes)
                 .put(trAmountByes)
+                .put(cardBytes)
+                .put(appCodeBytes)
                 .array();
 
         return UUID.nameUUIDFromBytes(idBytes).toString();
@@ -90,7 +98,7 @@ public class PbToZenTransactionMapper {
         final var trDate = dateService.toZenFormat(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone());
         final var appCode = Optional.ofNullable(pbTr.getAppcode()).orElse(EMPTY);
         final var createdTime = dateService.xmlDateTimeToZoned(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
-        final var idTr = createIdForZen(u.getId(), Math.abs(opAmount), trDate.getBytes());
+        final var idTr = createIdForZen(u.getId(), abs(opAmount), trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode());
         final var userId = zenResponseMapper.findUserId(zenDiff);
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
         final var merchantId = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);
