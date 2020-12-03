@@ -82,7 +82,9 @@ public class PbSyncService {
                                                 .flatMap(cfList -> of(CompletableFuture.allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
                                                         .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
                                                         .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList, pbTransactionMapper, onSuccessFunction, onEmptyFunction, st))))) // process all data
-                                        .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync"))));
+                                        .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync"))
+                        )
+                );
 
 
     }
