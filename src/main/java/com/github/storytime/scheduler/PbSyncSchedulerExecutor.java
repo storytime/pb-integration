@@ -2,7 +2,7 @@ package com.github.storytime.scheduler;
 
 import com.github.storytime.function.PbSyncLambdaHolder;
 import com.github.storytime.function.TrioFunction;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.internal.ExpiredPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
