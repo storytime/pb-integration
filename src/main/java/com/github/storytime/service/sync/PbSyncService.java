@@ -1,5 +1,6 @@
 package com.github.storytime.service.sync;
 
+import com.github.storytime.STUtils;
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.api.ms.AppUser;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.github.storytime.STUtils.getTime;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.getZenDiffUpdateHandler;
 import static com.github.storytime.function.FunctionUtils.logAndGetEmptyForSync;
 import static java.util.Optional.of;
@@ -63,6 +66,7 @@ public class PbSyncService {
                      final BiFunction<AppUser, MerchantInfo, ZonedDateTime> startDateFunction,
                      final TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> endDateFunction) {
 
+        final var st = STUtils.createSt();
         userService.findAllAsync()
                 .thenAccept(usersList ->
                         usersList.forEach(user ->
@@ -77,7 +81,7 @@ public class PbSyncService {
                                                 .collect(toUnmodifiableList()))
                                                 .flatMap(cfList -> of(CompletableFuture.allOf(cfList.toArray(new CompletableFuture[merchantLists.size()])) // wait for completions of all requests
                                                         .thenApply(aVoid -> cfList.stream().map(CompletableFuture::join).collect(toUnmodifiableList())) // collect results
-                                                        .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList, pbTransactionMapper, onSuccessFunction, onEmptyFunction))))) // process all data
+                                                        .thenAccept(newPbDataList -> handlePbCfRequestData(user, merchantLists, newPbDataList, pbTransactionMapper, onSuccessFunction, onEmptyFunction, st))))) // process all data
                                         .or(logAndGetEmptyForSync(LOGGER, WARN, "No merchants to sync"))));
 
 
@@ -88,15 +92,16 @@ public class PbSyncService {
                                       final List<List<Statement>> newPbDataList,
                                       final Function<List<List<Statement>>, List<ExpiredPbStatement>> pbTransactionMapper,
                                       final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccess,
-                                      final Consumer<List<MerchantInfo>> onEmpty) {
+                                      final Consumer<List<MerchantInfo>> onEmpty,
+                                      final StopWatch st) {
 
         final var maybeToPush = pbTransactionMapper.apply(newPbDataList);
 
         if (maybeToPush.isEmpty()) {
-            LOGGER.info("No new transaction for user: [{}] Nothing to push in current sync thread", appUser.getId());
+            LOGGER.info("No new transaction for user: [{}], time: [{}] - nothing to push", appUser.getId(), getTime(st));
             onEmpty.accept(merchants);
         } else {
-            LOGGER.info("User: [{}] has: [{}] transactions sync period", appUser.getId(), newPbDataList.size());
+            LOGGER.info("User: [{}], time: [{}], has: [{}] transactions to sync", appUser.getId(), newPbDataList.size(), getTime(st));
             // step by step in one thread
             zenAsyncService.zenDiffByUserForPb(appUser)
                     .thenApply(Optional::get)

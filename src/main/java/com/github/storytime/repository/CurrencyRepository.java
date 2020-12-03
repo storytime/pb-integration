@@ -13,6 +13,8 @@ import java.util.Optional;
 @Transactional
 public interface CurrencyRepository extends JpaRepository<CurrencyRates, Long> {
 
-    Optional<CurrencyRates> findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(CurrencySource cs, CurrencyType ct, Long date);
+    Optional<CurrencyRates> findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(final CurrencySource cs,
+                                                                                    final CurrencyType ct,
+                                                                                    final Long date);
 
 }

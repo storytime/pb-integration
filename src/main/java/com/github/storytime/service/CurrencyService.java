@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import static com.github.storytime.STUtils.createSt;
+import static com.github.storytime.STUtils.getTime;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.db.inner.CurrencySource.PB_CASH;
 import static java.lang.Math.abs;
@@ -56,21 +58,22 @@ public class CurrencyService {
 
     public Optional<CurrencyRates> pbUsdCashDayRates(final ZonedDateTime startDate,
                                                      final CurrencyType currencyType) {
+        final var st = createSt();
         try {
+            LOGGER.debug("Getting PB rate: [{}] - started", currencyType);
             final long beggingOfTheDay = startDate.with(MIN).toInstant().toEpochMilli();
-            final var or = currencyRepository.findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, currencyType, beggingOfTheDay)
+            final var rate = currencyRepository.findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, currencyType, beggingOfTheDay)
                     .or(() -> fetchCurrencyRate(startDate, currencyType));
-            return or;
+            LOGGER.debug("Getting PB rate: [{}], time: [{}] - finish", currencyType, getTime(st));
+            return rate;
         } catch (Exception e) {
-            LOGGER.error("Cannot getZenCurrencySymbol PB Cash rate due to unknown error: [{}]", e.getCause(), e);
+            LOGGER.error("Cannot get PB Cash rate, time: [{}] due to unknown error: [{}] - error", getTime(st), e.getCause(), e);
             return empty();
         }
     }
 
-    //TODO MAKE async
     private Optional<CurrencyRates> fetchCurrencyRate(final ZonedDateTime startDate,
                                                       final CurrencyType currencyType) {
-
         return currencyAsyncService.getPbCashDayRates()
                 .thenApply(r -> r.orElse(emptyList()))
                 .thenApply(r -> r.stream().filter(cr -> isEq(cr.getBaseCcy(), UAH_STR) && isEq(cr.getCcy(), currencyType.toString())).findFirst())

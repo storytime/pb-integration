@@ -60,19 +60,19 @@ public class PbSyncSchedulerExecutor {
 
     @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
     public void firstPrioritySync() {
-        LOGGER.debug("Starting first priority sync");
-        pbSyncService.sync(selectFirstPrioMerchants, regularSyncMapper, onSuccessFk, onEmptyFk, startDateFk, endDateFk);
+       //    LOGGER.debug("Starting first priority sync");
+       // pbSyncService.sync(selectFirstPrioMerchants, regularSyncMapper, onSuccessFk, onEmptyFk, startDateFk, endDateFk);
     }
 
     @Scheduled(fixedRateString = "${sync.second.priority.period.millis}", initialDelayString = "${sync.second.priority.delay.millis}")
     public void secondPrioritySync() {
-        LOGGER.debug("Starting second priority sync");
-        pbSyncService.sync(selectSecondPrioMerchants, regularSyncMapper, onSuccessFk, onEmptyFk, startDateFk, endDateFk);
+       // LOGGER.debug("Starting second priority sync");
+        //pbSyncService.sync(selectSecondPrioMerchants, regularSyncMapper, onSuccessFk, onEmptyFk, startDateFk, endDateFk);
     }
 
     @Scheduled(fixedRateString = "${sync.general.priority.period.millis}", initialDelayString = "${sync.general.priority.delay.millis}")
     public void generalPrioritySync() {
-        LOGGER.debug("Starting general priority sync");
-        pbSyncService.sync(selectGeneralPrioMerchants, regularSyncMapper, onSuccessFk, onEmptyFk, startDateFk, endDateFk);
+       // LOGGER.debug("Starting general priority sync");
+        //pbSyncService.sync(selectGeneralPrioMerchants, regularSyncMapper, onSuccessFk, onEmptyFk, startDateFk, endDateFk);
     }
 }
