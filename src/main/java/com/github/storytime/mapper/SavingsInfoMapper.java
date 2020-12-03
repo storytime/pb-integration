@@ -59,8 +59,8 @@ public class SavingsInfoMapper {
         return new StringBuilder().append(mapped);
     }
 
-    public List<SavingsInfo> updateSavingsInfoList(final BigDecimal totalAmountInUah,
-                                                   final List<SavingsInfo> savingsInfoList) {
+    public List<SavingsInfo> calculatePercents(final BigDecimal totalAmountInUah,
+                                               final List<SavingsInfo> savingsInfoList) {
         return savingsInfoList.stream()
                 .map(sa -> sa.setPercent(sa.getInUah()
                         .multiply(ONE_HUNDRED)
@@ -71,8 +71,6 @@ public class SavingsInfoMapper {
 
     public List<SavingsInfo> getUserSavings(final List<AccountItem> savingsAccounts, final ZenResponse zenDiff) {
         return savingsAccounts
-                .stream()
-                .collect(toUnmodifiableList())
                 .stream()
                 .map(a -> buildSavingsInfo(a, zenResponseMapper.getZenCurrencySymbol(zenDiff, a.getInstrument())))
                 .collect(toUnmodifiableList());

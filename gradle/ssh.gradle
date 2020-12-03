@@ -26,9 +26,11 @@ task uploadComposeFileToServer {
             session(remotes.devServer) {
                 put from: "/Users/bo/IdeaProjects/pb-integration-tmp/docker-compose.yml", into: "/tmp/docker-compose.yml"
                 put from: "/Users/bo/IdeaProjects/pb-integration-tmp/variables.env", into: "/tmp/variables.env"
+                put from: "/Users/bo/IdeaProjects/pb-integration-tmp/app-sync-users-ms-variables.env", into: "/tmp/app-sync-users-ms-variables.env"
                 // need to avoid user name
                 execute("mv /tmp/docker-compose.yml /home/appuser/pb-integration/docker-compose.yml", pty: true)
                 execute("mv /tmp/variables.env  /home/appuser/pb-integration/variables.env", pty: true)
+                execute("mv /tmp/app-sync-users-ms-variables.env  /home/appuser/pb-integration/app-sync-users-ms-variables.env", pty: true)
             }
         }
     }

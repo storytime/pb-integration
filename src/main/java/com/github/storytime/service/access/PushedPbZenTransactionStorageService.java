@@ -36,9 +36,9 @@ public class PushedPbZenTransactionStorageService {
                 .filter(eti -> currentTime - eti.getTransactionItemTime() > customConfig.getPushedPbZenTransactionStorageCleanOlderMillis())
                 .collect(toSet());
 
-        LOGGER.debug("Deleting:[{}] pushed PB from storage that contains:[{}]", toDelete.size(), pushedPbZenTransactionStorage.size());
-        LOGGER.trace("Zen storage:[{}]", pushedPbZenTransactionStorage);
+        LOGGER.debug("Deleting: [{}] pushed PB from storage that contains: [{}]", toDelete.size(), pushedPbZenTransactionStorage.size());
+        LOGGER.trace("Zen storage: [{}]", pushedPbZenTransactionStorage);
         pushedPbZenTransactionStorage.removeAll(toDelete);
-        LOGGER.trace("Current size of PB storage:[{}]", pushedPbZenTransactionStorage);
+        LOGGER.trace("Current size of PB storage: [{}]", pushedPbZenTransactionStorage);
     }
 }

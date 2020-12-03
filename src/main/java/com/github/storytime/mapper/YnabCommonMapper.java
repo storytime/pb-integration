@@ -1,6 +1,6 @@
 package com.github.storytime.mapper;
 
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.ynab.YnabTransactionProxyObject;
 import com.github.storytime.model.ynab.category.YnabCategories;
 import com.github.storytime.model.ynab.transaction.from.TransactionsItem;

@@ -52,7 +52,7 @@ public class PbResponseMapper {
         try {
             if (!body.contains(SIGNATURE)) { // is error response, wrong ip etc
                 final var error = (com.github.storytime.model.pb.jaxb.statement.response.error.Response) jaxbStatementErrorUnmarshaller.unmarshal(new StringReader(body));
-                LOGGER.error("Bank return response with error:[{}]", error.getData().getError().getMessage());
+                LOGGER.error("Bank return response with error: [{}]", error.getData().getError().getMessage());
                 return emptyList();
             }
 
@@ -63,7 +63,7 @@ public class PbResponseMapper {
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements::getStatement)
                     .orElse(emptyList());
         } catch (Exception e) {
-            LOGGER.error("Cannot parse bank response:[{}]", e.getMessage(), e);
+            LOGGER.error("Cannot parse bank response: [{}]", e.getMessage(), e);
             return emptyList();
         }
     }
@@ -80,7 +80,7 @@ public class PbResponseMapper {
                     .orElse(DEFAULT_ACC_BALANCE);
             return bigDecimal;
         } catch (Exception e) {
-            LOGGER.error("Cannot parse bank response:[{}]", e.getMessage(), e);
+            LOGGER.error("Cannot parse bank response: [{}]", e.getMessage(), e);
             return DEFAULT_ACC_BALANCE;
         }
     }

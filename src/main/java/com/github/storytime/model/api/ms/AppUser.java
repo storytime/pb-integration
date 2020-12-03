@@ -1,18 +1,21 @@
-package com.github.storytime.model.db;
+package com.github.storytime.model.api.ms;
 
-import javax.persistence.Entity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-@Entity
-public class AppUser extends BaseEntity {
+@JsonIgnoreProperties(ignoreUnknown=true)
+public class AppUser {
 
-    @NotNull
+    private long Id;
+
+    @NotEmpty
     private String zenAuthToken;
 
-    @NotNull
+    @NotEmpty
     private String timeZone;
 
-    @NotNull
     private Long zenLastSyncTimestamp;
 
     private String ynabAuthToken;
@@ -61,6 +64,15 @@ public class AppUser extends BaseEntity {
 
     public AppUser setYnabSyncEnabled(Boolean ynabSyncEnabled) {
         this.ynabSyncEnabled = ynabSyncEnabled;
+        return this;
+    }
+
+    public long getId() {
+        return Id;
+    }
+
+    public AppUser setId(long id) {
+        Id = id;
         return this;
     }
 }

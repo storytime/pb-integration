@@ -1,7 +1,7 @@
 package com.github.storytime.mapper;
 
 import com.github.storytime.mapper.zen.ZenCommonMapper;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.ynab.YnabToZenSyncHolder;
 import com.github.storytime.model.ynab.YnabZenHolder;
@@ -188,12 +188,12 @@ public class YnabZenCommonMapper {
                 .collect(toUnmodifiableList());
 
         if (sameAccounts.isEmpty()) {
-            LOGGER.debug("Finish! No same accounts for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
+            LOGGER.debug("Finish! No same accounts for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.getId());
             return empty();
         }
 
         if (ynabTransactions.isEmpty()) {
-            LOGGER.debug("Finish! No not synced transactions for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.id);
+            LOGGER.debug("Finish! No not synced transactions for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.getId());
             return empty();
         }
 

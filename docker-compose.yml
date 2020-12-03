@@ -14,7 +14,7 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 100MB
+          memory: 50MB
       restart_policy:
         condition: on-failure
 
@@ -32,7 +32,29 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 100MB
+          memory: 64MB
+      restart_policy:
+        condition: on-failure
+
+  app-sync-users-ms:
+    image: bobobo/app-sync-users-ms:latest
+    env_file:
+      - ./app-sync-users-ms-variables.env
+    ports:
+      - 10090:9000
+    logging:
+      driver: json-file
+    depends_on:
+      - postgres
+    volumes:
+      - app-sync-users-ms-log-vol:/home/app/logs
+    networks:
+      - backend
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 162MB
       restart_policy:
         condition: on-failure
 
@@ -41,7 +63,7 @@ services:
     env_file:
       - ./variables.env
     depends_on:
-      - postgres
+      - app-sync-users-ms
     ports:
       - 10080:8080
     logging:
@@ -64,7 +86,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/appuser/pb-integration/logs
+      device: /home/appuser/pb-integration/logs/app-sync
       o: bind
 
   db-vol:
@@ -79,6 +101,13 @@ volumes:
     driver_opts:
       type: none
       device: /home/appuser/pb-integration/pg-web-admin
+      o: bind
+
+  app-sync-users-ms-log-vol:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/appuser/pb-integration/logs/app-sync-users-ms
       o: bind
 
 networks:

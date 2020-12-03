@@ -29,10 +29,10 @@ public class CustomPayeeSchedulerExecutor {
 
     @Scheduled(fixedRateString = "${refresh.custom.payee.period.millis}", initialDelayString = "${refresh.custom.payee.delay.millis}")
     public void refreshCustomPayeeValue() {
-        LOGGER.debug("Updating custom payee values from DB, count: [{}]", customPayeeValues.size());
+        LOGGER.trace("Updating custom payee values from DB, count: [{}] - start", customPayeeValues.size());
         customPayeeValues.clear();
         customPayeeValues.addAll(customPayeeRepository.findAll());
-        LOGGER.debug("Updated custom payee values from DB, new count: [{}]", customPayeeValues.size());
+        LOGGER.trace("Updated custom payee values from DB, new count: [{}] - finish", customPayeeValues.size());
 
 //        final var cpv = customPayeeValues.stream().collect(Collectors.groupingBy(CustomPayee::getPayee));
 //        cpv.keySet().forEach(k -> {

@@ -1,7 +1,7 @@
 package com.github.storytime.function;
 
 import com.github.storytime.config.props.Constants;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.zen.ZenSyncRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(now().getEpochSecond())
-                    .setForceFetch(Set.of(Constants.ACCOUNT, Constants.INSTRUMENT));
+                    .setForceFetch(Set.of(Constants.ACCOUNT, Constants.INSTRUMENT)); //TODO Make it cachible
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }

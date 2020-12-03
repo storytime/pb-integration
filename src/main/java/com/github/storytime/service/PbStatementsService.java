@@ -4,7 +4,7 @@ import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.mapper.response.PbResponseMapper;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.pb.jaxb.request.Request;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
@@ -72,7 +72,7 @@ public class PbStatementsService {
                                                                 final ZonedDateTime startDate,
                                                                 final ZonedDateTime endDate) {
 
-        LOGGER.info("Syncing appUser:[{}] desc:[{}] mId:[{}] mNumb:[{}] sd:[{}] lastSync:[{}] card:[{}]",
+        LOGGER.info("Syncing user: [{}] desc: [{}] mId: [{}] mNumb: [{}] sd: [{}] lastSync: [{}] card: [{}]",
                 appUser.getId(),
                 ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY),
                 merchantInfo.getId(),
@@ -112,13 +112,13 @@ public class PbStatementsService {
             final var sDate = dateService.millisToIsoFormat(startDate);
             final var rollBackTime = dateService.millisToIsoFormat(rollBackStartDateMillis, u);
 
-            LOGGER.error("Desc:[{}] mId:[{}] invalid signature, rollback from:[{}] to:[{}]", mDesc, mId, sDate, rollBackTime);
+            LOGGER.error("Desc: [{}] mId: [{}] invalid signature, rollback from: [{}] to: [{}]", mDesc, mId, sDate, rollBackTime);
 
             final var now = now().withZoneSameInstant(of(u.getTimeZone())).toInstant().toEpochMilli();
             if (rollBackStartDateMillis > (now - customConfig.getMaxRollbackPeriod())) {
                 merchantService.save(m.setSyncStartDate(rollBackStartDateMillis));
             } else {
-                LOGGER.error("Desc:[{}] mId:[{}] invalid signature, failed to rollback from:[{}] to:[{}] date is too big", mDesc, mId, sDate, rollBackTime);
+                LOGGER.error("Desc: [{}] mId: [{}] invalid signature, failed to rollback from: [{}] to: [{}] date is too big", mDesc, mId, sDate, rollBackTime);
             }
 
             return emptyList();

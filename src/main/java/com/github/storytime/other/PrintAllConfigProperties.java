@@ -32,9 +32,9 @@ public class PrintAllConfigProperties {
     public void handleContextRefreshed(ContextRefreshedEvent event) {
         try {
             printActiveProperties((ConfigurableEnvironment) event.getApplicationContext().getEnvironment());
-            LOGGER.debug("========== Build date:[{}] ==========", versionService.readVersion());
+            LOGGER.debug("========== Build date: [{}] ==========", versionService.readVersion());
         } catch (Exception e) {
-            LOGGER.error("Cannot print properties:[{}]", e.getMessage());
+            LOGGER.error("Cannot print properties: [{}]", e.getMessage());
         }
     }
 

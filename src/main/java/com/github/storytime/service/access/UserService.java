@@ -1,35 +1,33 @@
 package com.github.storytime.service.access;
 
-import com.github.storytime.model.db.AppUser;
-import com.github.storytime.repository.UserRepository;
+import com.github.storytime.model.api.ms.AppUser;
+import com.github.storytime.service.async.UserMsAsyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.Optional.of;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class UserService {
 
-    private final UserRepository repository;
+    private final UserMsAsyncService userMsAsyncService;
 
     @Autowired
-    public UserService(final UserRepository repository) {
-        this.repository = repository;
+    public UserService(final UserMsAsyncService userMsAsyncService) {
+        this.userMsAsyncService = userMsAsyncService;
     }
 
-    public List<AppUser> findAll() {
-        return repository.findAll();
+    public CompletableFuture<List<AppUser>> findAllAsync() {
+        return userMsAsyncService.getAllUsers();
     }
 
-    public Optional<AppUser> findUserById(final long userId) {
-        return repository.findById(userId);
+    public CompletableFuture<Optional<AppUser>> findUserByIdAsync(final long userId) {
+        return userMsAsyncService.getByIdAsync(userId);
     }
 
-    public Optional<AppUser> updateUserLastZenSyncTime(final AppUser u) {
-        return of(repository.save(u));
+    public CompletableFuture<Optional<AppUser>> updateUserLastZenSyncTime(final AppUser appUser) {
+        return userMsAsyncService.saveUser(appUser);
     }
-
 }

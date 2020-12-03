@@ -1,16 +1,18 @@
 package com.github.storytime.service.http;
 
+import com.github.storytime.STUtils;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.currency.pb.cash.CashResponse;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.storytime.STUtils.createSt;
+import static com.github.storytime.STUtils.getTime;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -29,12 +31,14 @@ public class CurrencyHttpService {
     }
 
     public Optional<List<CashResponse>> pullPbCashRate() {
+        final var st = createSt();
         try {
-            LOGGER.info("Pulling PB Cash currency");
-            final ResponseEntity<CashResponse[]> forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
-            return Optional.of(List.of(ofNullable(forEntity.getBody()).orElse(new CashResponse[]{})));
+            final var forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
+            final var cashResponses = Optional.of(List.of(ofNullable(forEntity.getBody()).orElse(new CashResponse[]{})));
+            LOGGER.debug("Pulled PB cash rate, time: [{}] - finish", getTime(st));
+            return cashResponses;
         } catch (Exception e) {
-            LOGGER.error("Cannot getZenCurrencySymbol PB cash rate reason:[{}]", e.getMessage());
+            LOGGER.error("Cannot get PB cash, time: [{}], error: [{}]", getTime(st), e.getMessage(), e);
             return empty();
         }
     }

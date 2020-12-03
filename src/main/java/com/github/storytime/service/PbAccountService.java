@@ -3,7 +3,7 @@ package com.github.storytime.service;
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.mapper.response.PbAccountBalanceResponseMapper;
 import com.github.storytime.mapper.response.PbResponseMapper;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.service.async.PbAsyncService;
@@ -44,7 +44,7 @@ public class PbAccountService {
     public CompletableFuture<List<PbAccountBalance>> getPbAsyncAccounts(final AppUser appUser,
                                                                         final List<MerchantInfo> merchantInfos) {
 
-        LOGGER.debug("Fetching PB accounts, for user: [{}]", appUser.getId());
+        // LOGGER.debug("Fetching PB accounts, for user: [{}]", appUser.getId());
 
         final List<CompletableFuture<PbAccountBalance>> pbAccountCf = merchantInfos
                 .stream()
@@ -58,7 +58,7 @@ public class PbAccountService {
 
     public CompletableFuture<PbAccountBalance> getPbAsyncAccounts(final AppUser u, final MerchantInfo m) {
 
-        LOGGER.info("Fetching PB balance u:[{}] desc:[{}] mId:[{}] mNumb:[{}]", u.getId(), ofNullable(m.getShortDesc()).orElse(EMPTY), m.getId(), right(m.getCardNumber(), CARD_LAST_DIGITS));
+        //LOGGER.debug("Fetching PB balance used: [{}], desc: [{}], mId: [{}], mNumb: [{}]", u.getId(), ofNullable(m.getShortDesc()).orElse(EMPTY), m.getId(), right(m.getCardNumber(), CARD_LAST_DIGITS));
 
         return pbAsyncService.pullPbAccounts(pbRequestBuilder.buildAccountRequest(m))
                 .thenApply(r -> r.map(pbResponseMapper::mapAccountRequestBody).orElse(DEFAULT_ACC_BALANCE))

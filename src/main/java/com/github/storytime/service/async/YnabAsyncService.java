@@ -1,6 +1,6 @@
 package com.github.storytime.service.async;
 
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.ynab.account.YnabAccountResponse;
 import com.github.storytime.model.ynab.budget.YnabBudgetResponse;
 import com.github.storytime.model.ynab.category.YnabCategoryResponse;
@@ -23,45 +23,42 @@ public class YnabAsyncService {
 
     private static final Logger LOGGER = LogManager.getLogger(YnabAsyncService.class);
 
-    private final Executor cfThreadPool;
+    private final Executor pool;
     private final YnabHttpService ynabHttpService;
 
     @Autowired
-    public YnabAsyncService(final YnabHttpService ynabHttpService,
-                            final Executor cfThreadPool) {
+    public YnabAsyncService(final YnabHttpService ynabHttpService, final Executor cfThreadPool) {
         this.ynabHttpService = ynabHttpService;
-        this.cfThreadPool = cfThreadPool;
+        this.pool = cfThreadPool;
     }
 
     public CompletableFuture<Optional<YnabCategoryResponse>> getYnabCategories(final AppUser user,
                                                                                final String budgetToSync) {
-        return supplyAsync(() -> ynabHttpService.getCategories(user, budgetToSync), cfThreadPool);
+        LOGGER.debug("Fetching Ynab categories, for user: [{}], budget: [{}] - stared", user.getId(), budgetToSync);
+        return supplyAsync(() -> ynabHttpService.getCategories(user, budgetToSync), pool);
     }
 
     public CompletableFuture<Optional<YnabAccountResponse>> getYnabAccounts(final AppUser appUser,
-                                                                            final String budgetToSync) {
-        LOGGER.debug("Fetching Ynab accounts, for user: [{}]", appUser.getId());
-        return supplyAsync(() -> ynabHttpService.getAccounts(appUser, budgetToSync), cfThreadPool);
+                                                                            final String budget) {
+        LOGGER.debug("Fetching Ynab accounts, for user: [{}], budget: [{}] - stared", appUser.getId(), budget);
+        return supplyAsync(() -> ynabHttpService.getAccounts(appUser, budget), pool);
     }
 
     public CompletableFuture<Optional<TransactionsFormYnab>> getYnabTransactions(final AppUser appUser,
-                                                                                 final String budgetToReconcile) {
-        LOGGER.debug("Fetching Ynab transactions, for user: [{}]", appUser.getId());
-        return supplyAsync(() -> ynabHttpService.getYnabTransactions(appUser, budgetToReconcile), cfThreadPool);
+                                                                                 final String budget) {
+        LOGGER.debug("Fetching Ynab transactions, for user: [{}], budget: [{}] - started", appUser.getId(), budget);
+        return supplyAsync(() -> ynabHttpService.getYnabTransactions(appUser, budget), pool);
     }
 
     public CompletableFuture<Optional<YnabBudgetResponse>> getYnabBudget(final AppUser appUser) {
-        LOGGER.debug("Fetching Ynab budgets, for user: [{}]", appUser.getId());
-        return supplyAsync(() -> ynabHttpService.getBudget(appUser), cfThreadPool);
+        LOGGER.debug("Fetching Ynab budgets, for user: [{}] - started", appUser.getId());
+        return supplyAsync(() -> ynabHttpService.getBudget(appUser), pool);
     }
 
     public CompletableFuture<Optional<String>> pushToYnab(final AppUser appUser,
                                                           final String id,
                                                           final YnabTransactionsRequest request) {
-        LOGGER.debug("Pushing  zen tr to Ynab, for user: [{}], budget:[{}], tr count [{}]", appUser.getId(), id, request.getTransactions().size());
-        request.getTransactions()
-                .forEach(yTr -> LOGGER.debug("Going to push to YNAB: [{}], payee: [{}], date: [{}], catI: [{}]", yTr.getAmount(), yTr.getPayeeName(), yTr.getDate(), yTr.getCategoryId()));
-
-        return supplyAsync(() -> ynabHttpService.pushToYnab(appUser, id, request), cfThreadPool);
+        LOGGER.debug("Pushing  zen tr to Ynab, for user: [{}], budget: [{}], tr count [{}]", appUser.getId(), id, request.getTransactions().size());
+        return supplyAsync(() -> ynabHttpService.pushToYnab(appUser, id, request), pool);
     }
 }

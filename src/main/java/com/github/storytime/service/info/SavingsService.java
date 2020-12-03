@@ -3,8 +3,8 @@ package com.github.storytime.service.info;
 import com.github.storytime.mapper.SavingsInfoMapper;
 import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
-import com.github.storytime.model.api.SavingsInfoJson;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.SavingsInfoResponse;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.service.SavingsInfoFormatter;
 import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.async.ZenAsyncService;
@@ -13,11 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
+import static com.github.storytime.STUtils.createSt;
+import static com.github.storytime.STUtils.getTime;
 import static com.github.storytime.config.props.Constants.TOTAL;
 import static com.github.storytime.config.props.Constants.UAH;
+import static java.util.Collections.emptyList;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -49,54 +54,58 @@ public class SavingsService {
         this.savingsInfoFormatter = savingsInfoFormatter;
     }
 
-    public String getAllSavingsAsTable(final long userId) {
+    public CompletableFuture<String> getAllSavingsAsTable(final long userId) {
+        final var st = createSt();
         try {
-            LOGGER.debug("Calling get savings info as table for user: [{}]", userId);
-            return userService.findUserById(userId)
-                    .map(appUser -> {
-                        final List<SavingsInfo> savingsInfo = getUserSavings(appUser);
-                        final BigDecimal totalAmountInUah = savingsInfoMapper.getTotalInUah(savingsInfo);
-                        final List<SavingsInfo> savingsInfoNew = savingsInfoMapper.updateSavingsInfoList(totalAmountInUah, savingsInfo);
-                        final var niceSavingsText = savingsInfoMapper.getNiceSavings(savingsInfoNew);
-                        final var niceTotalInUah = savingsInfoFormatter.formatAmount(totalAmountInUah);
-
-                        LOGGER.debug("Finish get savings info as table for user: [{}]", userId);
-                        return niceSavingsText.append(TOTAL).append(niceTotalInUah).append(SPACE).append(UAH).toString();
-                    })
-                    .orElse(EMPTY);
+            LOGGER.debug("Calling get savings info as table for user: [{}] - start", userId);
+            return userService.findUserByIdAsync(userId)
+                    .thenApply(Optional::get)
+                    .thenCompose(this::getUserSavings)
+                    .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
+                    .thenApply(savingsInfo -> savingsInfoMapper.getNiceSavings(savingsInfo)
+                            .append(TOTAL)
+                            .append(savingsInfoFormatter.formatAmount(savingsInfoMapper.getTotalInUah(savingsInfo)))
+                            .append(SPACE)
+                            .append(UAH)
+                            .toString())
+                    .whenComplete((r, e) -> logExecution(userId, getTime(st), e));
         } catch (Exception e) {
-            //todo return server error
-            LOGGER.error("Cannot collect saving info as table for user: [{}] request:[{}]", userId, e.getCause());
-            return EMPTY;
+            LOGGER.error("Cannot collect saving info as table for user: [{}], time [{}], request: [{}]", userId, getTime(st), e.getCause());
+            return completedFuture(EMPTY);
         }
     }
 
-    public ResponseEntity<SavingsInfoJson> getAllSavingsJson(final long userId) {
+    public CompletableFuture<ResponseEntity<SavingsInfoResponse>> getAllSavingsJson(final long userId) {
+        final var st = createSt();
         try {
-            LOGGER.debug("Calling get savings info as JSON for user: [{}]", userId);
-            return userService.findUserById(userId)
-                    .map(appUser -> {
-                        final List<SavingsInfo> savingsInfo = getUserSavings(appUser);
-                        final BigDecimal totalAmountInUah = savingsInfoMapper.getTotalInUah(savingsInfo);
-                        final List<SavingsInfo> savingsInfoNew = savingsInfoMapper.updateSavingsInfoList(totalAmountInUah, savingsInfo);
-                        final var niceTotalInUah = savingsInfoFormatter.formatAmount(totalAmountInUah);
-                        final var response = new SavingsInfoJson().setSavings(savingsInfoNew).setTotal(niceTotalInUah);
-
-                        LOGGER.debug("Finish get savings info as JSON for user: [{}]", userId);
-                        return new ResponseEntity<>(response, OK);
-                    }).orElse(new ResponseEntity<>(NO_CONTENT));
-        } catch (Exception e) {
-            //todo return server error
-            LOGGER.error("Cannot collect saving info as JSON for user: [{}] request:[{}]", userId, e.getCause());
-            return new ResponseEntity<>(NO_CONTENT);
+            LOGGER.debug("Calling get savings info as JSON for user: [{}] - start", userId);
+            return userService.findUserByIdAsync(userId)
+                    .thenApply(Optional::get)
+                    .thenCompose(this::getUserSavings)
+                    .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
+                    .thenApply(updatedSavings -> new SavingsInfoResponse()
+                            .setSavings(updatedSavings)
+                            .setTotal(savingsInfoFormatter.formatAmount(savingsInfoMapper.getTotalInUah(updatedSavings))))
+                    .thenApply(resp -> new ResponseEntity<>(resp, OK))
+                    .whenComplete((resp, ex) -> logExecution(userId, getTime(st), ex));
+        } catch (Throwable e) {
+            LOGGER.error("Cannot get savings info as JSON for user: [{}], time: [{}], error: [{}] - error", userId, getTime(st), e.getCause(), e);
+            return completedFuture(new ResponseEntity<>(NO_CONTENT));
         }
     }
 
+    private CompletableFuture<List<SavingsInfo>> getUserSavings(final AppUser appUser) {
+        return zenAsyncService
+                .zenDiffByUserForSavings(appUser)
+                .thenApply(Optional::get)
+                .thenApply(zenDiff -> savingsInfoMapper.getUserSavings(zenResponseMapper.getSavingsAccounts(zenDiff), zenDiff))
+                .exceptionally(ex -> emptyList());
+    }
 
-    private List<SavingsInfo> getUserSavings(final AppUser appUser) {
-        final var zenDiff = zenAsyncService.zenDiffByUserForSavings(appUser)
-                .orElseThrow(() -> new RuntimeException("Cannot get zen diff to map"));
-        final var savingsAccounts = zenResponseMapper.getSavingsAccounts(zenDiff);
-        return savingsInfoMapper.getUserSavings(savingsAccounts, zenDiff);
+    private void logExecution(long userId, final String time, final Throwable e) {
+        if (e == null)
+            LOGGER.debug("Calling get savings info for user: [{}], time: [{}] - finish", userId, time);
+        else
+            LOGGER.error("Cannot collect saving info for user: [{}], time: [{}], error: [{}] - error", userId, time, e.getCause(), e);
     }
 }

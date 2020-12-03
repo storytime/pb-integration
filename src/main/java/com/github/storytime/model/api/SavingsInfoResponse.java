@@ -2,7 +2,7 @@ package com.github.storytime.model.api;
 
 import java.util.List;
 
-public class SavingsInfoJson {
+public class SavingsInfoResponse {
 
     private List<SavingsInfo> savings;
     private String total;
@@ -11,7 +11,7 @@ public class SavingsInfoJson {
         return savings;
     }
 
-    public SavingsInfoJson setSavings(final List<SavingsInfo> savings) {
+    public SavingsInfoResponse setSavings(final List<SavingsInfo> savings) {
         this.savings = savings;
         return this;
     }
@@ -20,7 +20,7 @@ public class SavingsInfoJson {
         return total;
     }
 
-    public SavingsInfoJson setTotal(final String total) {
+    public SavingsInfoResponse setTotal(final String total) {
         this.total = total;
         return this;
     }

@@ -1,6 +1,6 @@
 package com.github.storytime.function;
 
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.internal.ExpiredPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;

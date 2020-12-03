@@ -1,7 +1,7 @@
 package com.github.storytime.mapper.pb;
 
 import com.github.storytime.mapper.response.ZenResponseMapper;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;

@@ -51,6 +51,7 @@ public class AsyncThreadConfig implements AsyncConfigurer, SchedulingConfigurer 
         final ThreadPoolTaskExecutor cfExecutor = new ThreadPoolTaskExecutor();
         cfExecutor.setCorePoolSize(customConfig.getCfCorePoolSize());
         cfExecutor.setMaxPoolSize(customConfig.getCfMaxPoolSize());
+        cfExecutor.setKeepAliveSeconds(300);
         cfExecutor.setThreadNamePrefix(customConfig.getCfThreadPrefix());
         cfExecutor.initialize();
         return cfExecutor;

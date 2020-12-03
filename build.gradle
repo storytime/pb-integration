@@ -1,14 +1,14 @@
 buildscript {
     ext {
         // libs versions
-        springBootVersion = '2.3.5.RELEASE'
+        springBootVersion = '2.4.0'
         postgresqlVersion = '42.2.18'
         commonsVersion = '3.11'
         verbalRexExpVersion = '1.6'
         flywayVersion = '6.5.0'
         jUnitParamsVersion = '1.1.1'
         jfairyVersion = '0.5.9'
-        httpApacheClientVersion = '4.5.13'
+        httpApacheClientVersion = '4.5.13' //todo: fix logs
         logBookVersion = '2.4.1'
         jaxbImplVersion = '2.3.2'
         jaxbCoreVersion = '2.3.0.1'

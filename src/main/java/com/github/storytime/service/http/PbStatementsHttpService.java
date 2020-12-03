@@ -7,11 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
+import static com.github.storytime.STUtils.createSt;
+import static com.github.storytime.STUtils.getTime;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -31,17 +32,27 @@ public class PbStatementsHttpService {
     }
 
     public Optional<ResponseEntity<String>> pullPbTransactions(final Request requestToBank) {
+        final var st = createSt();
         try {
-            final String pbTransactionsUrl = customConfig.getPbTransactionsUrl();
-            LOGGER.debug("Going to call:[{}]", pbTransactionsUrl);
-            final StopWatch st = new StopWatch();
-            st.start();
-            final Optional<ResponseEntity<String>> response = of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
-            st.stop();
-            LOGGER.debug("Receive bank transactions response, execution time:[{}] sec", st.getTotalTimeSeconds());
+            final var pbTransactionsUrl = customConfig.getPbTransactionsUrl();
+            final var response = of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
+            LOGGER.debug("Fetched bank transactions response, time: [{}] - finish", getTime(st));
             return response;
         } catch (Exception e) {
-            LOGGER.error("Cannot do bank request:[{}]", e.getMessage());
+            LOGGER.error("Cannot fetch bank transactions, time: [{}], errors: [{}] - error", e.getMessage(), getTime(st), e);
+            return empty();
+        }
+    }
+
+    public Optional<ResponseEntity<String>> pullPbAccounts(final Request requestToBank) {
+        final var st = createSt();
+        try {
+            final var pbAccountsUrl = customConfig.getPbAccountsUrl();
+            final var response = of(restTemplate.postForEntity(pbAccountsUrl, requestToBank, String.class));
+            LOGGER.debug("Fetched bank account response, time: [{}] - finish", getTime(st));
+            return response;
+        } catch (Exception e) {
+            LOGGER.error("Cannot fetch bank account, time: [{}], errors: [{}] - error", e.getMessage(), getTime(st), e);
             return empty();
         }
     }

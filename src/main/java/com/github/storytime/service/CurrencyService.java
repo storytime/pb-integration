@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -20,6 +19,7 @@ import static java.lang.Math.abs;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.math.RoundingMode.HALF_UP;
+import static java.time.LocalTime.MIN;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -57,15 +57,17 @@ public class CurrencyService {
     public Optional<CurrencyRates> pbUsdCashDayRates(final ZonedDateTime startDate,
                                                      final CurrencyType currencyType) {
         try {
-            final long beggingOfTheDay = startDate.with(LocalTime.MIN).toInstant().toEpochMilli();
-            return currencyRepository.findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, currencyType, beggingOfTheDay)
+            final long beggingOfTheDay = startDate.with(MIN).toInstant().toEpochMilli();
+            final var or = currencyRepository.findCurrencyRatesByCurrencySourceAndCurrencyTypeAndDate(PB_CASH, currencyType, beggingOfTheDay)
                     .or(() -> fetchCurrencyRate(startDate, currencyType));
+            return or;
         } catch (Exception e) {
-            LOGGER.error("Cannot getZenCurrencySymbol PB Cash rate due to unknown error");
+            LOGGER.error("Cannot getZenCurrencySymbol PB Cash rate due to unknown error: [{}]", e.getCause(), e);
             return empty();
         }
     }
 
+    //TODO MAKE async
     private Optional<CurrencyRates> fetchCurrencyRate(final ZonedDateTime startDate,
                                                       final CurrencyType currencyType) {
 

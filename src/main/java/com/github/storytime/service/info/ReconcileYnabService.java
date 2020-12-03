@@ -4,8 +4,8 @@ import com.github.storytime.mapper.ReconcileCommonMapper;
 import com.github.storytime.mapper.YnabCommonMapper;
 import com.github.storytime.mapper.response.YnabResponseMapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
-import com.github.storytime.model.api.PbZenReconcileJson;
-import com.github.storytime.model.db.AppUser;
+import com.github.storytime.model.api.PbZenReconcileResponse;
+import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.budget.YnabBudgets;
@@ -28,19 +28,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static com.github.storytime.STUtils.createSt;
+import static com.github.storytime.STUtils.getTime;
+import static java.time.YearMonth.now;
 import static java.time.ZoneId.of;
-import static java.time.ZonedDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -93,104 +97,114 @@ public class ReconcileYnabService {
         this.reconcileCommonMapper = reconcileCommonMapper;
     }
 
-    public String reconcileTableDefault(final long userId, final String budgetName) {
+    public CompletableFuture<String> reconcileTableByBudget(final long userId, final String budget) {
+        final var st = createSt();
         try {
-            var appUser = userService.findUserById(userId).orElseThrow();
-            int year = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getYear();
-            int month = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getMonthValue();
-            return this.reconcileTableByDate(userId, budgetName, year, month);
+            LOGGER.debug("Building reconciled YNAB user: [{}], budget: [{}] - stated", userId, budget);
+            return getUserAsync(userId)
+                    .thenApply(user -> reconcileTableByDate(user, budget, getYear(user), getMonth(user)))
+                    .whenComplete((r, e) -> LOGGER.debug("Building reconciled YNAB user: [{}], budget: [{}], time [{}] - finish", userId, budget, getTime(st), e));
         } catch (Exception e) {
-            LOGGER.error("Cannot build reconcile table for user [{}], error [{}] for default dates", userId, e.getCause());
-            return EMPTY;
+            LOGGER.error("Cannot reconciled YNAB user: [{}], time: [{}], error: [{}] - error", userId, getTime(st), e.getCause());
+            return completedFuture(EMPTY);
         }
     }
 
-    public String reconcileTableAll(final long userId) {
+    public CompletableFuture<String> reconcileTableByBudgetForDate(final long userId, final String budget, int year, int mouth) {
+        final var st = createSt();
         try {
-            var appUser = userService.findUserById(userId).orElseThrow();
-            int year = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getYear();
-            int month = YearMonth.now(ZoneId.of(appUser.getTimeZone())).getMonthValue();
-
-            return ynabSyncServiceRepository
-                    .findAllByEnabledIsTrueAndUserId(appUser.getId())
-                    .orElse(emptyList())
-                    .stream()
-                    .map(YnabSyncConfig::getBudgetName)
-                    .collect(toUnmodifiableList())
-                    .stream()
-                    .map(budgetName -> reconcileTableByDate(userId, budgetName, year, month))
-                    .collect(Collectors.joining());
+            LOGGER.debug("Building reconciled YNAB for date for user: [{}], budget: [{}], y: [{}], m: [{}] - stated", userId, budget, year, mouth);
+            return getUserAsync(userId)
+                    .thenApply(user -> reconcileTableByDate(user, budget, year, mouth))
+                    .whenComplete((r, e) -> LOGGER.debug("Building reconciled YNAB budget for user: [{}], budget: [{}], time [{}] - finish", userId, budget, getTime(st), e));
         } catch (Exception e) {
-            LOGGER.error("Cannot build reconcile table for user [{}], error [{}] for default dates", userId, e.getCause());
-            return EMPTY;
+            LOGGER.error("Cannot reconcile YNAB for date for user: [{}], budget: [{}], y: [{}], m: [{}], time: [{}], error: [{}] - error", userId, budget, year, mouth, getTime(st), e.getCause(), e);
+            return completedFuture(EMPTY);
         }
     }
 
-    public ResponseEntity<PbZenReconcileJson> reconcilePbJson(final long userId) {
+    public CompletableFuture<String> reconcileTableDefaultAll(final long userId) {
+        final var st = createSt();
         try {
-            LOGGER.debug("Building pb/zen json, collecting info, for user: [{}]", userId);
-            return userService.findUserById(userId).map(appUser -> {
-
-                var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
-                var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
-                var startDate = now().withZoneSameInstant(of(appUser.getTimeZone())).toInstant().toEpochMilli();
-                var maybeZr = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate).join().orElseThrow();
-                var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
-
-                LOGGER.debug("Combine pb/zen info collecting info, for user: [{}]", userId);
-                var pbZenReconcile = reconcileCommonMapper.mapInfoForAccountJson(zenAccs, pbAccs.join());
-                LOGGER.debug("All is ready pb/zen, for user: [{}]", userId);
-                return new ResponseEntity<>(new PbZenReconcileJson(pbZenReconcile), OK);
-            }).orElse(new ResponseEntity<>(NO_CONTENT));
+            LOGGER.debug("Building YNAB reconcile all user: [{}] - stated", userId);
+            return getUserAsync(userId)
+                    .thenApply(appUser -> ynabSyncServiceRepository
+                            .findAllByEnabledIsTrueAndUserId(appUser.getId())
+                            .orElse(emptyList())
+                            .stream()
+                            .map(YnabSyncConfig::getBudgetName)
+                            .collect(toUnmodifiableList())
+                            .stream()
+                            .map(budgetName -> reconcileTableByDate(appUser, budgetName, getYear(appUser), getMonth(appUser)))
+                            .collect(Collectors.joining()))
+                    .whenComplete((r, e) -> LOGGER.debug("Building YNAB reconcile all user: [{}], time: [{}] - finish", userId, getTime(st), e));
         } catch (Exception e) {
-            LOGGER.error("Cannot build pb/zen json for user [{}], error [{}]", userId, e.getCause());
-            return new ResponseEntity<>(NO_CONTENT);
+            LOGGER.error("Cannot build YNAB reconcile all user: [{}], time: [{}], error: [{}] - error", userId, getTime(st), e.getCause(), e);
+
+            return completedFuture(EMPTY);
         }
     }
 
-    public String reconcileTableByDate(final long userId, final String budgetName, int year, int mouth) {
+    public CompletableFuture<ResponseEntity<PbZenReconcileResponse>> reconcilePbJson(final long userId) {
+        final var st = createSt();
+        try {
+            LOGGER.debug("Building pb/zen json, collecting info, for user: [{}] - stared", userId);
+            return getUserAsync(userId)
+                    .thenApply(appUser -> {
+                        var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
+                        var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
+                        var startDate = ZonedDateTime.now().withZoneSameInstant(of(appUser.getTimeZone())).toInstant().toEpochMilli();
+                        var maybeZr = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate).join().orElseThrow();
+                        var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
+
+                        LOGGER.debug("Combine pb/zen info collecting info, for user: [{}]", userId);
+                        var pbZenReconcile = reconcileCommonMapper.mapInfoForAccountJson(zenAccs, pbAccs.join());
+                        LOGGER.debug("Building pb/zen json, for user: [{}], time: [{}] - finish", userId, getTime(st));
+                        return new ResponseEntity<>(new PbZenReconcileResponse(pbZenReconcile), OK);
+                    }).whenComplete((r, e) -> LOGGER.debug("Building YNAB reconcile all user: [{}], time: [{}] - finish", userId, getTime(st), e));
+        } catch (Exception e) {
+            LOGGER.error("Cannot build pb/zen json for user: [{}], time: [{}], error [{}] - error", userId, getTime(st), e.getCause(), e);
+            return completedFuture(new ResponseEntity<>(NO_CONTENT));
+        }
+    }
+
+    public String reconcileTableByDate(final AppUser appUser, final String budgetName, int year, int mouth) {
         var table = new StringBuilder(EMPTY);
-        try {
-            LOGGER.debug("Building reconcile table, collecting info, for user: [{}]", userId);
-            userService.findUserById(userId).ifPresent(appUser -> {
-                final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
-                final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
+        final long userId = appUser.getId();
 
-                var ynabBudget = mapYnabBudgetData(appUser, budgetName);
-                var ynabAccs = getYnabAccounts(appUser, ynabBudget);
-                var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants())
-                        .orElse(emptyList())
-                        .stream()
-                        .filter(m -> ynabAccs.stream().anyMatch(ynabAccount -> ynabAccount.getName().equals(ofNullable(m.getShortDesc()).orElse(EMPTY))))
-                        .collect(toUnmodifiableList());
-                var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
-                var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
-                var ynabCategories = getYnabCategories(appUser, ynabBudget);
-                var maybeZr = zenAsyncService.zenDiffByUserForReconcile(appUser, startDate).join().orElseThrow();
-                var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
+        final long startDate = dateService.getStartOfMouthInSeconds(year, mouth, appUser);
+        final long endDate = dateService.getEndOfMouthInSeconds(year, mouth, appUser);
 
-                var allInfoForTagTable = mapInfoForTagsTable(appUser, ynabTransactions, ynabCategories, maybeZr, startDate, endDate);
-                var allInfoForAccountTable = reconcileCommonMapper.mapInfoForAccountTable(zenAccs, ynabAccs, pbAccs.join());
+        var ynabBudget = mapYnabBudgetData(appUser, budgetName);
+        var ynabAccs = getYnabAccounts(appUser, ynabBudget);
+        var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants())
+                .orElse(emptyList())
+                .stream()
+                .filter(m -> ynabAccs.stream().anyMatch(ynabAccount -> ynabAccount.getName().equals(ofNullable(m.getShortDesc()).orElse(EMPTY))))
+                .collect(toUnmodifiableList());
+        var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
+        var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
+        var ynabCategories = getYnabCategories(appUser, ynabBudget);
+        var maybeZr = zenAsyncService.zenDiffByUserForReconcile(appUser, startDate).join().orElseThrow();
+        var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
 
-                LOGGER.debug("Combine accounts info collecting info, for user: [{}]", userId);
-                reconcileTableService.buildAccountHeader(table);
-                allInfoForAccountTable.forEach(o -> reconcileTableService.buildAccountRow(table, o.getAccount(), o.getPbAmount(), o.getZenAmount(), o.getYnabAmount(), o.getPbZenDiff(), o.getZenYnabDiff(), o.getStatus()));
-                reconcileTableService.buildAccountLastLine(table);
+        var allInfoForTagTable = mapInfoForTagsTable(appUser, ynabTransactions, ynabCategories, maybeZr, startDate, endDate);
+        var allInfoForAccountTable = reconcileCommonMapper.mapInfoForAccountTable(zenAccs, ynabAccs, pbAccs.join());
 
-                if (!allInfoForTagTable.isEmpty()) {
-                    reconcileTableService.addEmptyLine(table);
-                    reconcileTableService.addEmptyLine(table);
-                    LOGGER.debug("Combine all category info, for user: [{}]", userId);
-                    reconcileTableService.buildTagHeader(table);
-                    allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmountAsString(), t.getYnabAmountAsString(), t.getDiff()));
-                    reconcileTableService.buildTagLastLine(table);
-                }
+        LOGGER.debug("Combine accounts info collecting info, for user: [{}]", userId);
+        reconcileTableService.buildAccountHeader(table);
+        allInfoForAccountTable.forEach(o -> reconcileTableService.buildAccountRow(table, o.getAccount(), o.getPbAmount(), o.getZenAmount(), o.getYnabAmount(), o.getPbZenDiff(), o.getZenYnabDiff(), o.getStatus()));
+        reconcileTableService.buildAccountLastLine(table);
 
-            });
-        } catch (Exception e) {
-            LOGGER.error("Cannot build reconcile table for user [{}], error [{}]", userId, e.getCause());
-            return table.toString();
+        if (!allInfoForTagTable.isEmpty()) {
+            reconcileTableService.addEmptyLine(table);
+            reconcileTableService.addEmptyLine(table);
+            LOGGER.debug("Combine all category info, for user: [{}]", userId);
+            reconcileTableService.buildTagHeader(table);
+            allInfoForTagTable.forEach(t -> reconcileTableService.buildTagSummaryRow(table, t.getCategory(), t.getZenAmountAsString(), t.getYnabAmountAsString(), t.getDiff()));
+            reconcileTableService.buildTagLastLine(table);
         }
+
         LOGGER.debug("Finish building reconcile table, for user: [{}]", userId);
         reconcileTableService.addEmptyLine(table);
         reconcileTableService.addEmptyLine(table);
@@ -265,5 +279,17 @@ public class ReconcileYnabService {
                 .join()
                 .map(ynabResponseMapper::mapTransactionsFromResponse)
                 .orElse(emptyList());
+    }
+
+    private CompletableFuture<AppUser> getUserAsync(long userId) {
+        return userService.findUserByIdAsync(userId).thenApply(Optional::get);
+    }
+
+    private int getYear(final AppUser appUser) {
+        return now(ZoneId.of(appUser.getTimeZone())).getYear();
+    }
+
+    private int getMonth(final AppUser appUser) {
+        return now(ZoneId.of(appUser.getTimeZone())).getMonthValue();
     }
 }

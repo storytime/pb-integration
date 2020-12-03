@@ -35,3 +35,4 @@ logs/
 
 /variables.env
 3.json
+/app-sync-users-ms-variables.env
