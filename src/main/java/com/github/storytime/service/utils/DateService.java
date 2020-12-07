@@ -17,6 +17,8 @@ import static java.time.DayOfWeek.SUNDAY;
 import static java.time.Instant.ofEpochMilli;
 import static java.time.Instant.ofEpochSecond;
 import static java.time.LocalDateTime.of;
+import static java.time.ZoneId.of;
+import static java.time.ZonedDateTime.now;
 import static java.time.ZonedDateTime.ofInstant;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.firstDayOfNextMonth;
@@ -32,10 +34,10 @@ public class DateService {
     private final DateTimeFormatter zenDateTimeFormatter;
 
     @Autowired
-    public DateService(DateTimeFormatter minfinDateTimeFormatter,
-                       DateTimeFormatter isoDateTimeFormatter,
-                       DateTimeFormatter zenDateTimeFormatter,
-                       DateTimeFormatter pbDateTimeFormatter) {
+    public DateService(final DateTimeFormatter minfinDateTimeFormatter,
+                       final DateTimeFormatter isoDateTimeFormatter,
+                       final DateTimeFormatter zenDateTimeFormatter,
+                       final DateTimeFormatter pbDateTimeFormatter) {
         this.minfinDateTimeFormatter = minfinDateTimeFormatter;
         this.isoDateTimeFormatter = isoDateTimeFormatter;
         this.pbDateTimeFormatter = pbDateTimeFormatter;
@@ -52,12 +54,12 @@ public class DateService {
 
     public ZonedDateTime millisUserDate(Long millis, AppUser u) {
         final Instant instant = ofEpochMilli(millis);
-        return ofInstant(instant, ZoneId.of(u.getTimeZone()));
+        return ofInstant(instant, of(u.getTimeZone()));
     }
 
     public ZonedDateTime secToUserDate(Long secs, AppUser u) {
         final Instant instant = ofEpochSecond(secs);
-        return ofInstant(instant, ZoneId.of(u.getTimeZone()));
+        return ofInstant(instant, of(u.getTimeZone()));
     }
 
     public String toPbFormat(Long millis, AppUser u) {
@@ -77,13 +79,13 @@ public class DateService {
     }
 
     public ZonedDateTime xmlDateTimeToZoned(final XMLGregorianCalendar d, final XMLGregorianCalendar t, final String timeZone) {
-        return of(d.getYear(), d.getMonth(), d.getDay(), t.getHour(), t.getMinute(), t.getSecond()).atZone(ZoneId.of(timeZone));
+        return of(d.getYear(), d.getMonth(), d.getDay(), t.getHour(), t.getMinute(), t.getSecond()).atZone(of(timeZone));
     }
 
     public Long zenStringToZonedSeconds(final String dateString, final String timeZone) {
         return LocalDate
                 .parse(dateString, minfinDateTimeFormatter)
-                .atStartOfDay(ZoneId.of(timeZone))
+                .atStartOfDay(of(timeZone))
                 .toInstant()
                 .getEpochSecond();
     }
@@ -116,13 +118,13 @@ public class DateService {
 
     public ZonedDateTime getPbStatementZonedDateTime(String timeZone, XMLGregorianCalendar trandate) {
         return of(trandate.getYear(), trandate.getMonth(), trandate.getDay(), 0, 0, 0)
-                .atZone(ZoneId.of(timeZone));
+                .atZone(of(timeZone));
     }
 
     public long getStartOfMouthInSeconds(int year, int mouth, final AppUser u) {
         return YearMonth.of(year, mouth)
                 .atDay(1)
-                .atStartOfDay(ZoneId.of(u.getTimeZone()))
+                .atStartOfDay(of(u.getTimeZone()))
                 .toInstant()
                 .getEpochSecond();
     }
@@ -130,9 +132,13 @@ public class DateService {
     public long getEndOfMouthInSeconds(int year, int mouth, final AppUser u) {
         return YearMonth.of(year, mouth)
                 .atEndOfMonth()
-                .atStartOfDay(ZoneId.of(u.getTimeZone()))
+                .atStartOfDay(of(u.getTimeZone()))
                 .plusHours(24)
                 .toInstant()
                 .getEpochSecond();
+    }
+
+    public long getUserStarDateInMillis(final AppUser appUser) {
+        return now().withZoneSameInstant(of(appUser.getTimeZone())).toInstant().toEpochMilli();
     }
 }

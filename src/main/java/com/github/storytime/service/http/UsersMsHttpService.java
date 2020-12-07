@@ -38,7 +38,7 @@ public class UsersMsHttpService {
     }
 
     public Optional<AppUser> getUserByIdAsync(final long id) {
-        final StopWatch st = createSt();
+        final var st = createSt();
         try {
             final var url = appServicesConfig.getUsersMsGetByIdUrl().concat(valueOf(id));
             final var forEntity = restTemplate.getForEntity(url, AppUser.class);
@@ -52,7 +52,7 @@ public class UsersMsHttpService {
     }
 
     public List<AppUser> getAllUsers() {
-        final StopWatch st = createSt();
+        final var st = createSt();
         try {
             final var forEntity = restTemplate.getForEntity(appServicesConfig.getUsersMmGetALlUrl(), AppUser[].class);
             final var appUsers = of(requireNonNull(forEntity.getBody()));
@@ -65,7 +65,7 @@ public class UsersMsHttpService {
     }
 
     public Optional<AppUser> saveUser(final AppUser updateUser) {
-        final StopWatch st = createSt();
+        final var st = createSt();
         try {
             final var exchange = restTemplate.exchange(appServicesConfig.getSaveUserUrl(), HttpMethod.PUT, new HttpEntity<>(updateUser), Void.class);
             final var statusCode = exchange.getStatusCode();
@@ -81,6 +81,4 @@ public class UsersMsHttpService {
             return empty();
         }
     }
-
-
 }

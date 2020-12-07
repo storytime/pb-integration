@@ -28,6 +28,7 @@ public class Constants {
     public static final String RATE = " Rate: ";
     public static final String CASH = "cash";
     public static final int CURRENCY_SCALE = 2;
+    public static final int PERCENTS_SCALE = 0;
     public static final String UAH_STR = "UAH";
     public static final int COMMENT_SIZE = 50;
     public static final String USD_COMMENT = "$ ";

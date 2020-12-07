@@ -21,7 +21,7 @@ import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTime;
 import static com.github.storytime.config.props.Constants.TOTAL;
 import static com.github.storytime.config.props.Constants.UAH;
-import static java.util.Collections.emptyList;
+import static com.github.storytime.error.AsyncErrorHandlerUtil.logSavingCf;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
@@ -68,9 +68,9 @@ public class SavingsService {
                             .append(SPACE)
                             .append(UAH)
                             .toString())
-                    .whenComplete((r, e) -> logExecution(userId, getTime(st), e));
+                    .whenComplete((r, e) -> logSavingCf(userId, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot collect saving info as table for user: [{}], time [{}], request: [{}]", userId, getTime(st), e.getCause());
+            LOGGER.error("Cannot collect saving info as table for user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
             return completedFuture(EMPTY);
         }
     }
@@ -86,10 +86,10 @@ public class SavingsService {
                     .thenApply(updatedSavings -> new SavingsInfoResponse()
                             .setSavings(updatedSavings)
                             .setTotal(savingsInfoFormatter.formatAmount(savingsInfoMapper.getTotalInUah(updatedSavings))))
-                    .thenApply(resp -> new ResponseEntity<>(resp, OK))
-                    .whenComplete((resp, ex) -> logExecution(userId, getTime(st), ex));
+                    .thenApply(r -> new ResponseEntity<>(r, OK))
+                    .whenComplete((t, e) -> logSavingCf(userId, st, LOGGER, e));
         } catch (Throwable e) {
-            LOGGER.error("Cannot get savings info as JSON for user: [{}], time: [{}], error: [{}] - error", userId, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot get savings info as JSON for user: [{}], time: [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
             return completedFuture(new ResponseEntity<>(NO_CONTENT));
         }
     }
@@ -98,14 +98,6 @@ public class SavingsService {
         return zenAsyncService
                 .zenDiffByUserForSavings(appUser)
                 .thenApply(Optional::get)
-                .thenApply(zenDiff -> savingsInfoMapper.getUserSavings(zenResponseMapper.getSavingsAccounts(zenDiff), zenDiff))
-                .exceptionally(ex -> emptyList());
-    }
-
-    private void logExecution(long userId, final String time, final Throwable e) {
-        if (e == null)
-            LOGGER.debug("Calling get savings info for user: [{}], time: [{}] - finish", userId, time);
-        else
-            LOGGER.error("Cannot collect saving info for user: [{}], time: [{}], error: [{}] - error", userId, time, e.getCause(), e);
+                .thenApply(zenDiff -> savingsInfoMapper.getUserSavings(zenResponseMapper.getSavingsAccounts(zenDiff), zenDiff));
     }
 }

@@ -41,25 +41,19 @@ public class PbAccountService {
         this.pbResponseMapper = pbResponseMapper;
     }
 
-    public CompletableFuture<List<PbAccountBalance>> getPbAsyncAccounts(final AppUser appUser,
-                                                                        final List<MerchantInfo> merchantInfos) {
-
-        // LOGGER.debug("Fetching PB accounts, for user: [{}]", appUser.getId());
-
+    public CompletableFuture<List<PbAccountBalance>> getPbAsyncAccounts(final List<MerchantInfo> merchantInfos) {
         final List<CompletableFuture<PbAccountBalance>> pbAccountCf = merchantInfos
                 .stream()
-                .map(merchantInfo -> getPbAsyncAccounts(appUser, merchantInfo))
+                .map(this::getPbAsyncAccounts)
                 .collect(toUnmodifiableList());
 
         return CompletableFuture
                 .allOf(pbAccountCf.toArray(new CompletableFuture[pbAccountCf.size()]))
                 .thenApply(aVoid -> pbAccountCf.stream().map(CompletableFuture::join).collect(toUnmodifiableList()));
+        //Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere
     }
 
-    public CompletableFuture<PbAccountBalance> getPbAsyncAccounts(final AppUser u, final MerchantInfo m) {
-
-        //LOGGER.debug("Fetching PB balance used: [{}], desc: [{}], mId: [{}], mNumb: [{}]", u.getId(), ofNullable(m.getShortDesc()).orElse(EMPTY), m.getId(), right(m.getCardNumber(), CARD_LAST_DIGITS));
-
+    public CompletableFuture<PbAccountBalance> getPbAsyncAccounts(final MerchantInfo m) {
         return pbAsyncService.pullPbAccounts(pbRequestBuilder.buildAccountRequest(m))
                 .thenApply(r -> r.map(pbResponseMapper::mapAccountRequestBody).orElse(DEFAULT_ACC_BALANCE))
                 .thenApply(r -> pbAccountBalanceResponseMapper.buildSimpleObject(r, m));

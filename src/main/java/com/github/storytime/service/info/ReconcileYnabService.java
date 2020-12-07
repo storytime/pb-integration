@@ -29,23 +29,22 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTime;
+import static com.github.storytime.error.AsyncErrorHandlerUtil.*;
 import static java.time.YearMonth.now;
-import static java.time.ZoneId.of;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
@@ -103,9 +102,9 @@ public class ReconcileYnabService {
             LOGGER.debug("Building reconciled YNAB user: [{}], budget: [{}] - stated", userId, budget);
             return getUserAsync(userId)
                     .thenApply(user -> reconcileTableByDate(user, budget, getYear(user), getMonth(user)))
-                    .whenComplete((r, e) -> LOGGER.debug("Building reconciled YNAB user: [{}], budget: [{}], time [{}] - finish", userId, budget, getTime(st), e));
+                    .whenComplete((r, e) -> logReconcileByBudgetCf(userId, budget, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot reconciled YNAB user: [{}], time: [{}], error: [{}] - error", userId, getTime(st), e.getCause());
+            LOGGER.error("Cannot reconciled YNAB user: [{}], time: [{}], error: [{}] - error", userId, getTime(st), e.getCause(), e);
             return completedFuture(EMPTY);
         }
     }
@@ -113,12 +112,12 @@ public class ReconcileYnabService {
     public CompletableFuture<String> reconcileTableByBudgetForDate(final long userId, final String budget, int year, int mouth) {
         final var st = createSt();
         try {
-            LOGGER.debug("Building reconciled YNAB for date for user: [{}], budget: [{}], y: [{}], m: [{}] - stated", userId, budget, year, mouth);
+            LOGGER.debug("Building reconciled YNAB for date for user: [{}], budget: [{}]  - stated", userId, budget);
             return getUserAsync(userId)
                     .thenApply(user -> reconcileTableByDate(user, budget, year, mouth))
-                    .whenComplete((r, e) -> LOGGER.debug("Building reconciled YNAB budget for user: [{}], budget: [{}], time [{}] - finish", userId, budget, getTime(st), e));
+                    .whenComplete((r, e) -> logReconcileByBudgetCf(userId, budget, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot reconcile YNAB for date for user: [{}], budget: [{}], y: [{}], m: [{}], time: [{}], error: [{}] - error", userId, budget, year, mouth, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot reconcile YNAB for date for user: [{}], budget: [{}],  time: [{}], error: [{}] - error", userId, budget, getTime(st), e.getCause(), e);
             return completedFuture(EMPTY);
         }
     }
@@ -136,11 +135,10 @@ public class ReconcileYnabService {
                             .collect(toUnmodifiableList())
                             .stream()
                             .map(budgetName -> reconcileTableByDate(appUser, budgetName, getYear(appUser), getMonth(appUser)))
-                            .collect(Collectors.joining()))
-                    .whenComplete((r, e) -> LOGGER.debug("Building YNAB reconcile all user: [{}], time: [{}] - finish", userId, getTime(st), e));
+                            .collect(joining()))
+                    .whenComplete((r, e) -> logReconcileTableDefaultAll(userId, st, LOGGER, e));
         } catch (Exception e) {
             LOGGER.error("Cannot build YNAB reconcile all user: [{}], time: [{}], error: [{}] - error", userId, getTime(st), e.getCause(), e);
-
             return completedFuture(EMPTY);
         }
     }
@@ -148,20 +146,19 @@ public class ReconcileYnabService {
     public CompletableFuture<ResponseEntity<PbZenReconcileResponse>> reconcilePbJson(final long userId) {
         final var st = createSt();
         try {
-            LOGGER.debug("Building pb/zen json, collecting info, for user: [{}] - stared", userId);
+            LOGGER.debug("Building pb/zen reconcile json, for user: [{}] - stared", userId);
             return getUserAsync(userId)
-                    .thenApply(appUser -> {
-                        var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants()).orElse(emptyList());
-                        var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
-                        var startDate = ZonedDateTime.now().withZoneSameInstant(of(appUser.getTimeZone())).toInstant().toEpochMilli();
-                        var maybeZr = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate).join().orElseThrow();
-                        var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
-
-                        LOGGER.debug("Combine pb/zen info collecting info, for user: [{}]", userId);
-                        var pbZenReconcile = reconcileCommonMapper.mapInfoForAccountJson(zenAccs, pbAccs.join());
-                        LOGGER.debug("Building pb/zen json, for user: [{}] - finish", userId);
-                        return new ResponseEntity<>(new PbZenReconcileResponse(pbZenReconcile), OK);
-                    }).whenComplete((r, e) -> LOGGER.debug("Building YNAB reconcile all user: [{}], time: [{}] - finish", userId, getTime(st), e));
+                    .thenCompose(appUser -> {
+                        final var merchantInfos = merchantService.getAllEnabledMerchants();
+                        final var startDate = dateService.getUserStarDateInMillis(appUser);
+                        final var pbAccsFuture = pbAccountService.getPbAsyncAccounts(merchantInfos);
+                        final var zenAccsFuture = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate)
+                                .thenApply(Optional::get)
+                                .thenApply(zenCommonMapper::getZenAccounts);
+                        return zenAccsFuture.thenCombine(pbAccsFuture, reconcileCommonMapper::mapInfoForAccountJson);
+                    })
+                    .thenApply(r -> new ResponseEntity<>(new PbZenReconcileResponse(r), OK))
+                    .whenComplete((r, e) -> logReconcilePbJson(userId, st, LOGGER, e));
         } catch (Exception e) {
             LOGGER.error("Cannot build pb/zen json for user: [{}], time: [{}], error [{}] - error", userId, getTime(st), e.getCause(), e);
             return completedFuture(new ResponseEntity<>(NO_CONTENT));
@@ -182,7 +179,7 @@ public class ReconcileYnabService {
                 .stream()
                 .filter(m -> ynabAccs.stream().anyMatch(ynabAccount -> ynabAccount.getName().equals(ofNullable(m.getShortDesc()).orElse(EMPTY))))
                 .collect(toUnmodifiableList());
-        var pbAccs = pbAccountService.getPbAsyncAccounts(appUser, merchantInfos);
+        var pbAccs = pbAccountService.getPbAsyncAccounts(merchantInfos);
         var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
         var ynabCategories = getYnabCategories(appUser, ynabBudget);
         var maybeZr = zenAsyncService.zenDiffByUserForReconcile(appUser, startDate).join().orElseThrow();
@@ -212,6 +209,7 @@ public class ReconcileYnabService {
         return table.toString();
     }
 
+    //TODO: MOVE to mappers
     private List<ZenYnabTagReconcileProxyObject> mapInfoForTagsTable(final AppUser appUser,
                                                                      final List<TransactionsItem> ynabTransactions,
                                                                      final List<YnabCategories> ynabCategories,

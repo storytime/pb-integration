@@ -30,12 +30,12 @@ public class PbAsyncService {
     }
 
     public CompletableFuture<Optional<ResponseEntity<String>>> pullPbTransactions(final Request requestToBank) {
-        LOGGER.debug("Fetched bank transactions response - started");
+        LOGGER.debug("Fetching bank transactions - started");
         return supplyAsync(() -> pbStatementsHttpService.pullPbTransactions(requestToBank), pool);
     }
 
     public CompletableFuture<Optional<ResponseEntity<String>>> pullPbAccounts(final Request requestToBank) {
-        LOGGER.debug("Fetched bank accounts response - started");
+        LOGGER.debug("Fetching bank accounts  - started");
         return supplyAsync(() -> pbStatementsHttpService.pullPbAccounts(requestToBank), pool);
     }
 }

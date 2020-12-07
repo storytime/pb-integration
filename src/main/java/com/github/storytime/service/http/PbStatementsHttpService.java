@@ -36,7 +36,7 @@ public class PbStatementsHttpService {
         try {
             final var pbTransactionsUrl = customConfig.getPbTransactionsUrl();
             final var response = of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
-            LOGGER.debug("Fetched bank transactions response, time: [{}] - finish", getTime(st));
+            LOGGER.debug("Fetched bank transactions, time: [{}] - finish", getTime(st));
             return response;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch bank transactions, time: [{}], errors: [{}] - error", e.getMessage(), getTime(st), e);
@@ -49,7 +49,7 @@ public class PbStatementsHttpService {
         try {
             final var pbAccountsUrl = customConfig.getPbAccountsUrl();
             final var response = of(restTemplate.postForEntity(pbAccountsUrl, requestToBank, String.class));
-            LOGGER.debug("Fetched bank account response, time: [{}] - finish", getTime(st));
+            LOGGER.debug("Fetched bank account, time: [{}] - finish", getTime(st));
             return response;
         } catch (Exception e) {
             LOGGER.error("Cannot fetch bank account, time: [{}], errors: [{}] - error", e.getMessage(), getTime(st), e);

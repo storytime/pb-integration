@@ -2,8 +2,8 @@ package com.github.storytime.model.ynab;
 
 public class YnabZenSyncObject {
 
-    private String zenId;
-    private String ynabId;
+    private final String zenId;
+    private final String ynabId;
     private String name;
 
     public YnabZenSyncObject(String zenId, String ynabId, String name) {

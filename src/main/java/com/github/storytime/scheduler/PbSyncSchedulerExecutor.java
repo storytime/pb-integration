@@ -32,9 +32,9 @@ public class PbSyncSchedulerExecutor {
 
     private static final Logger LOGGER = getLogger(PbSyncSchedulerExecutor.class);
     private final PbSyncService pbSyncService;
-    private final Function<MerchantService, Optional<List<MerchantInfo>>> selectFirstPrioMerchants;
-    private final Function<MerchantService, Optional<List<MerchantInfo>>> selectSecondPrioMerchants;
-    private final Function<MerchantService, Optional<List<MerchantInfo>>> selectGeneralPrioMerchants;
+    private final Function<MerchantService, List<MerchantInfo>> selectFirstPrioMerchants;
+    private final Function<MerchantService, List<MerchantInfo>> selectSecondPrioMerchants;
+    private final Function<MerchantService, List<MerchantInfo>> selectGeneralPrioMerchants;
     private final Function<List<List<Statement>>, List<ExpiredPbStatement>> regularSyncMapper;
     private final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccessFk;
     private final Consumer<List<MerchantInfo>> onEmptyFk;

@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
+import static java.util.Collections.emptyList;
 
 @Service
 public class MerchantService {
@@ -19,12 +20,14 @@ public class MerchantService {
         this.repository = repository;
     }
 
-    public Optional<List<MerchantInfo>> getAllEnabledMerchantsBySyncPriority(final SyncPriority syncPriority) {
-        return repository.findAllByEnabledIsTrueAndSyncPriority(syncPriority);
+    public List<MerchantInfo> getAllEnabledMerchantsBySyncPriority(final SyncPriority syncPriority) {
+        final var maybeAllByPrio = repository.findAllByEnabledIsTrueAndSyncPriority(syncPriority);
+        return maybeAllByPrio.isEmpty() ? emptyList() : maybeAllByPrio.get();
     }
 
-    public Optional<List<MerchantInfo>> getAllEnabledMerchantsWithPriority() {
-        return repository.findAllByEnabledIsTrueAndSyncPriorityIsNull();
+    public List<MerchantInfo> getAllEnabledMerchantsWithPriority() {
+        final var maybeWithoutPro = repository.findAllByEnabledIsTrueAndSyncPriorityIsNull();
+        return maybeWithoutPro.isEmpty() ? emptyList() : maybeWithoutPro.get();
     }
 
     //TODO: Need to add user id

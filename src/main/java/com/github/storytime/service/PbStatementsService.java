@@ -72,7 +72,7 @@ public class PbStatementsService {
                                                                 final ZonedDateTime startDate,
                                                                 final ZonedDateTime endDate) {
 
-        LOGGER.info("Syncing user: [{}] desc: [{}] mId: [{}] mNumb: [{}] sd: [{}] lastSync: [{}] card: [{}]",
+        LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync: [{}], card: [{}]",
                 appUser.getId(),
                 ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY),
                 merchantInfo.getId(),
@@ -82,14 +82,11 @@ public class PbStatementsService {
                 right(merchantInfo.getCardNumber(), CARD_LAST_DIGITS)
         );
 
-        final Request requestToBank = pbRequestBuilder.buildStatementRequest(merchantInfo, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
+        final var requestToBank = pbRequestBuilder.buildStatementRequest(merchantInfo, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
         return pbAsyncService.pullPbTransactions(requestToBank)
-                .thenApply(Optional::orElseThrow)
+                .thenApply(Optional::get)
                 .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
-                .thenApply(statementList ->
-                        statementList.stream()
-                                .peek(statement -> additionalCommentService.handle(statement, merchantInfo, appUser.getTimeZone()))
-                                .collect(toUnmodifiableList()))
+                .thenApply(stList -> stList.stream().peek(s -> additionalCommentService.handle(s, merchantInfo, appUser.getTimeZone())).collect(toUnmodifiableList()))
                 .handle(getPbServiceAsyncHandler());
     }
 
@@ -114,7 +111,7 @@ public class PbStatementsService {
 
             LOGGER.error("Desc: [{}] mId: [{}] invalid signature, rollback from: [{}] to: [{}]", mDesc, mId, sDate, rollBackTime);
 
-            final var now = now().withZoneSameInstant(of(u.getTimeZone())).toInstant().toEpochMilli();
+            final var now = dateService.getUserStarDateInMillis(u);
             if (rollBackStartDateMillis > (now - customConfig.getMaxRollbackPeriod())) {
                 merchantService.save(m.setSyncStartDate(rollBackStartDateMillis));
             } else {

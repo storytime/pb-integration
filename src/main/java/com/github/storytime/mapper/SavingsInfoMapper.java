@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.storytime.config.props.Constants.PERCENTS_SCALE;
 import static com.github.storytime.model.db.inner.CurrencyType.EUR;
 import static com.github.storytime.model.db.inner.CurrencyType.USD;
 import static java.math.BigDecimal.ZERO;
@@ -64,8 +65,8 @@ public class SavingsInfoMapper {
         return savingsInfoList.stream()
                 .map(sa -> sa.setPercent(sa.getInUah()
                         .multiply(ONE_HUNDRED)
-                        .divide(totalAmountInUah, Constants.CURRENCY_SCALE, HALF_UP)
-                        .setScale(Constants.CURRENCY_SCALE, HALF_DOWN)))
+                        .divide(totalAmountInUah, PERCENTS_SCALE, HALF_UP)
+                        .setScale(PERCENTS_SCALE, HALF_DOWN)))
                 .collect(toUnmodifiableList());
     }
 
