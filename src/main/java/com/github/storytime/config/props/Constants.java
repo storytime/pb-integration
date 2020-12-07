@@ -28,7 +28,7 @@ public class Constants {
     public static final String RATE = " Rate: ";
     public static final String CASH = "cash";
     public static final int CURRENCY_SCALE = 2;
-    public static final int PERCENTS_SCALE = 0;
+    public static final int PERCENTS_SCALE = 2;
     public static final String UAH_STR = "UAH";
     public static final int COMMENT_SIZE = 50;
     public static final String USD_COMMENT = "$ ";
@@ -49,7 +49,7 @@ public class Constants {
     public static final String DOT = ".";
     public static final String RECONCILE_OK = "OK";
     public static final String RECONCILE_NOT_OK = "Not OK!";
-    public static final long ZERO_DIIF = 0l;
+    public static final long ZERO_DIIF = 0L;
     public static final String CARDNUM = "cardnum";
     public static final String COUNTRY = "country";
     public static final String UA = "UA";
