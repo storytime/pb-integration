@@ -366,6 +366,7 @@ public class TransactionItem {
                 .add("opayee = " + originalPayee)
                 .add("payee = " + payee)
                 .add("merchant = " + merchant)
+                .add("\n")
                 .toString();
     }
 

@@ -10,7 +10,6 @@ import com.github.storytime.service.AdditionalCommentService;
 import com.github.storytime.service.utils.CustomPayeeService;
 import com.github.storytime.service.utils.DateService;
 import com.github.storytime.service.utils.RegExpService;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,12 +26,9 @@ import static java.lang.Double.valueOf;
 import static java.lang.Math.abs;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.*;
-import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
 public class PbToZenTransactionMapper {
-
-    private static final Logger LOGGER = getLogger(PbToZenTransactionMapper.class);
 
     private final DateService dateService;
     private final RegExpService regExpService;
@@ -69,14 +65,15 @@ public class PbToZenTransactionMapper {
                                   final byte[] trDateBytes,
                                   final Long card,
                                   final String appcode,
-                                  final String transactionDesc) {
+                                  final String terminal) {
         final var userIdBytes = Long.toString(userId).getBytes();
         final var trAmountByes = String.valueOf(amount).getBytes();
         final var cardBytes = Long.toString(card).getBytes();
         final var appCodeBytes = appcode.getBytes();
-        final var descBytes = transactionDesc.getBytes();
+        final var descBytes = terminal.getBytes();
         final var capacity = userIdBytes.length + trDateBytes.length +
                 trAmountByes.length + cardBytes.length + appCodeBytes.length + descBytes.length;
+
         final var idBytes = ByteBuffer.allocate(capacity)
                 .put(userIdBytes)
                 .put(trDateBytes)
@@ -102,7 +99,7 @@ public class PbToZenTransactionMapper {
         final var trDate = dateService.toZenFormat(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone());
         final var appCode = Optional.ofNullable(pbTr.getAppcode()).orElse(EMPTY);
         final var createdTime = dateService.xmlDateTimeToZoned(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
-        final var idTr = createIdForZen(u.getId(), abs(opAmount), trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode(), transactionDesc);
+        final var idTr = createIdForZen(u.getId(), opAmount, trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode(), pbTr.getTerminal());
         final var userId = zenResponseMapper.findUserId(zenDiff);
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
         final var merchantId = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);
@@ -140,7 +137,6 @@ public class PbToZenTransactionMapper {
         if (regExpService.isCashWithdrawal(transactionDesc)) {
             final var maybeCashCurrency = zenResponseMapper.findCashAccountByCurrencyId(zenDiff, currencyIdByShortLetter);
             maybeCashCurrency.ifPresent(updateIncomeIfCashWithdrawal(newZenTr, opAmount));
-            LOGGER.info("Cash withdrawal transaction");
             return newZenTr;
         }
 
