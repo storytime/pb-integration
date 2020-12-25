@@ -88,7 +88,7 @@ public class PbSyncService {
 
 
         if (newPbTrList.isEmpty()) {
-            LOGGER.info("No new transaction for user: [{}], time: [{}] - nothing to push - sync finished", user.getId(), getTime(st));
+            LOGGER.debug("No new transaction for user: [{}], merch: [{}] time: [{}] - nothing to push - sync finished", user.getId(), selectedMerchants.size(), getTime(st));
             onSuccessFk.accept(emptyList(), selectedMerchants);
             return;
         }
@@ -104,7 +104,7 @@ public class PbSyncService {
                 .thenCompose(zr -> userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
                 .thenAccept(x -> onSuccessFk.accept(newPbTrList, selectedMerchants))
-                .thenAccept(v -> LOGGER.info("User: [{}], time: [{}], transactions: [{}] were pushed. Sync completed!", user.getId(), newPbTrList.size(), getTime(st)));
+                .thenAccept(v -> LOGGER.debug("User: [{}], time: [{}], transactions: [{}] were pushed. Sync completed!", user.getId(), newPbTrList.size(), getTime(st)));
 
     }
 
