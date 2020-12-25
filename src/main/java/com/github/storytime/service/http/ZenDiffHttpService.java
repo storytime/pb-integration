@@ -44,7 +44,7 @@ public class ZenDiffHttpService {
             final var body = ofNullable(zenResponseResponseEntity.getBody());
             LOGGER.info("Finish! Updated zen diff with: [{}], was pushed to zen for user id: [{}], time: [{}] - finish", request.getTransaction(), u.getId(), getTime(st));
             return body;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LOGGER.error("Cannot push zen diff, time: [{}], request: [{}] - error", getTime(st), e.getMessage());
             return empty();
         }
@@ -57,7 +57,7 @@ public class ZenDiffHttpService {
             final var body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), httpEntity, ZenResponse.class).getBody());
             LOGGER.debug("Zen diff was fetched time: [{}] - finish!", getTime(st));
             return body;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             LOGGER.error("Cannot fetch zen diff, time: [{}], error: [{}]", getTime(st), e.getMessage());
             return empty();
         }

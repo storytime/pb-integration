@@ -11,20 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.github.storytime.config.props.Constants.PERCENTS_SCALE;
+import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.db.inner.CurrencyType.EUR;
 import static com.github.storytime.model.db.inner.CurrencyType.USD;
 import static java.math.BigDecimal.ZERO;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.math.RoundingMode.HALF_UP;
+import static java.time.LocalTime.MIN;
+import static java.time.ZoneId.systemDefault;
+import static java.time.ZonedDateTime.now;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Component
@@ -48,15 +48,15 @@ public class SavingsInfoMapper {
         return savingsInfoList.stream()
                 .map(SavingsInfo::getInUah)
                 .reduce(ZERO, BigDecimal::add)
-                .setScale(Constants.ZERO_SCALE, HALF_DOWN);
+                .setScale(ZERO_SCALE, HALF_DOWN);
     }
 
     public StringBuilder getNiceSavings(final List<SavingsInfo> savingsInfoList) {
         final String mapped = savingsInfoList
                 .stream()
-                .sorted(Comparator.comparing(SavingsInfo::getPercent))
+                .sorted(comparing(SavingsInfo::getPercent))
                 .map(savingsInfoFormatter::mapToNiceSavingsString)
-                .collect(Collectors.joining());
+                .collect(joining());
         return new StringBuilder().append(mapped);
     }
 
@@ -81,17 +81,17 @@ public class SavingsInfoMapper {
                                          final String zenCurrencySymbol) {
         final var instrument = accountItem.getInstrument();
         final var balance = accountItem.getBalance();
-        final var startDate = ZonedDateTime.now(ZoneId.systemDefault()).with(LocalTime.MIN);
+        final var startDate = now(systemDefault()).with(MIN);
         final var bal = valueOf(balance);
-        final var inUah = instrument == Constants.USD_ID ? currencyService.pbUsdCashDayRates(startDate, USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
-                instrument == Constants.EUR_ID ? currencyService.pbUsdCashDayRates(startDate, EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) : bal;
+        final var inUah = instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
+                instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) : bal;
 
         return new SavingsInfo()
-                .setBalance(bal.setScale(Constants.ZERO_SCALE, HALF_DOWN))
+                .setBalance(bal.setScale(ZERO_SCALE, HALF_DOWN))
                 .setCurrencySymbol(zenCurrencySymbol)
                 .setTitle(accountItem.getTitle().trim())
-                .setInUah(inUah.setScale(Constants.ZERO_SCALE, HALF_DOWN))
-                .setInUahStr(savingsInfoFormatter.formatAmount(inUah.setScale(Constants.ZERO_SCALE, HALF_DOWN)))
-                .setBalanceStr(savingsInfoFormatter.formatAmount(bal.setScale(Constants.ZERO_SCALE, HALF_DOWN)));
+                .setInUah(inUah.setScale(ZERO_SCALE, HALF_DOWN))
+                .setInUahStr(savingsInfoFormatter.formatAmount(inUah.setScale(ZERO_SCALE, HALF_DOWN)))
+                .setBalanceStr(savingsInfoFormatter.formatAmount(bal.setScale(ZERO_SCALE, HALF_DOWN)));
     }
 }

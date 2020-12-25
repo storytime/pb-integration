@@ -2,6 +2,7 @@ package com.github.storytime.service;
 
 import com.github.storytime.function.CurrencyCommentFunction;
 import com.github.storytime.model.db.MerchantInfo;
+import com.github.storytime.model.db.inner.AdditionalComment;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.utils.DateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +42,11 @@ public class AdditionalCommentService {
                 .getAdditionalComment()
                 .forEach(ac -> {
                     final StringBuilder comment = new StringBuilder(COMMENT_SIZE);
-                    switch (ac) {
-                        case PB_CURRENT_BUSINESS_DAY:
-                            final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
-                            currencyService
-                                    .pbUsdCashDayRates(startDate, USD)
-                                    .ifPresent(rate -> currencyCommentFunction.generate(comment, rate, s, BANK_RATE, USD_COMMENT));
-                            break;
-
-                        default:
-                            break;
+                    if (ac == AdditionalComment.PB_CURRENT_BUSINESS_DAY) {
+                        final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
+                        currencyService
+                                .pbUsdCashDayRates(startDate, USD)
+                                .ifPresent(rate -> currencyCommentFunction.generate(comment, rate, s, BANK_RATE, USD_COMMENT));
                     }
 
                     s.setCustomComment(ofNullable(s.getCustomComment()).orElse(EMPTY) + comment.toString());

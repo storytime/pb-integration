@@ -2,7 +2,6 @@ package com.github.storytime.function;
 
 import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.internal.ExpiredPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.utils.DateService;
@@ -20,22 +19,29 @@ import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 @Component
 public class PbSyncLambdaHolder {
 
-    public Function<List<List<Statement>>, List<ExpiredPbStatement>> getRegularSyncMapper(
-            final Function<Set<ExpiredPbStatement>, Predicate<ExpiredPbStatement>> function,
-            final Set<ExpiredPbStatement> set) {
-        return (pbTrList) -> pbTrList
-                .stream()
-                .flatMap(Collection::stream)
-                .map(ExpiredPbStatement::new)
-                .filter(function.apply(set))
+    public UnaryOperator<List<List<Statement>>> getRegularSyncMapper(
+            final Function<Set<Statement>, Predicate<Statement>> filterFk,
+            final Set<Statement> alreadyPushedToZen) {
+
+        return pbTrLists -> pbTrLists.stream()
+                .map(pbTrList -> flatAndFilterTransactions(filterFk, alreadyPushedToZen, pbTrList))
+                .filter(not(List::isEmpty))
                 .collect(toUnmodifiableList());
     }
 
-    public Function<Set<ExpiredPbStatement>, Predicate<ExpiredPbStatement>> getRegularSyncPredicate() {
+
+    private List<Statement> flatAndFilterTransactions(final Function<Set<Statement>, Predicate<Statement>> filterFk,
+                                                      final Set<Statement> alreadyPushedToZen,
+                                                      final List<Statement> pbTrList) {
+        return pbTrList.stream().filter(filterFk.apply(alreadyPushedToZen)).collect(toUnmodifiableList());
+    }
+
+    public Function<Set<Statement>, Predicate<Statement>> ifWasMapped() {
         return s -> not(s::contains);
     }
 
@@ -54,15 +60,12 @@ public class PbSyncLambdaHolder {
     /**
      * In case if push tr to zen, we need to update merchant time sync time and add handled tr to tmp storage
      */
-    public BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onRegularSyncSuccess(final MerchantService merchantService,
-                                                                                         final Set<ExpiredPbStatement> alreadyMappedPbZenTransaction) {
-        return (pushed, merchantsDbList) -> {
+    public BiConsumer<List<List<Statement>>, List<MerchantInfo>> onRegularSyncSuccess(final Set<Statement> alreadyMappedPbZenTransaction,
+                                                                                      final MerchantService merchantService) {
+        return (pushedByNotCached, merchantsDbList) -> {
             merchantService.saveAll(merchantsDbList);
-            alreadyMappedPbZenTransaction.addAll(pushed);
+            alreadyMappedPbZenTransaction.addAll(pushedByNotCached.stream().flatMap(Collection::stream).collect(toUnmodifiableSet()));
         };
     }
 
-    public Consumer<List<MerchantInfo>> onEmptyFilter(final MerchantService ms) {
-        return ms::saveAll;
-    }
 }

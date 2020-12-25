@@ -2,7 +2,7 @@ package com.github.storytime.config;
 
 
 import com.github.storytime.model.db.CustomPayee;
-import com.github.storytime.model.internal.ExpiredPbStatement;
+import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.repository.CustomPayeeRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +36,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public Set<ExpiredPbStatement> pushedPbZenTransactionStorage() {
+    public Set<Statement> pushedPbZenTransactionStorage() {
         return new HashSet<>();
     }
 

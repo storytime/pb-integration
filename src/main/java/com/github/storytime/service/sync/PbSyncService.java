@@ -1,11 +1,9 @@
 package com.github.storytime.service.sync;
 
-import com.github.storytime.STUtils;
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.internal.ExpiredPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.PbStatementsService;
 import com.github.storytime.service.access.MerchantService;
@@ -23,11 +21,13 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
+import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTime;
-import static com.github.storytime.error.AsyncErrorHandlerUtil.getZenDiffUpdateHandler;
+import static java.util.Collections.emptyList;
+import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
@@ -56,29 +56,58 @@ public class PbSyncService {
     }
 
     @Async
-    public void sync(final Function<MerchantService, List<MerchantInfo>> selectFunction,
-                     final Function<List<List<Statement>>, List<ExpiredPbStatement>> pbTransactionMapper,
-                     final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccessFunction,
-                     final Consumer<List<MerchantInfo>> onEmptyFunction,
-                     final BiFunction<AppUser, MerchantInfo, ZonedDateTime> startDateFunction,
-                     final TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> endDateFunction) {
+    public void sync(final Function<MerchantService, List<MerchantInfo>> selectMerchantsFk,
+                     final UnaryOperator<List<List<Statement>>> filterAlreadyPushed,
+                     final BiConsumer<List<List<Statement>>, List<MerchantInfo>> onSuccessFk,
+                     final BiFunction<AppUser, MerchantInfo, ZonedDateTime> startDateFk,
+                     final TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> endDateFk) {
 
-        final var st = STUtils.createSt();
+        final var st = createSt();
         userService.findAllAsync()
                 .thenAccept(usersList -> usersList.forEach(user -> {
-                            final List<MerchantInfo> selectedMerch = selectFunction.apply(merchantService);
-                            final List<CompletableFuture<List<Statement>>> futureList = selectedMerch
+                            final var selectedMerchants = selectMerchantsFk.apply(merchantService);
+                            final var futureList = selectedMerchants
                                     .stream()
-                                    .map(merch -> getListCompletableFuture(startDateFunction, endDateFunction, user, merch)) // create async requests
+                                    .map(m -> getListCompletableFuture(startDateFk, endDateFk, user, m)) // create async requests
                                     .collect(toUnmodifiableList());
 
                             // Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere
-                            CompletableFuture.allOf(futureList.toArray(new CompletableFuture[selectedMerch.size()]))
-                                    .thenApply(aVoid -> futureList.stream().map(CompletableFuture::join).collect(toUnmodifiableList()))
-                                    .thenAccept(newPbDataList -> handlePbCfRequestData(user, selectedMerch, newPbDataList, pbTransactionMapper, onSuccessFunction, onEmptyFunction, st));
+                            allOf(futureList.toArray(new CompletableFuture[selectedMerchants.size()]))
+                                    .thenApply(v -> futureList.stream().map(CompletableFuture::join).collect(toUnmodifiableList()))
+                                    .thenApply(filterAlreadyPushed)
+                                    .thenAccept(newPbTrList -> handleAll(newPbTrList, user, selectedMerchants, onSuccessFk, st));
                         })
                 );
     }
+
+    public void handleAll(final List<List<Statement>> newPbTrList,
+                          final AppUser user,
+                          final List<MerchantInfo> selectedMerchants,
+                          final BiConsumer<List<List<Statement>>, List<MerchantInfo>> onSuccessFk,
+                          final StopWatch st) {
+
+
+        if (newPbTrList.isEmpty()) {
+            LOGGER.info("No new transaction for user: [{}], time: [{}] - nothing to push - sync finished", user.getId(), getTime(st));
+            onSuccessFk.accept(emptyList(), selectedMerchants);
+            return;
+        }
+
+        LOGGER.info("User: [{}], time: [{}], has: [{}] transactions to push", user.getId(), newPbTrList.size(), getTime(st));
+        // step by step in one thread
+        zenAsyncService.zenDiffByUserForPb(user)
+                .thenApply(Optional::get)
+                .thenApply(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbTrList, zenDiff, user))
+                .thenApply(Optional::get)
+                .thenCompose(tr -> zenAsyncService.pushToZen(user, tr))
+                .thenApply(Optional::get)
+                .thenCompose(zr -> userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
+                .thenApply(Optional::get)
+                .thenAccept(x -> onSuccessFk.accept(newPbTrList, selectedMerchants))
+                .thenAccept(v -> LOGGER.info("User: [{}], time: [{}], transactions: [{}] were pushed. Sync completed!", user.getId(), newPbTrList.size(), getTime(st)));
+
+    }
+
 
     private CompletableFuture<List<Statement>> getListCompletableFuture(final BiFunction<AppUser, MerchantInfo, ZonedDateTime> startDateFunction,
                                                                         final TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> endDateFunction,
@@ -87,34 +116,5 @@ public class PbSyncService {
         final var startDate = startDateFunction.apply(user, merch);
         final var endDate = endDateFunction.calculate(user, merch, startDate);
         return pbStatementsService.getPbTransactions(user, merch, startDate, endDate);
-    }
-
-    public void handlePbCfRequestData(final AppUser appUser,
-                                      final List<MerchantInfo> merchants,
-                                      final List<List<Statement>> newPbDataList,
-                                      final Function<List<List<Statement>>, List<ExpiredPbStatement>> pbTransactionMapper,
-                                      final BiConsumer<List<ExpiredPbStatement>, List<MerchantInfo>> onSuccess,
-                                      final Consumer<List<MerchantInfo>> onEmpty,
-                                      final StopWatch st) {
-
-        final var maybeToPush = pbTransactionMapper.apply(newPbDataList);
-
-        if (maybeToPush.isEmpty()) {
-            LOGGER.info("No new transaction for user: [{}], time: [{}] - nothing to push", appUser.getId(), getTime(st));
-            onEmpty.accept(merchants);
-        } else {
-            LOGGER.info("User: [{}], time: [{}], has: [{}] transactions to sync", appUser.getId(), newPbDataList.size(), getTime(st));
-            // step by step in one thread
-            zenAsyncService.zenDiffByUserForPb(appUser)
-                    .thenApply(Optional::get)
-                    .thenApply(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbDataList, zenDiff, appUser))
-                    .thenApply(Optional::get)
-                    .thenCompose(tr -> zenAsyncService.pushToZen(appUser, tr))
-                    .thenApply(Optional::get)
-                    .thenCompose(zr -> userService.updateUserLastZenSyncTime(appUser.setZenLastSyncTimestamp(zr.getServerTimestamp())))
-                    .thenApply(Optional::get)
-                    .thenAccept(user -> onSuccess.accept(maybeToPush, merchants))
-                    .handle(getZenDiffUpdateHandler());
-        }
     }
 }
