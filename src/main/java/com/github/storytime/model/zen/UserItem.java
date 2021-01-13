@@ -14,7 +14,7 @@ public class UserItem {
     private Object parent;
 
     @JsonProperty("paidTill")
-    private int paidTill;
+    private long paidTill;
 
     @JsonProperty("countryCode")
     private String countryCode;
@@ -50,11 +50,11 @@ public class UserItem {
         this.parent = parent;
     }
 
-    public int getPaidTill() {
+    public long getPaidTill() {
         return paidTill;
     }
 
-    public void setPaidTill(int paidTill) {
+    public void setPaidTill(long paidTill) {
         this.paidTill = paidTill;
     }
 
