@@ -72,13 +72,12 @@ public class PbResponseMapper {
         final var body = ofNullable(responseEntity.getBody()).orElse(EMPTY);
         try {
             final Response parsedResponse = (Response) jaxbAccountOkUnmarshaller.unmarshal(new StringReader(body));
-            final BigDecimal bigDecimal = ofNullable(parsedResponse.getData())
+            return ofNullable(parsedResponse.getData())
                     .map(Response.Data::getInfo)
                     .map(Response.Data.Info::getCardbalance)
                     .map(Response.Data.Info.Cardbalance::getBalance)
                     .map(bal -> BigDecimal.valueOf(bal).setScale(CURRENCY_SCALE, HALF_DOWN))
                     .orElse(DEFAULT_ACC_BALANCE);
-            return bigDecimal;
         } catch (Exception e) {
             LOGGER.error("Cannot parse bank response: [{}]", e.getMessage(), e);
             return DEFAULT_ACC_BALANCE;

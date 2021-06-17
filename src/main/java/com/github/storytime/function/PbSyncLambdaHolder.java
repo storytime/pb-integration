@@ -30,15 +30,14 @@ public class PbSyncLambdaHolder {
 
         return pbTrLists -> pbTrLists.stream()
                 .map(pbTrList -> flatAndFilterTransactions(filterFk, alreadyPushedToZen, pbTrList))
-                .filter(not(List::isEmpty))
-                .collect(toUnmodifiableList());
+                .filter(not(List::isEmpty)).toList();
     }
 
 
     private List<Statement> flatAndFilterTransactions(final Function<Set<Statement>, Predicate<Statement>> filterFk,
                                                       final Set<Statement> alreadyPushedToZen,
                                                       final List<Statement> pbTrList) {
-        return pbTrList.stream().filter(filterFk.apply(alreadyPushedToZen)).collect(toUnmodifiableList());
+        return pbTrList.stream().filter(filterFk.apply(alreadyPushedToZen)).toList();
     }
 
     public Function<Set<Statement>, Predicate<Statement>> ifWasMapped() {

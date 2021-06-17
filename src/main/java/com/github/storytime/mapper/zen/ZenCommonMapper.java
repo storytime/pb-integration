@@ -65,22 +65,18 @@ public class ZenCommonMapper {
                                                                    long endDate,
                                                                    final ZenResponse maybeZr) {
 
-
         final List<TransactionItem> transactionItems = this.getZenTransactions(maybeZr);
         final List<TagItem> zenTags = this.getTags(maybeZr)
                 .stream()
-                .filter(not(t -> t.getTitle().startsWith(PROJECT_TAG)))
-                .collect(toUnmodifiableList());
+                .filter(not(t -> t.getTitle().startsWith(PROJECT_TAG))).toList();
 
         final var zenTr = transactionItems
                 .stream()
                 .filter(not(TransactionItem::isDeleted))
-                .filter(zTr -> zTr.getCreated() >= startDate && zTr.getCreated() < endDate)
-                .collect(toUnmodifiableList())
+                .filter(zTr -> zTr.getCreated() >= startDate && zTr.getCreated() < endDate).toList()
                 .stream()
                 .map(zt -> this.flatToParentCategory(zenTags, zt))
-                .sorted(comparing(TransactionItem::getCreated))
-                .collect(toUnmodifiableList());
+                .sorted(comparing(TransactionItem::getCreated)).toList();
 
         //TODO: add amount of transactions
         final Map<String, DoubleSummaryStatistics> groupByTags = zenTr

@@ -44,12 +44,11 @@ public class PbAccountService {
     public CompletableFuture<List<PbAccountBalance>> getPbAsyncAccounts(final List<MerchantInfo> merchantInfos) {
         final List<CompletableFuture<PbAccountBalance>> pbAccountCf = merchantInfos
                 .stream()
-                .map(this::getPbAsyncAccounts)
-                .collect(toUnmodifiableList());
+                .map(this::getPbAsyncAccounts).toList();
 
         return CompletableFuture
                 .allOf(pbAccountCf.toArray(new CompletableFuture[pbAccountCf.size()]))
-                .thenApply(aVoid -> pbAccountCf.stream().map(CompletableFuture::join).collect(toUnmodifiableList()));
+                .thenApply(aVoid -> pbAccountCf.stream().map(CompletableFuture::join).toList());
         //Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere
     }
 

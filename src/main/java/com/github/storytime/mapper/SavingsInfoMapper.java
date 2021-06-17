@@ -66,15 +66,13 @@ public class SavingsInfoMapper {
                 .map(sa -> sa.setPercent(sa.getInUah()
                         .multiply(ONE_HUNDRED)
                         .divide(totalAmountInUah, PERCENTS_SCALE, HALF_UP)
-                        .setScale(PERCENTS_SCALE, HALF_DOWN)))
-                .collect(toUnmodifiableList());
+                        .setScale(PERCENTS_SCALE, HALF_DOWN))).toList();
     }
 
     public List<SavingsInfo> getUserSavings(final List<AccountItem> savingsAccounts, final ZenResponse zenDiff) {
         return savingsAccounts
                 .stream()
-                .map(a -> buildSavingsInfo(a, zenResponseMapper.getZenCurrencySymbol(zenDiff, a.getInstrument())))
-                .collect(toUnmodifiableList());
+                .map(a -> buildSavingsInfo(a, zenResponseMapper.getZenCurrencySymbol(zenDiff, a.getInstrument()))).toList();
     }
 
     private SavingsInfo buildSavingsInfo(final AccountItem accountItem,

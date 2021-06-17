@@ -1,6 +1,6 @@
-FROM openjdk:11-jre-slim
+FROM amazoncorretto:16.0.1
 RUN cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime
-RUN echo "Europe/Kiev" >  /etc/timezone
+RUN echo "Europe/Kiev" > /etc/timezone
 EXPOSE 10080
 ENV aUser app
 ENV id 1525

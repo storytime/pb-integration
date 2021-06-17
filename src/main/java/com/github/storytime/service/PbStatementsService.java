@@ -86,7 +86,7 @@ public class PbStatementsService {
         return pbAsyncService.pullPbTransactions(requestToBank)
                 .thenApply(Optional::get)
                 .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
-                .thenApply(stList -> stList.stream().peek(s -> additionalCommentService.handle(s, merchantInfo, appUser.getTimeZone())).collect(toUnmodifiableList()))
+                .thenApply(stList -> stList.stream().peek(s -> additionalCommentService.handle(s, merchantInfo, appUser.getTimeZone())).toList())
                 .handle(getPbServiceAsyncHandler());
     }
 
@@ -132,8 +132,7 @@ public class PbStatementsService {
         final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
         return pbStatements
                 .stream()
-                .filter(getStatementComparatorPredicate(end, appUser, comparator, searchStartTime))
-                .collect(toUnmodifiableList());
+                .filter(getStatementComparatorPredicate(end, appUser, comparator, searchStartTime)).toList();
     }
 
     public Predicate<Statement> getStatementComparatorPredicate(final ZonedDateTime end,

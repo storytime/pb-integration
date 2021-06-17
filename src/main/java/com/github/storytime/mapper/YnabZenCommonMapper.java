@@ -113,8 +113,7 @@ public class YnabZenCommonMapper {
                 .filter(zt -> zt.getCreated() < EPOCH_MILLI_FIX)
                 .filter(zt -> zt.getCreated() > ynabSyncConfig.getLastSync()) //only new
                 .filter(zt -> sameAccounts.isExistsByZenId(zt.getIncomeAccount()) || sameAccounts.isExistsByZenId(zt.getOutcomeAccount()))
-                .sorted(comparing(TransactionItem::getCreated))
-                .collect(toUnmodifiableList());
+                .sorted(comparing(TransactionItem::getCreated)).toList();
     }
 
 
@@ -175,8 +174,7 @@ public class YnabZenCommonMapper {
         final YnabZenHolder sameTags = this.mapYnabZenSameTags(zenTags, ynabCategories);
         final List<TransactionItem> zenTransaction = this.selectZenNotSyncedTransactions(zenTransactions, sameAccounts, ynabSyncConfig)
                 .stream()
-                .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt))
-                .collect(toUnmodifiableList());
+                .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt)).toList();
 
         final List<YnabTransactions> ynabTransactions = zenTransaction
                 .stream()
@@ -184,8 +182,7 @@ public class YnabZenCommonMapper {
                         .findByZenId(zTr.getIncomeAccount())
                         .or(() -> sameAccounts.findByZenId(zTr.getOutcomeAccount()))
                         .map(ynabZenSyncObject -> createYnabTransactions(sameTags, zTr, ynabZenSyncObject, user))
-                        .get())
-                .collect(toUnmodifiableList());
+                        .get()).toList();
 
         if (sameAccounts.isEmpty()) {
             LOGGER.debug("Finish! No same accounts for budget: [{}] for user [{}]", ynabSyncConfig.getBudgetName(), user.getId());

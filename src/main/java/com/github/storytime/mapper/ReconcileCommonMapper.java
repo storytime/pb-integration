@@ -25,7 +25,6 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 @Component
 public class ReconcileCommonMapper {
 
-    private static final Logger LOGGER = LogManager.getLogger(ReconcileCommonMapper.class);
     private final YnabCommonMapper ynabCommonMapper;
 
     @Autowired
@@ -33,37 +32,29 @@ public class ReconcileCommonMapper {
         this.ynabCommonMapper = ynabCommonMapper;
     }
 
-
     public List<ZenYnabAccountReconcileProxyObject> mapInfoForAccountTable(final List<AccountItem> zenAccs,
                                                                            final List<YnabAccounts> ynabAccs,
                                                                            final List<PbAccountBalance> pbAccs) {
         return zenAccs
                 .stream()
                 .map(zenAcc -> ynabAccs.stream()
-                        .filter(yA -> yA.getName().equalsIgnoreCase(zenAcc.getTitle()))
-                        .collect(toUnmodifiableList())
+                        .filter(yA -> yA.getName().equalsIgnoreCase(zenAcc.getTitle())).toList()
                         .stream()
-                        .map(yAcc -> this.mapToZenYnabPbAcc(pbAccs, zenAcc, zenAcc.getTitle(), yAcc))
-                        .collect(toUnmodifiableList()))
-                .collect(toUnmodifiableList())
+                        .map(yAcc -> this.mapToZenYnabPbAcc(pbAccs, zenAcc, zenAcc.getTitle(), yAcc)).toList()).toList()
                 .stream()
                 .flatMap(Collection::stream)
-                .sorted(comparing(ZenYnabAccountReconcileProxyObject::getPbAmount))
-                .collect(toUnmodifiableList());
+                .sorted(comparing(ZenYnabAccountReconcileProxyObject::getPbAmount)).toList();
     }
 
 
     public List<PbZenReconcile> mapInfoForAccountJson(final List<AccountItem> zenAccs,
                                                       final List<PbAccountBalance> pbAccs) {
         return zenAccs.stream().map(za -> pbAccs.stream()
-                .filter(pa -> pa.getAccount().equals(za.getTitle()))
-                .collect(toUnmodifiableList())
+                .filter(pa -> pa.getAccount().equals(za.getTitle())).toList()
                 .stream()
-                .map(x -> mapToZenPbAcc(za, x)).collect(toUnmodifiableList()))
-                .collect(toUnmodifiableList())
+                .map(x -> mapToZenPbAcc(za, x)).toList()).toList()
                 .stream()
-                .flatMap(Collection::stream)
-                .collect(toUnmodifiableList());
+                .flatMap(Collection::stream).toList();
     }
 
     private PbZenReconcile mapToZenPbAcc(final AccountItem za, final PbAccountBalance x) {

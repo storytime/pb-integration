@@ -103,8 +103,7 @@ public class PbToZenAccountMapper {
             return FALSE;
         } else {
             final List<String> uniqueCards = concat(zenCards.stream(), cardsFromBank.stream())
-                    .distinct()
-                    .collect(toUnmodifiableList());
+                    .distinct().toList();
             existingAccount.getSyncID().clear();
             existingAccount.setSyncID(uniqueCards);
             existingAccount.setChanged(now().toEpochMilli());
@@ -125,10 +124,7 @@ public class PbToZenAccountMapper {
                                    final List<String> pbCards) {
         return ofNullable(zenAccounts.getSyncID())
                 .orElse(emptyList())
-                .stream()
-                .filter(pbCards::contains)
-                .collect(toUnmodifiableList())
-                .isEmpty();
+                .stream().noneMatch(pbCards::contains);
     }
 
     private List<String> getCardsFromBank(final List<Statement> pbStatementList) {

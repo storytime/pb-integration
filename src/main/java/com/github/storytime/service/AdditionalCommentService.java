@@ -49,7 +49,7 @@ public class AdditionalCommentService {
                                 .ifPresent(rate -> currencyCommentFunction.generate(comment, rate, s, BANK_RATE, USD_COMMENT));
                     }
 
-                    s.setCustomComment(ofNullable(s.getCustomComment()).orElse(EMPTY) + comment.toString());
+                    s.setCustomComment(ofNullable(s.getCustomComment()).orElse(EMPTY) + comment);
                 });
     }
 

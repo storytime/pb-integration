@@ -68,12 +68,11 @@ public class PbSyncService {
                             final var selectedMerchants = selectMerchantsFk.apply(merchantService);
                             final var futureList = selectedMerchants
                                     .stream()
-                                    .map(m -> getListCompletableFuture(startDateFk, endDateFk, user, m)) // create async requests
-                                    .collect(toUnmodifiableList());
+                                    .map(m -> getListCompletableFuture(startDateFk, endDateFk, user, m)).toList();
 
                             // Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere
                             allOf(futureList.toArray(new CompletableFuture[selectedMerchants.size()]))
-                                    .thenApply(v -> futureList.stream().map(CompletableFuture::join).collect(toUnmodifiableList()))
+                                    .thenApply(v -> futureList.stream().map(CompletableFuture::join).toList())
                                     .thenApply(filterAlreadyPushed)
                                     .thenAccept(newPbTrList -> handleAll(newPbTrList, user, selectedMerchants, onSuccessFk, st));
                         })

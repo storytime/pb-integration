@@ -1,6 +1,5 @@
 package com.github.storytime.mapper.response;
 
-import com.github.storytime.error.exception.ZenUserNotFoundException;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.InstrumentItem;
 import com.github.storytime.model.zen.MerchantItem;
@@ -106,7 +105,6 @@ public class ZenResponseMapper {
                 .stream()
                 .filter(AccountItem::getSavings)
                 .filter(not(AccountItem::isArchive))
-                .filter(ai -> ai.getBalance() > EMPTY_BAL)
-                .collect(toUnmodifiableList());
+                .filter(ai -> ai.getBalance() > EMPTY_BAL).toList();
     }
 }

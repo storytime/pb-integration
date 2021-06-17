@@ -56,8 +56,7 @@ public class PbToZenTransactionMapper {
         return statementList
                 .stream()
                 .map(pbStatement -> parseTransactionItem(zenDiff, u, pbStatement))
-                .filter(Objects::nonNull)
-                .collect(toUnmodifiableList());
+                .filter(Objects::nonNull).toList();
     }
 
     private String createIdForZen(final long userId,

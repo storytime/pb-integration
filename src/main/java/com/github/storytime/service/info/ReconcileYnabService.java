@@ -131,8 +131,7 @@ public class ReconcileYnabService {
                             .findAllByEnabledIsTrueAndUserId(appUser.getId())
                             .orElse(emptyList())
                             .stream()
-                            .map(YnabSyncConfig::getBudgetName)
-                            .collect(toUnmodifiableList())
+                            .map(YnabSyncConfig::getBudgetName).toList()
                             .stream()
                             .map(budgetName -> reconcileTableByDate(appUser, budgetName, getYear(appUser), getMonth(appUser)))
                             .collect(joining()))
@@ -177,8 +176,7 @@ public class ReconcileYnabService {
         var merchantInfos = ofNullable(merchantService.getAllEnabledMerchants())
                 .orElse(emptyList())
                 .stream()
-                .filter(m -> ynabAccs.stream().anyMatch(ynabAccount -> ynabAccount.getName().equals(ofNullable(m.getShortDesc()).orElse(EMPTY))))
-                .collect(toUnmodifiableList());
+                .filter(m -> ynabAccs.stream().anyMatch(ynabAccount -> ynabAccount.getName().equals(ofNullable(m.getShortDesc()).orElse(EMPTY)))).toList();
         var pbAccs = pbAccountService.getPbAsyncAccounts(merchantInfos);
         var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
         var ynabCategories = getYnabCategories(appUser, ynabBudget);
@@ -233,8 +231,7 @@ public class ReconcileYnabService {
         return allInfoForTagTable
                 .stream()
                 .filter(not(x -> x.getCategory().isEmpty()))
-                .sorted(comparing(ZenYnabTagReconcileProxyObject::getZenAmount).reversed())
-                .collect(toUnmodifiableList());
+                .sorted(comparing(ZenYnabTagReconcileProxyObject::getZenAmount).reversed()).toList();
     }
 
     public List<YnabAccounts> getYnabAccounts(final AppUser appUser,

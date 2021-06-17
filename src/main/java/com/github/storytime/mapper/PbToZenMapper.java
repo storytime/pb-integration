@@ -51,8 +51,7 @@ public class PbToZenMapper {
                 .stream()
                 .map(t -> pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, appUser))
                 .flatMap(Collection::stream)
-                .sorted(comparingLong(TransactionItem::getCreated).reversed())
-                .collect(toUnmodifiableList());
+                .sorted(comparingLong(TransactionItem::getCreated).reversed()).toList();
 
         return of(new ZenDiffRequest()
                 .setCurrentClientTimestamp(now().getEpochSecond())

@@ -51,8 +51,7 @@ public class YnabCommonMapper {
         final List<YnabTransactionProxyObject> ynabTransProxy = ynabTransactions
                 .stream()
                 .filter(transactionsItem -> filterTransactions(appUser, startDate, endDate, transactionsItem))
-                .map(transactionsItem -> mapTransactionsToSimpleRepresentation(ynabCategories, transactionsItem))
-                .collect(toUnmodifiableList());
+                .map(transactionsItem -> mapTransactionsToSimpleRepresentation(ynabCategories, transactionsItem)).toList();
 
         return ynabTransProxy
                 .stream()

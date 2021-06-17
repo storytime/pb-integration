@@ -35,8 +35,7 @@ public class YnabResponseMapper {
                                         .stream()
                                         .flatMap(categoryGroupsItem -> ofNullable(categoryGroupsItem.getCategories())
                                                 .orElse(emptyList())
-                                                .stream()))
-                        .collect(toUnmodifiableList()))
+                                                .stream())).toList())
                 .orElse(emptyList());
     }
 
@@ -53,8 +52,7 @@ public class YnabResponseMapper {
                 .getYnabBudgetData()
                 .getBudgets()
                 .stream()
-                .filter(budget -> budgetNames.contains(budget.getName()))
-                .collect(toUnmodifiableList());
+                .filter(budget -> budgetNames.contains(budget.getName())).toList();
     }
 
     public Optional<YnabBudgets> mapBudgets(final String budgetToReconcile,
@@ -63,8 +61,7 @@ public class YnabResponseMapper {
                 .getYnabBudgetData()
                 .getBudgets()
                 .stream()
-                .filter(budget -> budgetToReconcile.equalsIgnoreCase(budget.getName()))
-                .collect(toUnmodifiableList())
+                .filter(budget -> budgetToReconcile.equalsIgnoreCase(budget.getName())).toList()
                 .stream()
                 .findFirst();
     }
@@ -74,8 +71,7 @@ public class YnabResponseMapper {
                 .getData()
                 .getTransactions()
                 .stream()
-                .filter(not(TransactionsItem::isDeleted))
-                .collect(toUnmodifiableList());
+                .filter(not(TransactionsItem::isDeleted)).toList();
     }
 
 }
