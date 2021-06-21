@@ -21,7 +21,6 @@ remotes {
 task uploadComposeFileToServer {
     doLast {
 
-
         ssh.run {
             session(remotes.devServer) {
                 put from: "/Users/bo/IdeaProjects/pb-integration-tmp/docker-compose.yml", into: "/tmp/docker-compose.yml"
