@@ -8,8 +8,7 @@ buildscript {
         flywayVersion = '7.10.0'
         jUnitParamsVersion = '1.1.1'
         jfairyVersion = '0.5.9'
-        httpApacheClientVersion = '4.5.13' //todo: fix logs
-        logBookVersion = '2.11.0'
+        logBookVersion = '2.4.1'
         jaxbImplVersion = '2.3.2'
         jaxbCoreVersion = '2.3.0.1'
         validationVersion = '2.0.1.Final'
@@ -53,7 +52,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql:$postgresqlVersion")
     implementation("org.zalando:logbook-spring-boot-starter:$logBookVersion")
-    implementation("org.apache.httpcomponents:httpclient:$httpApacheClientVersion")
     implementation("org.apache.commons:commons-lang3:$commonsVersion")
     implementation("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
