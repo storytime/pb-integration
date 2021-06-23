@@ -9,7 +9,7 @@ buildscript {
         jUnitParamsVersion = '1.1.1'
         jfairyVersion = '0.5.9'
         httpApacheClientVersion = '4.5.13' //todo: fix logs
-        logBookVersion = '2.4.1'
+        logBookVersion = '2.11.0'
         jaxbImplVersion = '2.3.2'
         jaxbCoreVersion = '2.3.0.1'
         validationVersion = '2.0.1.Final'

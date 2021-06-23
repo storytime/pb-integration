@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  postgres:
+  pg:
     image: postgres:11-alpine
     env_file:
       - ./variables.env
@@ -18,7 +18,7 @@ services:
       restart_policy:
         condition: on-failure
 
-  postgres-admin-web-ui:
+  pg-admin-web-ui:
     image: dpage/pgadmin4
     env_file:
       - ./variables.env
@@ -45,7 +45,7 @@ services:
     logging:
       driver: json-file
     depends_on:
-      - postgres
+      - pg
     volumes:
       - app-sync-users-ms-log-vol:/home/app/logs
     networks:
