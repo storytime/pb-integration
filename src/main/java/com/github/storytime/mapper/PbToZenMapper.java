@@ -20,7 +20,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingLong;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Component
 public class PbToZenMapper {

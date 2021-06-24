@@ -1,6 +1,5 @@
 package com.github.storytime.service.http;
 
-import com.github.storytime.STUtils;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.model.currency.pb.cash.CashResponse;
 import org.apache.logging.log4j.Logger;

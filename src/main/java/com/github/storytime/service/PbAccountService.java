@@ -3,7 +3,6 @@ package com.github.storytime.service;
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.mapper.response.PbAccountBalanceResponseMapper;
 import com.github.storytime.mapper.response.PbResponseMapper;
-import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
 import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.service.async.PbAsyncService;
@@ -15,10 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static com.github.storytime.config.props.Constants.*;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.apache.commons.lang3.StringUtils.right;
+import static com.github.storytime.config.props.Constants.DEFAULT_ACC_BALANCE;
 
 @Service
 public class PbAccountService {

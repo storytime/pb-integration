@@ -6,7 +6,6 @@ import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.mapper.response.PbResponseMapper;
 import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.MerchantInfo;
-import com.github.storytime.model.pb.jaxb.request.Request;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.async.PbAsyncService;
@@ -27,13 +26,10 @@ import java.util.function.Predicate;
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
 import static com.github.storytime.config.props.Constants.EMPTY;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.getPbServiceAsyncHandler;
-import static java.time.ZoneId.of;
-import static java.time.ZonedDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.StringUtils.right;
 
 @Service

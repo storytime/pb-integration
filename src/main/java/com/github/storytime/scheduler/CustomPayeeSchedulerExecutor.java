@@ -8,9 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static com.github.storytime.config.props.Constants.*;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component

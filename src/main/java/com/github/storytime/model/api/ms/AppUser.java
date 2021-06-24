@@ -3,9 +3,8 @@ package com.github.storytime.model.api.ms;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AppUser {
 
     private long Id;

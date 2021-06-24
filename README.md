@@ -7,35 +7,43 @@
 [![](https://images.microbadger.com/badges/version/bobobo/pb-integration.svg)](https://microbadger.com/images/bobobo/pb-integration "MASTER The latest container build version")
 
 ## Overview
-Simple integration service that collects data by schedule form bank and pushes it to [ZenMoney](https://zenmoney.ru/) with some customizations like currencySymbol rate.
+
+Simple integration service that collects data by schedule form bank and pushes it to [ZenMoney](https://zenmoney.ru/)
+with some customizations like currencySymbol rate.
 
 Supported banks:
 
 - [Private bank (not for business)](https://www.privat24.ua/)
 
-## Requirements 
+## Requirements
+
 - Java 11
 - Gradle 4 or more
-- Docker 18.06.0+ and Docker-compose(3.7) 1.21+ 
+- Docker 18.06.0+ and Docker-compose(3.7) 1.21+
 
 ## How to
 
-To build (gradle push docker-compose with all params to server): 
+To build (gradle push docker-compose with all params to server):
 
-- Copy `gradle.properties.template` to `gradle.properties` where  `PB_SSH_HOST` and `PB_SSH_USER` - credentials for ssh login
+- Copy `gradle.properties.template` to `gradle.properties` where  `PB_SSH_HOST` and `PB_SSH_USER` - credentials for ssh
+  login
 - Run: `./gradlew clean build` to build application
-- Copy `variables.env.template` to `variables.env` - settings for app in docker container; `./gradlew upladComposeFileToServer` - to push docker files to server
+- Copy `variables.env.template` to `variables.env` - settings for app in docker
+  container; `./gradlew upladComposeFileToServer` - to push docker files to server
 
 ## Docker
-On prod app is running in docker container check `docker-compose.yml`,  **watchtower** container is used for auto-updates for the main container.
+
+On prod app is running in docker container check `docker-compose.yml`,  **watchtower** container is used for
+auto-updates for the main container.
 
 #### Docker swarm
 
-To avoid JVM **out of memory error**  in docker container app must be executed in swarm mode in order to set docker memory. Also it will be nice to have **swap** on the target system.
+To avoid JVM **out of memory error**  in docker container app must be executed in swarm mode in order to set docker
+memory. Also it will be nice to have **swap** on the target system.
 
 [Very basis expiation of the OOM problem](https://medium.com/@yortuc/jvm-memory-allocation-in-docker-container-a26bbce3a3f2)
 
-Swarm commands: 
+Swarm commands:
 
 - `docker stack rm sync`  - remove docker stack called *sync*
 
@@ -43,15 +51,18 @@ Swarm commands:
 
 - `docker stack deploy -c docker-compose.yml sync` - run docker stack called *sync*
 
-
 ## Database
+
 **Docker:** DB configs can be found in `variables.env` file
 
-**Without docker:** Some properties are taken from env variable(if exists), all other located in: `application.properties` 
+**Without docker:** Some properties are taken from env variable(if exists), all other located
+in: `application.properties`
 
-### How to insert custom comment generator 
-`INSERT INTO MERCHANT_INFO_ADDITIONAL_COMMENT ( MERCHANT_INFO_ID , ADDITIONAL_COMMENT ) VALUES ( 1, 'NBU_PREV_MOUTH_LAST_BUSINESS_DAY')` 
+### How to insert custom comment generator
+
+`INSERT INTO MERCHANT_INFO_ADDITIONAL_COMMENT ( MERCHANT_INFO_ID , ADDITIONAL_COMMENT ) VALUES ( 1, 'NBU_PREV_MOUTH_LAST_BUSINESS_DAY')`
 
 ## Links
-1. [How configure ssh auto deploy via pipeline](https://community.atlassian.com/t5/Bitbucket-questions/How-do-I-set-up-ssh-public-key-authentication-so-that-I-can-use/qaq-p/171671) 
+
+1. [How configure ssh auto deploy via pipeline](https://community.atlassian.com/t5/Bitbucket-questions/How-do-I-set-up-ssh-public-key-authentication-so-that-I-can-use/qaq-p/171671)
 2. [Top-like interface for container metrics](https://github.com/bcicen/ctop) 

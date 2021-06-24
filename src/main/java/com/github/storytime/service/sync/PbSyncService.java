@@ -28,7 +28,6 @@ import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTime;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.allOf;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
@@ -103,7 +102,7 @@ public class PbSyncService {
                 .thenCompose(zr -> userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
                 .thenAccept(x -> onSuccessFk.accept(newPbTrList, selectedMerchants));
-               // .thenAccept(v -> LOGGER.debug("User: [{}], time: [{}], transactions: [{}] were pushed. Sync completed!", user.getId(), newPbTrList.size(), getTime(st)));
+        // .thenAccept(v -> LOGGER.debug("User: [{}], time: [{}], transactions: [{}] were pushed. Sync completed!", user.getId(), newPbTrList.size(), getTime(st)));
 
     }
 

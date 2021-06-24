@@ -18,7 +18,6 @@ import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 
 @Component
@@ -32,7 +31,6 @@ public class PbSyncLambdaHolder {
                 .map(pbTrList -> flatAndFilterTransactions(filterFk, alreadyPushedToZen, pbTrList))
                 .filter(not(List::isEmpty)).toList();
     }
-
 
     private List<Statement> flatAndFilterTransactions(final Function<Set<Statement>, Predicate<Statement>> filterFk,
                                                       final Set<Statement> alreadyPushedToZen,
@@ -66,5 +64,4 @@ public class PbSyncLambdaHolder {
             alreadyMappedPbZenTransaction.addAll(pushedByNotCached.stream().flatMap(Collection::stream).collect(toUnmodifiableSet()));
         };
     }
-
 }

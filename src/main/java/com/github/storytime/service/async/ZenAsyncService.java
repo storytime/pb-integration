@@ -68,6 +68,6 @@ public class ZenAsyncService {
     public CompletableFuture<Optional<ZenResponse>> pushToZen(final AppUser appUser,
                                                               final ZenDiffRequest request) {
         LOGGER.debug("Pushing zen diff for user: [{}] - stared", appUser.getId());
-        return supplyAsync(() -> zenDiffHttpService.pushToZen(appUser, request));
+        return supplyAsync(() -> zenDiffHttpService.pushToZen(appUser, request), pool);
     }
 }

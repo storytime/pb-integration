@@ -17,7 +17,6 @@ import java.util.Set;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Component
 public class YnabResponseMapper {

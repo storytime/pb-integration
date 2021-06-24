@@ -5,8 +5,6 @@ import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.model.ynab.account.YnabAccounts;
 import com.github.storytime.model.ynab.common.ZenYnabAccountReconcileProxyObject;
 import com.github.storytime.model.zen.AccountItem;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +18,6 @@ import static com.github.storytime.service.ReconcileTableService.X;
 import static java.lang.String.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Component
 public class ReconcileCommonMapper {
