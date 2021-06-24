@@ -57,7 +57,7 @@ public class PbSyncSchedulerExecutor {
     @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
     public void firstPrioritySync() {
         LOGGER.debug("Starting first priority sync");
-        //pbSyncService.sync(selectFirstPrioMerchantsFk, ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
+        pbSyncService.sync(selectFirstPrioMerchantsFk, ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
     }
 
     @Scheduled(fixedRateString = "${sync.second.priority.period.millis}", initialDelayString = "${sync.second.priority.delay.millis}")
