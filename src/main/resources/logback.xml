@@ -19,7 +19,7 @@
     <property name="ERROR_LOG_FILE" value="/home/app/logs/error.log"/>
     <property name="MAX_LOG_SIZE" value="512MB"/>
     <property name="TOTAL_CAP_SIZE" value="1GB"/>
-    <property name="MAX_HISTORY_SIZE" value="12"/>
+    <property name="MAX_HISTORY_SIZE" value="60"/>
 
 
     <!-- appenders -->
