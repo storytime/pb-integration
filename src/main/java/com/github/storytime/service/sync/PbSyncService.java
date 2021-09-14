@@ -101,9 +101,8 @@ public class PbSyncService {
                 .thenApply(Optional::get)
                 .thenCompose(zr -> userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
-                .thenAccept(x -> onSuccessFk.accept(newPbTrList, selectedMerchants));
-        // .thenAccept(v -> LOGGER.debug("User: [{}], time: [{}], transactions: [{}] were pushed. Sync completed!", user.getId(), newPbTrList.size(), getTime(st)));
-
+                .thenAccept(x -> onSuccessFk.accept(newPbTrList, selectedMerchants))
+                .thenAccept(v -> LOGGER.debug("User: [{}], time: [{}], transactions: [{}] were pushed. Sync completed!", user.getId(), newPbTrList.size(), getTime(st)));
     }
 
 

@@ -1,38 +1,14 @@
-buildscript {
-    ext {
-        // libs versions
-        springBootVersion = '2.5.1'
-        postgresqlVersion = '42.2.22'
-        commonsVersion = '3.12.0'
-        verbalRexExpVersion = '1.8'
-        flywayVersion = '7.10.0'
-        jUnitParamsVersion = '1.1.1'
-        jfairyVersion = '0.5.9'
-        logBookVersion = '2.4.1'
-        jaxbImplVersion = '2.3.2'
-        jaxbCoreVersion = '2.3.0.1'
-        validationVersion = '2.0.1.Final'
-        streamExVersion = '0.7.3'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
-}
-
 plugins {
+    id 'org.springframework.boot' version '2.5.4'
     id "org.sonarqube" version "3.3"
     id 'com.adarshr.test-logger' version "3.0.0"
     id "org.hidetake.ssh" version "2.10.1" //ssh.gradle
-    id 'net.nemerosa.versioning' version '2.14.0' // utils.gradle
+    id 'net.nemerosa.versioning' version '2.15.0' // utils.gradle
 }
 
 apply from: 'gradle/ssh.gradle'
 apply from: 'gradle/utils.gradle'
 apply from: 'gradle/xjc.gradle'
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -44,26 +20,27 @@ sourceCompatibility = '16'
 archivesBaseName = 'pb-integration'
 
 repositories {
+    maven { url 'https://repo.spring.io/release' }
     mavenCentral()
 }
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.postgresql:postgresql:$postgresqlVersion")
-    implementation("org.zalando:logbook-spring-boot-starter:$logBookVersion")
-    implementation("org.apache.commons:commons-lang3:$commonsVersion")
-    implementation("ru.lanwen.verbalregex:java-verbal-expressions:$verbalRexExpVersion")
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.postgresql:postgresql:42.2.23")
+    implementation("org.zalando:logbook-spring-boot-starter:2.4.1")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("ru.lanwen.verbalregex:java-verbal-expressions:1.8")
+    implementation("org.flywaydb:flyway-core:7.15.0")
     implementation('org.springframework.boot:spring-boot-starter-actuator')
-    implementation("com.sun.xml.bind:jaxb-impl:$jaxbImplVersion")
-    implementation("com.sun.xml.bind:jaxb-core:$jaxbCoreVersion")
-    implementation("javax.validation:validation-api:$validationVersion")
-    implementation("one.util:streamex:$streamExVersion")
+    implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
+    implementation("com.sun.xml.bind:jaxb-core:2.3.0.1")
+    implementation("javax.validation:validation-api:2.0.1.Final")
+    implementation("one.util:streamex:0.7.3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("pl.pragmatists:JUnitParams:$jUnitParamsVersion")
-    testImplementation("io.codearte.jfairy:jfairy:$jfairyVersion")
+    testImplementation("pl.pragmatists:JUnitParams:1.1.1")
+    testImplementation("io.codearte.jfairy:jfairy:0.5.9")
 }
 
 
@@ -83,7 +60,6 @@ subprojects {
         maxParallelForks = Runtime.runtime.availableProcessors()
     }
 }
-
 
 // compileJava.dependsOn xsd2java
 
