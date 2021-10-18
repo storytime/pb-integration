@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import static com.github.storytime.other.Utils.createHeader;
 import static java.time.Instant.now;
+import static java.util.Set.of;
 
 @Component
 public class ZenDiffLambdaHolder {
@@ -48,7 +49,7 @@ public class ZenDiffLambdaHolder {
                                                                 final YnabSyncConfig ynabSyncConfig) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(clientSyncTime);
-            zenSyncRequest.setForceFetch(Set.of(Constants.TAG, Constants.ACCOUNT));
+            zenSyncRequest.setForceFetch(of(Constants.TAG, Constants.ACCOUNT));
             zenSyncRequest.setServerTimestamp(ynabSyncConfig.getLastSync());
             return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
         };
@@ -59,7 +60,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(now().getEpochSecond())
-                    .setForceFetch(Set.of(Constants.ACCOUNT, Constants.INSTRUMENT)); //TODO Make it cachible
+                    .setForceFetch(of(Constants.ACCOUNT, Constants.INSTRUMENT)); //TODO Make it cachible
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
@@ -69,7 +70,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(startDate)
-                    .setForceFetch(Set.of(Constants.TAG, Constants.ACCOUNT));
+                    .setForceFetch(of(Constants.TAG, Constants.ACCOUNT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
@@ -79,7 +80,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(startDate)
-                    .setForceFetch(Set.of(Constants.ACCOUNT));
+                    .setForceFetch(of(Constants.ACCOUNT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }

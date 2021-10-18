@@ -96,6 +96,7 @@ import javax.xml.bind.annotation.*;
  * &lt;/complexType>
  * </pre>
  */
+@Deprecated
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
         "merchant",

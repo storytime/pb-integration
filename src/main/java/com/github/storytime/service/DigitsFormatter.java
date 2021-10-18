@@ -14,7 +14,7 @@ import static com.github.storytime.config.props.Constants.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @Service
-public class SavingsInfoFormatter {
+public class DigitsFormatter {
 
     public String formatAmount(final BigDecimal amount) {
         final String[] totalAsArray = amount.toPlainString().split(SPLITTER_EMPTY);

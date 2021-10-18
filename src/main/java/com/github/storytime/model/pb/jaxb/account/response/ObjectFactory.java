@@ -11,6 +11,7 @@ package com.github.storytime.model.pb.jaxb.account.response;
 import javax.xml.bind.annotation.XmlRegistry;
 
 
+
 /**
  * This object contains factory methods for each
  * Java content interface and Java element interface
@@ -24,6 +25,7 @@ import javax.xml.bind.annotation.XmlRegistry;
  * groups.  Factory methods for each of these are
  * provided in this class.
  */
+@Deprecated
 @XmlRegistry
 public class ObjectFactory {
 

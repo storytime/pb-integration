@@ -5,7 +5,7 @@ import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.api.SavingsInfoResponse;
 import com.github.storytime.model.api.ms.AppUser;
-import com.github.storytime.service.SavingsInfoFormatter;
+import com.github.storytime.service.DigitsFormatter;
 import com.github.storytime.service.access.UserService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
@@ -39,19 +39,19 @@ public class SavingsService {
     private final ZenAsyncService zenAsyncService;
     private final SavingsInfoMapper savingsInfoMapper;
     private final ZenResponseMapper zenResponseMapper;
-    private final SavingsInfoFormatter savingsInfoFormatter;
+    private final DigitsFormatter digitsFormatter;
 
     @Autowired
     public SavingsService(final UserService userService,
                           final SavingsInfoMapper savingsInfoMapper,
                           final ZenResponseMapper zenResponseMapper,
-                          final SavingsInfoFormatter savingsInfoFormatter,
+                          final DigitsFormatter digitsFormatter,
                           final ZenAsyncService zenAsyncService) {
         this.userService = userService;
         this.zenAsyncService = zenAsyncService;
         this.zenResponseMapper = zenResponseMapper;
         this.savingsInfoMapper = savingsInfoMapper;
-        this.savingsInfoFormatter = savingsInfoFormatter;
+        this.digitsFormatter = digitsFormatter;
     }
 
     public CompletableFuture<String> getAllSavingsAsTable(final long userId) {
@@ -64,7 +64,7 @@ public class SavingsService {
                     .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
                     .thenApply(savingsInfo -> savingsInfoMapper.getNiceSavings(savingsInfo)
                             .append(TOTAL)
-                            .append(savingsInfoFormatter.formatAmount(savingsInfoMapper.getTotalInUah(savingsInfo)))
+                            .append(digitsFormatter.formatAmount(savingsInfoMapper.getTotalInUah(savingsInfo)))
                             .append(SPACE)
                             .append(UAH)
                             .toString())
@@ -85,7 +85,7 @@ public class SavingsService {
                     .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
                     .thenApply(updatedSavings -> new SavingsInfoResponse()
                             .setSavings(updatedSavings)
-                            .setTotal(savingsInfoFormatter.formatAmount(savingsInfoMapper.getTotalInUah(updatedSavings))))
+                            .setTotal(digitsFormatter.formatAmount(savingsInfoMapper.getTotalInUah(updatedSavings))))
                     .thenApply(r -> new ResponseEntity<>(r, OK))
                     .whenComplete((t, e) -> logSavingCf(userId, st, LOGGER, e));
         } catch (Throwable e) {

@@ -49,6 +49,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
+@Deprecated
 @Component
 public class ReconcileYnabService {
 
@@ -179,7 +180,7 @@ public class ReconcileYnabService {
         var pbAccs = pbAccountService.getPbAsyncAccounts(merchantInfos);
         var ynabTransactions = getYnabTransactions(appUser, ynabBudget);
         var ynabCategories = getYnabCategories(appUser, ynabBudget);
-        var maybeZr = zenAsyncService.zenDiffByUserForReconcile(appUser, startDate).join().orElseThrow();
+        var maybeZr = zenAsyncService.zenDiffByUserTagsAndTransaction(appUser, startDate).join().orElseThrow();
         var zenAccs = zenCommonMapper.getZenAccounts(maybeZr);
 
         var allInfoForTagTable = mapInfoForTagsTable(appUser, ynabTransactions, ynabCategories, maybeZr, startDate, endDate);

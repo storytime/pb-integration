@@ -3,7 +3,7 @@ package com.github.storytime.model.ynab;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+@Deprecated
 public class YnabZenHolder {
 
     private final List<YnabZenSyncObject> storage;

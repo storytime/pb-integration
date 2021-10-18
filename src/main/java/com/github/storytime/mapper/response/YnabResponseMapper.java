@@ -18,6 +18,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
 
+@Deprecated
 @Component
 public class YnabResponseMapper {
 

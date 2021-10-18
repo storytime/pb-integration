@@ -76,6 +76,17 @@ public class Constants {
     public static final String YNAB_CATEGORIES = "/categories";
     public static final String YNAB_TRANSACTIONS = "/transactions";
     public static final String YNAB_ACCOUNTS = "/accounts";
+    public static final String CATEGORY = "Category";
+    public static final double INITIAL_VALUE = 0D;
+    public static final String TOTAL_EXPORT = "Total";
+    public static final String MEDIAN = "Median";
+    public static final int YEAR_INDEX_BEGIN = 2;
+    public static final int YEAR_END_INDEX = 4;
+    public static final String DATE_SEPARATOR = "-";
+    public static final String YEAR = "Y ";
+    public static final String QUARTER = "Q ";
+    public static final int MONTH_BEGIN_INDEX = 5;
+    public static final int MONTH_END_INDEX = 7;
 
     private Constants() {
     }

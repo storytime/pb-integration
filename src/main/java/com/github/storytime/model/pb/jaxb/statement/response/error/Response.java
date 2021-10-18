@@ -1,7 +1,7 @@
 package com.github.storytime.model.pb.jaxb.statement.response.error;
 
 import javax.xml.bind.annotation.*;
-
+@Deprecated
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
         "data"

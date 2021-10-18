@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import static com.github.storytime.config.props.Constants.CURRENCY_SCALE;
 import static java.math.RoundingMode.HALF_DOWN;
-
+@Deprecated
 public class ZenYnabTagReconcileProxyObject {
 
     private final String category;

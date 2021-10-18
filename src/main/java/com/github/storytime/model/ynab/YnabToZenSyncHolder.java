@@ -4,7 +4,7 @@ import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.zen.ZenResponse;
 
 import java.util.Optional;
-
+@Deprecated
 public class YnabToZenSyncHolder {
     private Optional<ZenResponse> zenResponse;
     private YnabSyncConfig ynabSyncConfig;

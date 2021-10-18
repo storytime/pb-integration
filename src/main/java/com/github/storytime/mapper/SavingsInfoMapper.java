@@ -6,7 +6,7 @@ import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.CurrencyService;
-import com.github.storytime.service.SavingsInfoFormatter;
+import com.github.storytime.service.DigitsFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,14 +32,14 @@ public class SavingsInfoMapper {
     private static final BigDecimal ONE_HUNDRED = new BigDecimal(Constants.ONE_HUNDRED);
     private final CurrencyService currencyService;
     private final ZenResponseMapper zenResponseMapper;
-    private final SavingsInfoFormatter savingsInfoFormatter;
+    private final DigitsFormatter digitsFormatter;
 
     @Autowired
     public SavingsInfoMapper(final CurrencyService currencyService,
-                             final SavingsInfoFormatter savingsInfoFormatter,
+                             final DigitsFormatter digitsFormatter,
                              final ZenResponseMapper zenResponseMapper) {
         this.currencyService = currencyService;
-        this.savingsInfoFormatter = savingsInfoFormatter;
+        this.digitsFormatter = digitsFormatter;
         this.zenResponseMapper = zenResponseMapper;
     }
 
@@ -54,7 +54,7 @@ public class SavingsInfoMapper {
         final String mapped = savingsInfoList
                 .stream()
                 .sorted(comparing(SavingsInfo::getPercent))
-                .map(savingsInfoFormatter::mapToNiceSavingsString)
+                .map(digitsFormatter::mapToNiceSavingsString)
                 .collect(joining());
         return new StringBuilder().append(mapped);
     }
@@ -88,7 +88,7 @@ public class SavingsInfoMapper {
                 .setCurrencySymbol(zenCurrencySymbol)
                 .setTitle(accountItem.getTitle().trim())
                 .setInUah(inUah.setScale(ZERO_SCALE, HALF_DOWN))
-                .setInUahStr(savingsInfoFormatter.formatAmount(inUah.setScale(ZERO_SCALE, HALF_DOWN)))
-                .setBalanceStr(savingsInfoFormatter.formatAmount(bal.setScale(ZERO_SCALE, HALF_DOWN)));
+                .setInUahStr(digitsFormatter.formatAmount(inUah.setScale(ZERO_SCALE, HALF_DOWN)))
+                .setBalanceStr(digitsFormatter.formatAmount(bal.setScale(ZERO_SCALE, HALF_DOWN)));
     }
 }

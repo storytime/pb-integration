@@ -1,5 +1,5 @@
 package com.github.storytime.model.ynab.common;
-
+@Deprecated
 public class ZenYnabAccountReconcileProxyObject {
 
     private final String account;

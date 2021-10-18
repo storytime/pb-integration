@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Deprecated
 @Component
 @Transactional
 public interface YnabSyncServiceRepository extends JpaRepository<YnabSyncConfig, Long> {

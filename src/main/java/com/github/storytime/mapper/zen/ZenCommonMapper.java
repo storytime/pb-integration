@@ -22,21 +22,45 @@ import static java.util.stream.Collectors.groupingBy;
 @Component
 public class ZenCommonMapper {
 
-    public TransactionItem flatToParentCategory(final List<TagItem> zenTags, final TransactionItem zt) {
-        final String innerTagId = ofNullable(zt.getTag()).orElse(emptyList())
-                .stream()
-                .filter(not(s -> s.startsWith(PROJECT_TAG)))
-                .findFirst()
-                .orElse(EMPTY);
+    public TransactionItem flatToParentCategoryId(final List<TagItem> zenTags, final TransactionItem zt) {
+        final String innerTagId = findInnerTag(zt);
+        final var parentTag = findParentTagId(zenTags, innerTagId);
+        return zt.setTag(List.of(parentTag)); //TODO: use copy
+    }
 
-        final String parentTag = zenTags
+    public TransactionItem flatToParentCategoryName(final List<TagItem> zenTags, final TransactionItem zt) {
+        final var innerTagId = findInnerTag(zt);
+        final var parentTag = findParentTagId(zenTags, innerTagId);
+        final var parentTagTitle = zenTags
+                .stream()
+                .filter(t -> t.getId().equalsIgnoreCase(parentTag))
+                .findFirst()
+                .map(tag -> ofNullable(tag.getTitle()).orElse(parentTag))
+                .orElse(parentTag);
+
+        return zt.setTag(List.of(parentTagTitle)); //TODO: use copy
+    }
+
+    private String findParentTagId(List<TagItem> zenTags, String innerTagId) {
+        return zenTags
                 .stream()
                 .filter(tagItem -> tagItem.getId().equalsIgnoreCase(innerTagId))
                 .findFirst()
                 .map(tagItem -> ofNullable(tagItem.getParent()).orElse(innerTagId))
                 .orElse(innerTagId);
+    }
 
-        return zt.setTag(List.of(parentTag)); //TODO: use copy
+    private String findInnerTag(TransactionItem zt) {
+        return ofNullable(zt.getTag()).orElse(emptyList())
+                .stream()
+                .filter(not(s -> s.startsWith(PROJECT_TAG)))
+                .findFirst()
+                .orElse(EMPTY);
+    }
+
+    public List<TransactionItem> flatToParentCategoryTransactionList(final List<TagItem> zenTags,
+                                                                     final List<TransactionItem> trList){
+        return trList.stream().map(tagItem -> flatToParentCategoryName(zenTags, tagItem)).toList();
     }
 
     public String getTagNameByTagId(final List<TagItem> zenTags, final String id) {
@@ -74,7 +98,7 @@ public class ZenCommonMapper {
                 .filter(not(TransactionItem::isDeleted))
                 .filter(zTr -> zTr.getCreated() >= startDate && zTr.getCreated() < endDate).toList()
                 .stream()
-                .map(zt -> this.flatToParentCategory(zenTags, zt))
+                .map(zt -> this.flatToParentCategoryId(zenTags, zt))
                 .sorted(comparing(TransactionItem::getCreated)).toList();
 
         //TODO: add amount of transactions

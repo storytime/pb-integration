@@ -3,7 +3,7 @@ package com.github.storytime.model.ynab.transaction.from;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Generated;
-
+@Deprecated
 @Generated("com.robohorse.robopojogenerator")
 public class TransactionsFormYnab {
 

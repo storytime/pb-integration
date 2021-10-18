@@ -32,6 +32,7 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
+@Deprecated
 @Component
 public class YnabZenCommonMapper {
 
@@ -174,7 +175,7 @@ public class YnabZenCommonMapper {
         final YnabZenHolder sameTags = this.mapYnabZenSameTags(zenTags, ynabCategories);
         final List<TransactionItem> zenTransaction = this.selectZenNotSyncedTransactions(zenTransactions, sameAccounts, ynabSyncConfig)
                 .stream()
-                .map(zt -> zenCommonMapper.flatToParentCategory(zenTags, zt)).toList();
+                .map(zt -> zenCommonMapper.flatToParentCategoryId(zenTags, zt)).toList();
 
         final List<YnabTransactions> ynabTransactions = zenTransaction
                 .stream()

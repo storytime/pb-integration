@@ -45,6 +45,16 @@ public interface AsyncErrorHandlerUtil {
             logger.error("Cannot collect saving for user: [{}], time: [{}], error: [{}] - error endpoint ===", userId, getTime(st), e.getCause(), e);
     }
 
+    static void logExport(long userId,
+                          final StopWatch st,
+                          final Logger logger,
+                          final Throwable e) {
+        if (e == null)
+            logger.debug("Calling get export for user: [{}], time: [{}] - finish endpoint ===", userId, getTime(st));
+        else
+            logger.error("Cannot not get export [{}], time: [{}], error: [{}] - error endpoint ===", userId, getTime(st), e.getCause(), e);
+    }
+
     static void logVersionCf(final StopWatch st, final Logger logger, final Throwable e) {
         if (e == null)
             logger.debug("Version time: [{}] - finish endpoint ===", getTime(st));

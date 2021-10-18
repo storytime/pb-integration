@@ -1,5 +1,6 @@
 package com.github.storytime.model.api;
 
+@Deprecated
 public class YnabBudgetSyncStatus {
 
     private String name;

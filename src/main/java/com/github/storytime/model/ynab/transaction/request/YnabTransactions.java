@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
-
+@Deprecated
 @Generated("com.robohorse.robopojogenerator")
 public class YnabTransactions {
 

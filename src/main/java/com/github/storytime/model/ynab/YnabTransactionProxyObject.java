@@ -1,5 +1,5 @@
 package com.github.storytime.model.ynab;
-
+@Deprecated
 public class YnabTransactionProxyObject {
 
     private String categoryId;

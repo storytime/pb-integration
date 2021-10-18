@@ -14,6 +14,7 @@ import static com.github.storytime.config.props.Constants.API_PREFIX;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
+@Deprecated
 @RestController
 public class ReconcileController {
 
