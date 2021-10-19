@@ -1,12 +1,15 @@
 package com.github.storytime.service.utils;
 
 import com.github.storytime.model.db.CustomPayee;
+import com.github.storytime.repository.CustomPayeeRepository;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.List;
 
+import static com.github.storytime.config.props.CacheNames.CUSTOM_PAYEE;
 import static com.github.storytime.config.props.Constants.EMPTY;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -15,16 +18,16 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class CustomPayeeService {
 
     private static final Logger LOGGER = getLogger(CustomPayeeService.class);
-    private final Set<CustomPayee> customPayeeValues;
+    private final CustomPayeeRepository customPayeeRepository;
 
     @Autowired
-    public CustomPayeeService(final Set<CustomPayee> customPayeeValues) {
-        this.customPayeeValues = customPayeeValues;
+    public CustomPayeeService(final CustomPayeeRepository customPayeeRepository) {
+        this.customPayeeRepository = customPayeeRepository;
     }
 
     public String getNicePayee(final String maybePayee) {
         var originalPayee = ofNullable(maybePayee).orElse(EMPTY);
-        var nicePayee = customPayeeValues
+        var nicePayee = findAll()
                 .stream()
                 .filter(cp -> originalPayee.contains(cp.getContainsValue()))
                 .findAny()
@@ -33,5 +36,10 @@ public class CustomPayeeService {
 
         LOGGER.debug("Nice payee is: [{}] for original: [{}]", nicePayee, originalPayee);
         return nicePayee;
+    }
+
+    @Cacheable(CUSTOM_PAYEE)
+    public List<CustomPayee> findAll() {
+        return customPayeeRepository.findAll();
     }
 }

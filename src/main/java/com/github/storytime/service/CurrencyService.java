@@ -7,6 +7,7 @@ import com.github.storytime.repository.CurrencyRepository;
 import com.github.storytime.service.async.CurrencyAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTime;
+import static com.github.storytime.config.props.CacheNames.CURRENCY_CACHE;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.db.inner.CurrencySource.PB_CASH;
 import static java.lang.Math.abs;
@@ -56,6 +58,7 @@ public class CurrencyService {
         return cardSum.divide(rate, CURRENCY_SCALE, HALF_UP).setScale(CURRENCY_SCALE, HALF_DOWN);
     }
 
+    @Cacheable(CURRENCY_CACHE)
     public Optional<CurrencyRates> pbUsdCashDayRates(final ZonedDateTime startDate,
                                                      final CurrencyType currencyType) {
         final var st = createSt();

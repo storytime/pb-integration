@@ -1,10 +1,7 @@
 package com.github.storytime.config;
 
 
-import com.github.storytime.model.db.CustomPayee;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.repository.CustomPayeeRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,24 +13,6 @@ import static java.util.List.of;
 
 @Configuration
 public class ApplicationConfig {
-
-    @Value("#{'${zen.sync.force.fetch.items}'.split(',')}")
-    private Set<String> zenSyncForceFetchItemsValues;
-
-    @Bean
-    public Set<String> pbTransferInfoStorage() {
-        return new HashSet<>();
-    }
-
-    @Bean
-    public Set<CustomPayee> customPayeeValuesStorage(final CustomPayeeRepository customPayeeRepository) {
-        return new HashSet<>(customPayeeRepository.findAll());
-    }
-
-    @Bean
-    public Set<String> zenSyncForceFetchItems() {
-        return new HashSet<>(zenSyncForceFetchItemsValues);
-    }
 
     @Bean
     public Set<Statement> pushedPbZenTransactionStorage() {

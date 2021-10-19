@@ -10,12 +10,14 @@ import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import static com.github.storytime.config.props.CacheNames.TR_TAGS_DIFF;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
@@ -46,15 +48,13 @@ public class ZenAsyncService {
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser)), pool);
     }
 
-    public CompletableFuture<Optional<ZenResponse>>
-    zenDiffByUserTagsAndTransaction(final AppUser appUser,
-                                                                                    long startDate) {
-        LOGGER.debug("Fetching ZEN accounts/tags ynab for user: [{}] - start", appUser.getId());
+    @Cacheable(TR_TAGS_DIFF)
+    public CompletableFuture<Optional<ZenResponse>> zenDiffByUserTagsAndTransaction(final AppUser appUser, long startDate) {
+        LOGGER.debug("Fetching ZEN accounts/tags for user: [{}] - start", appUser.getId());
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccountAndTags(appUser, startDate)), pool);
     }
 
-    public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForPbAccReconcile(final AppUser appUser,
-                                                                                   long startDate) {
+    public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForPbAccReconcile(final AppUser appUser, long startDate) {
         LOGGER.debug("Fetching ZEN accounts for user: [{}] - start", appUser.getId());
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate)), pool);
     }
