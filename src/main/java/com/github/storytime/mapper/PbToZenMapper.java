@@ -7,6 +7,8 @@ import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.In
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
+import com.github.storytime.service.sync.PbSyncService;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +22,12 @@ import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingLong;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
 public class PbToZenMapper {
+
+    private static final Logger LOGGER = getLogger(PbToZenMapper.class);
 
     private final PbToZenAccountMapper pbToZenAccountMapper;
     private final PbToZenTransactionMapper pbToZenTransactionMapper;
@@ -39,6 +44,7 @@ public class PbToZenMapper {
                                                           final ZenResponse zenDiff,
                                                           final AppUser appUser) {
 
+        LOGGER.debug("Starting build data for zen, for user: [{}]", appUser.getId());
         final boolean isAccountsPushNeeded = newPbTransaction
                 .stream()
                 .map(t -> pbToZenAccountMapper.mapPbAccountToZen(t, zenDiff))
@@ -46,12 +52,14 @@ public class PbToZenMapper {
                 .stream()
                 .anyMatch(r -> r == TRUE);
 
+        LOGGER.debug("No new accounts, from bank, for user: [{}]", appUser.getId());
         final List<TransactionItem> allTransactionsToZen = newPbTransaction
                 .stream()
                 .map(t -> pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, appUser))
                 .flatMap(Collection::stream)
                 .sorted(comparingLong(TransactionItem::getCreated).reversed()).toList();
 
+        LOGGER.debug("Transactions from bank, are ready for user: [{}]", appUser.getId());
         return of(new ZenDiffRequest()
                 .setCurrentClientTimestamp(now().getEpochSecond())
                 .setLastServerTimestamp(zenDiff.getServerTimestamp())
