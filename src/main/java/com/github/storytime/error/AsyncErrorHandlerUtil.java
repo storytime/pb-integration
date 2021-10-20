@@ -87,4 +87,11 @@ public interface AsyncErrorHandlerUtil {
             logger.error("Cannot build pb/zen json for user: [{}], time: [{}], error [{}] - error endpoint ===", userId, getTime(st), e.getCause(), e);
     }
 
+    static void logSync(final long userId, final StopWatch st, final Logger logger, final Throwable e) {
+        if (e == null)
+            logger.debug("Sync for user: [{}], time: [{}] - finished without issues", userId, getTime(st));
+        else
+            logger.error("Error! Sync for user: [{}], time: [{}], error [{}] - finished with error", userId, getTime(st), e.getCause(), e);
+    }
+
 }

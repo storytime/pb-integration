@@ -1,5 +1,6 @@
 package com.github.storytime.service.sync;
 
+import com.github.storytime.error.AsyncErrorHandlerUtil;
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.api.ms.AppUser;
@@ -26,6 +27,8 @@ import java.util.function.UnaryOperator;
 
 import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTime;
+import static com.github.storytime.error.AsyncErrorHandlerUtil.logExport;
+import static com.github.storytime.error.AsyncErrorHandlerUtil.logSync;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -91,7 +94,7 @@ public class PbSyncService {
             return;
         }
 
-        LOGGER.info("User: [{}], time: [{}], has: [{}] transactions to push", user.getId(), newPbTrList.size(), getTime(st));
+        LOGGER.info("User: [{}] has: [{}] transactions to push, time: [{}]", user.getId(), newPbTrList.size(), getTime(st));
         // step by step in one thread
         zenAsyncService.zenDiffByUserForPb(user)
                 .thenApply(Optional::get)
@@ -101,7 +104,8 @@ public class PbSyncService {
                 .thenApply(Optional::get)
                 .thenCompose(zr -> userService.updateUserLastZenSyncTime(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
-                .thenAccept(x -> onSuccessFk.accept(newPbTrList, selectedMerchants));
+                .thenAccept(x -> onSuccessFk.accept(newPbTrList, selectedMerchants))
+                .whenComplete((r, e) -> logSync(user.getId(), st, LOGGER, e));
     }
 
 
