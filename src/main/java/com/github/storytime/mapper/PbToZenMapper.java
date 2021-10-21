@@ -44,7 +44,7 @@ public class PbToZenMapper {
                                                           final AppUser appUser) {
 
         try {
-            LOGGER.debug("Starting build data for zen, for user: [{}]", appUser.getId());
+            LOGGER.debug("Starting build data for zen, for user: [{}] ", appUser.getId());
             final boolean isAccountsPushNeeded = newPbTransaction
                     .stream()
                     .map(t -> pbToZenAccountMapper.mapPbAccountToZen(t, zenDiff))
