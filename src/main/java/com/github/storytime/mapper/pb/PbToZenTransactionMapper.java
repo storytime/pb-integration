@@ -70,8 +70,9 @@ public class PbToZenTransactionMapper {
         final var cardBytes = Long.toString(card).getBytes();
         final var appCodeBytes = appcode.getBytes();
         final var descBytes = terminal.getBytes();
+
         final var transactionDescBytes = transactionDesc.getBytes();
-        final var capacity = userIdBytes.length + trDateBytes.length +
+        final var capacity = userIdBytes.length * userIdBytes.length + trDateBytes.length +
                 trAmountByes.length + cardBytes.length + appCodeBytes.length + descBytes.length + transactionDescBytes.length;
 
         final var idBytes = ByteBuffer.allocate(capacity)
