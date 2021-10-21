@@ -1,6 +1,5 @@
 package com.github.storytime.function;
 
-import com.github.storytime.config.props.Constants;
 import com.github.storytime.model.api.ms.AppUser;
 import com.github.storytime.model.db.YnabSyncConfig;
 import com.github.storytime.model.zen.ZenSyncRequest;
@@ -8,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
 import java.util.function.Supplier;
 
+import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.other.Utils.createHeader;
 import static java.time.Instant.now;
 import static java.util.Set.of;
@@ -27,12 +26,12 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(now().getEpochSecond());
             final Long zenLastSyncTimestamp = u.getZenLastSyncTimestamp();
 
-            if (zenLastSyncTimestamp == null || zenLastSyncTimestamp == Constants.INITIAL_TIMESTAMP) {
+            if (zenLastSyncTimestamp == null || zenLastSyncTimestamp == INITIAL_TIMESTAMP) {
                 //fetch all data
                 zenSyncRequest.setForceFetch(null);
-                zenSyncRequest.setServerTimestamp(Constants.INITIAL_TIMESTAMP);
+                zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
             } else {
-                zenSyncRequest.setForceFetch(of(Constants.USER));
+                zenSyncRequest.setForceFetch(of(USER,INSTRUMENT));
                 zenSyncRequest.setServerTimestamp(zenLastSyncTimestamp);
             }
 
@@ -45,7 +44,7 @@ public class ZenDiffLambdaHolder {
                                                                 final YnabSyncConfig ynabSyncConfig) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(clientSyncTime);
-            zenSyncRequest.setForceFetch(of(Constants.TAG, Constants.ACCOUNT));
+            zenSyncRequest.setForceFetch(of(TAG, ACCOUNT));
             zenSyncRequest.setServerTimestamp(ynabSyncConfig.getLastSync());
             return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
         };
@@ -56,7 +55,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(now().getEpochSecond())
-                    .setForceFetch(of(Constants.ACCOUNT, Constants.INSTRUMENT)); //TODO Make it cachible
+                    .setForceFetch(of(ACCOUNT, INSTRUMENT)); //TODO Make it cachible
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
@@ -66,7 +65,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(startDate)
-                    .setForceFetch(of(Constants.TAG, Constants.ACCOUNT));
+                    .setForceFetch(of(TAG, ACCOUNT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
@@ -76,7 +75,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(startDate)
-                    .setForceFetch(of(Constants.ACCOUNT));
+                    .setForceFetch(of(ACCOUNT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
