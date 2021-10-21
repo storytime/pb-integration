@@ -7,7 +7,6 @@ import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.In
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
-import com.github.storytime.service.sync.PbSyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,26 +43,31 @@ public class PbToZenMapper {
                                                           final ZenResponse zenDiff,
                                                           final AppUser appUser) {
 
-        LOGGER.debug("Starting build data for zen, for user: [{}]", appUser.getId());
-        final boolean isAccountsPushNeeded = newPbTransaction
-                .stream()
-                .map(t -> pbToZenAccountMapper.mapPbAccountToZen(t, zenDiff))
-                .collect(toSet())
-                .stream()
-                .anyMatch(r -> r == TRUE);
+        try {
+            LOGGER.debug("Starting build data for zen, for user: [{}]", appUser.getId());
+            final boolean isAccountsPushNeeded = newPbTransaction
+                    .stream()
+                    .map(t -> pbToZenAccountMapper.mapPbAccountToZen(t, zenDiff))
+                    .collect(toSet())
+                    .stream()
+                    .anyMatch(r -> r == TRUE);
 
-        LOGGER.debug("No new accounts, from bank, for user: [{}]", appUser.getId());
-        final List<TransactionItem> allTransactionsToZen = newPbTransaction
-                .stream()
-                .map(t -> pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, appUser))
-                .flatMap(Collection::stream)
-                .sorted(comparingLong(TransactionItem::getCreated).reversed()).toList();
+            LOGGER.debug("No new accounts, from bank, for user: [{}]", appUser.getId());
+            final List<TransactionItem> allTransactionsToZen = newPbTransaction
+                    .stream()
+                    .map(t -> pbToZenTransactionMapper.mapPbTransactionToZen(t, zenDiff, appUser))
+                    .flatMap(Collection::stream)
+                    .sorted(comparingLong(TransactionItem::getCreated).reversed()).toList();
 
-        LOGGER.debug("Transactions from bank, are ready for user: [{}]", appUser.getId());
-        return of(new ZenDiffRequest()
-                .setCurrentClientTimestamp(now().getEpochSecond())
-                .setLastServerTimestamp(zenDiff.getServerTimestamp())
-                .setAccount(isAccountsPushNeeded ? zenDiff.getAccount() : emptyList())
-                .setTransaction(allTransactionsToZen));
+            LOGGER.debug("Transactions from bank, are ready for user: [{}]", appUser.getId());
+            return of(new ZenDiffRequest()
+                    .setCurrentClientTimestamp(now().getEpochSecond())
+                    .setLastServerTimestamp(zenDiff.getServerTimestamp())
+                    .setAccount(isAccountsPushNeeded ? zenDiff.getAccount() : emptyList())
+                    .setTransaction(allTransactionsToZen));
+        } catch (Exception e) {
+            LOGGER.debug("Error", e);
+            return Optional.empty();
+        }
     }
 }
