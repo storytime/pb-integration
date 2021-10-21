@@ -31,7 +31,7 @@ public class ZenDiffLambdaHolder {
                 zenSyncRequest.setForceFetch(null);
                 zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
             } else {
-                zenSyncRequest.setForceFetch(of(USER,INSTRUMENT));
+                zenSyncRequest.setForceFetch(of(USER, INSTRUMENT, ACCOUNT));
                 zenSyncRequest.setServerTimestamp(zenLastSyncTimestamp);
             }
 
@@ -55,7 +55,7 @@ public class ZenDiffLambdaHolder {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
                     .setServerTimestamp(now().getEpochSecond())
-                    .setForceFetch(of(ACCOUNT, INSTRUMENT)); //TODO Make it cachible
+                    .setForceFetch(of(ACCOUNT, INSTRUMENT));
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
