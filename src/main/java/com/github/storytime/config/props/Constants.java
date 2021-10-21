@@ -61,6 +61,7 @@ public class Constants {
     public static final String ACCOUNT = "account";
     public static final String INSTRUMENT = "instrument";
     public static final String TAG = "tag";
+    public static final String USER = "user";
     public static final String SLASH = "/";
     public static final BigDecimal DEFAULT_ACC_BALANCE = BigDecimal.valueOf(0);
     public static final String SPLITTER = "; ";

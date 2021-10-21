@@ -18,12 +18,8 @@ import static java.util.Set.of;
 @Component
 public class ZenDiffLambdaHolder {
 
-    private final Set<String> zenSyncForceFetchItems;
-
     @Autowired
-    public ZenDiffLambdaHolder(final Set<String> zenSyncForceFetchItems) {
-        //todo better to hold here or in holder class
-        this.zenSyncForceFetchItems = zenSyncForceFetchItems;
+    public ZenDiffLambdaHolder() {
     }
 
     public Supplier<HttpEntity<ZenSyncRequest>> getInitialFunction(final AppUser u) {
@@ -36,7 +32,7 @@ public class ZenDiffLambdaHolder {
                 zenSyncRequest.setForceFetch(null);
                 zenSyncRequest.setServerTimestamp(Constants.INITIAL_TIMESTAMP);
             } else {
-                zenSyncRequest.setForceFetch(zenSyncForceFetchItems);
+                zenSyncRequest.setForceFetch(of(Constants.USER));
                 zenSyncRequest.setServerTimestamp(zenLastSyncTimestamp);
             }
 
