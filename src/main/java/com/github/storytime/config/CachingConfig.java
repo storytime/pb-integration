@@ -28,6 +28,7 @@ public class CachingConfig {
         caches.add(new ConcurrentMapCache(MERCHANT_CACHE));
         caches.add(new ConcurrentMapCache(TR_TAGS_DIFF));
         caches.add(new ConcurrentMapCache(CUSTOM_PAYEE));
+        caches.add(new ConcurrentMapCache(VERSION));
         cacheManager.setCaches(caches);
         return cacheManager;
     }
