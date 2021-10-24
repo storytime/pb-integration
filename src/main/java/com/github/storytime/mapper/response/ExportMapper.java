@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.storytime.config.props.Constants.*;
+import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.UP;
 import static java.util.Comparator.reverseOrder;
 import static java.util.Map.Entry.comparingByKey;
@@ -46,11 +47,11 @@ public class ExportMapper {
     }
 
     private String getTotal(final Map<String, DoubleSummaryStatistics> groupedByDate) {
-        return digitsFormatter.formatAmount(BigDecimal.valueOf(getSum(groupedByDate)).setScale(ZERO_SCALE, UP));
+        return digitsFormatter.formatAmount(valueOf(getSum(groupedByDate)).setScale(ZERO_SCALE, UP));
     }
 
     private String getAvg(final Map<String, DoubleSummaryStatistics> groupedByDate, int dateRangeSize) {
-        return digitsFormatter.formatAmount(BigDecimal.valueOf(getSum(groupedByDate) / dateRangeSize).setScale(ZERO_SCALE, UP));
+        return digitsFormatter.formatAmount(valueOf(getSum(groupedByDate) / dateRangeSize).setScale(ZERO_SCALE, UP));
     }
 
     private Double getSum(final Map<String, DoubleSummaryStatistics> groupedByDate) {
@@ -61,35 +62,47 @@ public class ExportMapper {
                 .reduce(INITIAL_VALUE, Double::sum);
     }
 
-    public List<Map<String, String>> mapExportData(final LinkedHashMap<String, List<ExportTransaction>> groupedByCat,
-                                                   final List<ExportTransaction> transactions) {
+    public List<Map<String, String>> mapExportData(final LinkedHashMap<String, List<ExportTransaction>> groupedByCat) {
 
-        final var dateRange = transactions.stream().map(ExportTransaction::date).collect(toSet());
-        final List<Map<String, String>> response = new ArrayList<>();
+        final Set<String> dateRange = groupedByCat
+                .entrySet().stream().flatMap(e -> e.getValue().stream()).toList()
+                .stream().map(ExportTransaction::date).collect(toSet());
 
-        groupedByCat.forEach((final String categoryId, final List<ExportTransaction> tagsInCategory) -> {
-            final var groupedByDate = tagsInCategory
-                    .stream()
-                    .collect(groupingBy(ExportTransaction::date, summarizingDouble(ExportTransaction::amount)));
+        return groupedByCat
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    final Map<String, BigDecimal> defaultResultMap = dateRange.stream().collect(toMap(k -> k, v -> new BigDecimal(0)));
+                    final Map<String, DoubleSummaryStatistics> groupedByDate = entry.getValue()
+                            .stream()
+                            .collect(groupingBy(ExportTransaction::date, summarizingDouble(ExportTransaction::amount)));
 
-            final LinkedHashMap<String, BigDecimal> unSortedMap = new LinkedHashMap<>();
-            groupedByDate.forEach((date, amountInfo) -> unSortedMap.put(date, BigDecimal.valueOf(amountInfo.getSum()).setScale(ZERO_SCALE, UP)));
+                    final Map<String, String> resultMap = createHeader(defaultResultMap.size(), entry.getKey(), groupedByDate);
+                    final LinkedHashMap<String, BigDecimal> unSortedMap = groupedByDate
+                            .entrySet()
+                            .stream()
+                            .collect(toMap(Map.Entry::getKey, e -> valueOf(e.getValue().getSum()).setScale(ZERO_SCALE, UP), (o1, o2) -> o1, LinkedHashMap::new));
 
-            final LinkedHashMap<String, String> sortedMap = new LinkedHashMap<>();
-            sortedMap.put(CATEGORY, categoryId);
-            sortedMap.put(TOTAL_EXPORT, this.getTotal(groupedByDate));
-            sortedMap.put(MEDIAN, this.getAvg(groupedByDate, dateRange.size()));
+                    defaultResultMap.putAll(unSortedMap);
+                    final LinkedHashMap<String, String> sortedMapWithValues = defaultResultMap.entrySet()
+                            .stream()
+                            .sorted(comparingByKey(reverseOrder()))
+                            .collect(toMap(Map.Entry::getKey, e -> digitsFormatter.formatAmount(e.getValue()), (o1, o2) -> o1, LinkedHashMap::new));
 
-            dateRange.forEach(r -> unSortedMap.putIfAbsent(r, new BigDecimal(0)));
-            unSortedMap.entrySet()
-                    .stream()
-                    .sorted(comparingByKey(reverseOrder()))
-                    .forEachOrdered(r -> sortedMap.put(r.getKey(), digitsFormatter.formatAmount(r.getValue())));
+                    resultMap.putAll(sortedMapWithValues);
+                    return resultMap;
+                }).toList();
 
-            response.add(sortedMap);
-        });
+    }
 
-        return response;
+    private LinkedHashMap<String, String> createHeader(final int maxResultSize,
+                                                       final String categoryId,
+                                                       final Map<String, DoubleSummaryStatistics> groupedByDate) {
+        final LinkedHashMap<String, String> headersMap = new LinkedHashMap<>();
+        headersMap.put(CATEGORY, categoryId);
+        headersMap.put(TOTAL_EXPORT, this.getTotal(groupedByDate));
+        headersMap.put(MEDIAN, this.getAvg(groupedByDate, maxResultSize));
+        return headersMap;
     }
 
     public List<ExportTransaction> mapTransaction(final Function<TransactionItem, ExportTransaction> transactionMapper,

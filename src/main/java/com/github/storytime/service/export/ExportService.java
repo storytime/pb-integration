@@ -21,10 +21,8 @@ import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logExport;
 import static com.github.storytime.mapper.response.ExportMapper.*;
 import static java.util.Collections.emptyList;
-import static java.util.Map.Entry.comparingByKey;
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
@@ -160,16 +158,12 @@ public class ExportService {
         return zenAsyncService
                 .zenDiffByUserTagsAndTransaction(appUser, 0)
                 .thenApply(Optional::get)
-                .thenApply(zenDiff -> {
-                    final List<ExportTransaction> transactions = exportMapper.mapTransaction(transactionMapper, transactionFilter, zenDiff);
-                    final LinkedHashMap<String, List<ExportTransaction>> groupedByCat = new LinkedHashMap<>();
-                    transactions.stream()
-                            .collect(groupingBy(ExportTransaction::category, toList()))
-                            .entrySet()
-                            .stream()
-                            .sorted(comparingByKey())
-                            .forEachOrdered(r -> groupedByCat.put(r.getKey(), r.getValue()));
-                    return exportMapper.mapExportData(groupedByCat, transactions);
-                });
+                .thenApply(zenDiff -> exportMapper.mapTransaction(transactionMapper, transactionFilter, zenDiff))
+                .thenApply(transactions -> transactions.stream()
+                        .collect(groupingBy(ExportTransaction::category, toList()))
+                        .entrySet()
+                        .stream()
+                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (o1, o2) -> o1, LinkedHashMap::new)))
+                .thenApply(exportMapper::mapExportData);
     }
 }
