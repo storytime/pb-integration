@@ -72,7 +72,7 @@ public class ExportMapper {
                 .entrySet()
                 .stream()
                 .map(entry -> {
-                    final Map<String, BigDecimal> defaultResultMap = dateRange.stream().collect(toMap(k -> k, v -> new BigDecimal(0)));
+                    final Map<String, BigDecimal> defaultResultMap = dateRange.stream().collect(toMap(k -> k, v -> new BigDecimal(ZERO)));
                     final Map<String, DoubleSummaryStatistics> groupedByDate = entry.getValue()
                             .stream()
                             .collect(groupingBy(ExportTransaction::date, summarizingDouble(ExportTransaction::amount)));

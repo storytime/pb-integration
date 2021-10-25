@@ -157,7 +157,7 @@ public class ExportService {
                                                                        final Function<TransactionItem, ExportTransaction> transactionMapper,
                                                                        final Predicate<TransactionItem> transactionFilter) {
         return zenAsyncService
-                .zenDiffByUserTagsAndTransaction(appUser, 0)
+                .zenDiffByUserTagsAndTransaction(appUser, INITIAL_TIMESTAMP)
                 .thenApply(Optional::get)
                 .thenApply(zenDiff -> exportMapper.mapTransaction(transactionMapper, transactionFilter, zenDiff))
                 .thenApply(transactions -> transactions.stream()

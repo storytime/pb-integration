@@ -9,13 +9,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import static com.github.storytime.config.props.CacheNames.*;
+import static com.github.storytime.config.props.Constants.INITIAL_TIMESTAMP;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
 public class CacheResetScheduler {
 
     private static final Logger LOGGER = getLogger(CacheResetScheduler.class);
-    private  final ZenAsyncService zenAsyncService;
+    private final ZenAsyncService zenAsyncService;
     private final UserService userService;
 
     @Autowired
@@ -37,8 +38,9 @@ public class CacheResetScheduler {
         LOGGER.debug("Cleaning up tags cache ...");
         userService
                 .findAllAsync()
-                .thenAccept(usersList -> usersList.forEach(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, 0)));
-        LOGGER.debug("Warming up, tags cache ...");
+                .thenAccept(usersList -> usersList.forEach(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, INITIAL_TIMESTAMP)))
+                .thenAccept(x -> LOGGER.debug("Warming up, tags cache ..."));
+
     }
 
     @Scheduled(fixedRateString = "${cache.clean.payee.millis}")
