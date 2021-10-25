@@ -21,6 +21,7 @@ import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logExport;
 import static com.github.storytime.mapper.response.ExportMapper.*;
 import static java.util.Collections.emptyList;
+import static java.util.Map.Entry.comparingByKey;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.stream.Collectors.*;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -163,6 +164,10 @@ public class ExportService {
                         .collect(groupingBy(ExportTransaction::category, toList()))
                         .entrySet()
                         .stream()
+                        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (o1, o2) -> o1, LinkedHashMap::new))
+                        .entrySet()
+                        .stream()
+                        .sorted(comparingByKey())
                         .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (o1, o2) -> o1, LinkedHashMap::new)))
                 .thenApply(exportMapper::mapExportData);
     }
