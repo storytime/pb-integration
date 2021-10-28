@@ -32,7 +32,7 @@ public class CacheResetScheduler {
         LOGGER.debug("Cleaning up currency cache ...");
     }
 
-    @Scheduled(fixedRateString = "45000")
+    @Scheduled(fixedRateString = "${cache.clean.zentags.millis}")
     @CacheEvict(allEntries = true, value = {TR_TAGS_DIFF, OUT_DATA_BY_MONTH, IN_DATA_BY_MONTH,
             OUT_DATA_BY_YEAR, IN_DATA_BY_YEAR, OUT_DATA_BY_QUARTER, IN_DATA_BY_QUARTER})
     public void cleaningZenDiffTagsCache() {
