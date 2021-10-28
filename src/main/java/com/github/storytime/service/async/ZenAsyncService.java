@@ -10,6 +10,7 @@ import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class ZenAsyncService {
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser)), pool);
     }
 
-    @Cacheable(TR_TAGS_DIFF)
+    @Cacheable(cacheNames = TR_TAGS_DIFF, key="#appUser.getId")
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserTagsAndTransaction(final AppUser appUser, long startDate) {
         LOGGER.debug("Fetching ZEN accounts/tags for user: [{}] - start", appUser.getId());
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccountAndTags(appUser, startDate)), pool);

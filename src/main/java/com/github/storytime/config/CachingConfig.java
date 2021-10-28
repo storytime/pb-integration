@@ -29,6 +29,12 @@ public class CachingConfig {
         caches.add(new ConcurrentMapCache(TR_TAGS_DIFF));
         caches.add(new ConcurrentMapCache(CUSTOM_PAYEE));
         caches.add(new ConcurrentMapCache(VERSION));
+        caches.add(new ConcurrentMapCache(OUT_DATA_BY_MONTH));
+        caches.add(new ConcurrentMapCache(IN_DATA_BY_MONTH));
+        caches.add(new ConcurrentMapCache(OUT_DATA_BY_YEAR));
+        caches.add(new ConcurrentMapCache(IN_DATA_BY_YEAR));
+        caches.add(new ConcurrentMapCache(OUT_DATA_BY_QUARTER));
+        caches.add(new ConcurrentMapCache(IN_DATA_BY_QUARTER));
         cacheManager.setCaches(caches);
         return cacheManager;
     }
