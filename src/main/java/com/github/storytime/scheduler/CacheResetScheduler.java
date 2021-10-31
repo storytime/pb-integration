@@ -8,8 +8,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.CompletableFuture;
+
+import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.config.props.CacheNames.*;
 import static com.github.storytime.config.props.Constants.INITIAL_TIMESTAMP;
+import static com.github.storytime.error.AsyncErrorHandlerUtil.logCache;
+import static java.util.concurrent.CompletableFuture.allOf;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
@@ -32,15 +37,23 @@ public class CacheResetScheduler {
         LOGGER.debug("Cleaning up currency cache ...");
     }
 
-    @Scheduled(fixedRateString = "${cache.clean.zentags.millis}")
-    @CacheEvict(allEntries = true, value = {TR_TAGS_DIFF, OUT_DATA_BY_MONTH, IN_DATA_BY_MONTH,
-            OUT_DATA_BY_YEAR, IN_DATA_BY_YEAR, OUT_DATA_BY_QUARTER, IN_DATA_BY_QUARTER})
+    @Scheduled(fixedRateString = "45000")
+    @CacheEvict(allEntries = true, beforeInvocation = true, value = {TR_TAGS_DIFF, OUT_DATA_BY_MONTH, IN_DATA_BY_MONTH,
+            OUT_DATA_BY_YEAR, IN_DATA_BY_YEAR, OUT_DATA_BY_QUARTER, IN_DATA_BY_QUARTER
+    })
     public void cleaningZenDiffTagsCache() {
         LOGGER.debug("Cleaning up tags cache ...");
+
         userService
                 .findAllAsync()
-                .thenAccept(usersList -> usersList.forEach(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, INITIAL_TIMESTAMP)))
-                .thenAccept(x -> LOGGER.debug("Warming up, tags cache ..."));
+                .thenAccept(usersList -> {
+                    final var st =  createSt();
+                    final var completableFutures = usersList.stream().map(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, INITIAL_TIMESTAMP)).toList();
+                    allOf(completableFutures.toArray(new CompletableFuture[0]))
+                            .whenComplete((r, e) -> logCache(st, LOGGER, e));
+
+                });
+
 
     }
 

@@ -44,8 +44,7 @@ public class PbToZenAccountMapper {
         final List<AccountItem> zenAccounts = zenDiff.getAccount();
         final List<String> pbCards = getCardsFromBank(pbStatementList); // Get accounts from bank response
 
-        if (pbCards.isEmpty())
-            return FALSE;
+        if (pbCards.isEmpty()) return FALSE;
 
         // check if current account exists in Zen
         return isPbAccountExistsInZen(zenAccounts, pbCards)
@@ -102,8 +101,7 @@ public class PbToZenAccountMapper {
             LOGGER.debug("No new cards for account: [{}]", existingAccount.getId());
             return FALSE;
         } else {
-            final List<String> uniqueCards = concat(zenCards.stream(), cardsFromBank.stream())
-                    .distinct().toList();
+            final List<String> uniqueCards = concat(zenCards.stream(), cardsFromBank.stream()).distinct().toList();
             existingAccount.getSyncID().clear();
             existingAccount.setSyncID(uniqueCards);
             existingAccount.setChanged(now().toEpochMilli());

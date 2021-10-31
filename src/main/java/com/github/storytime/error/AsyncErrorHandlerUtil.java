@@ -55,6 +55,15 @@ public interface AsyncErrorHandlerUtil {
             logger.error("Cannot not get export [{}], time: [{}], error: [{}] - error endpoint ===", userId, getTime(st), e.getCause(), e);
     }
 
+    static void logCache(final StopWatch st,
+                          final Logger logger,
+                          final Throwable e) {
+        if (e == null)
+            logger.debug("Refresh zend cache time: [{}] - finish", getTime(st));
+        else
+            logger.error("Refresh zend cache time:time: [{}], error: [{}]", getTime(st), e.getCause(), e);
+    }
+
     static void logVersionCf(final StopWatch st, final Logger logger, final Throwable e) {
         if (e == null)
             logger.debug("Version time: [{}] - finish endpoint ===", getTime(st));
