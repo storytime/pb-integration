@@ -45,7 +45,7 @@ public class CacheResetScheduler {
         LOGGER.debug("Cleaning up tags cache ...");
 
         userService
-                .findAllAsync()
+                .findAllAsyncForCache()
                 .thenAccept(usersList -> {
                     final var st =  createSt();
                     final var completableFutures = usersList.stream().map(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, INITIAL_TIMESTAMP)).toList();
