@@ -25,6 +25,7 @@ public class CachingConfig {
         final List<Cache> caches = new ArrayList<>();
         caches.add(new ConcurrentMapCache(USERS_CACHE));
         caches.add(new ConcurrentMapCache(USERS_PERMANENT_CACHE));
+        caches.add(new ConcurrentMapCache(USER_PERMANENT_CACHE));
         caches.add(new ConcurrentMapCache(CURRENCY_CACHE));
         caches.add(new ConcurrentMapCache(MERCHANT_CACHE));
         caches.add(new ConcurrentMapCache(TR_TAGS_DIFF));

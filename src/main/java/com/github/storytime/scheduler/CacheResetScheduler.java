@@ -43,7 +43,6 @@ public class CacheResetScheduler {
     })
     public void cleaningZenDiffTagsCache() {
         LOGGER.debug("Cleaning up tags cache ...");
-
         userService
                 .findAllAsyncForCache()
                 .thenAccept(usersList -> {
@@ -51,10 +50,7 @@ public class CacheResetScheduler {
                     final var completableFutures = usersList.stream().map(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, INITIAL_TIMESTAMP)).toList();
                     allOf(completableFutures.toArray(new CompletableFuture[0]))
                             .whenComplete((r, e) -> logCache(st, LOGGER, e));
-
                 });
-
-
     }
 
     @Scheduled(fixedRateString = "${cache.clean.payee.millis}")

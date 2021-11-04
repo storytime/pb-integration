@@ -72,7 +72,7 @@ public class ExportService {
         try {
             LOGGER.debug("Calling get export out monthly user: [{}] - start", userId);
 
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outMonthlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -86,8 +86,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in monthly user: [{}] - start", userId);
-
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inMonthlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -101,7 +100,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export out yearly user: [{}] - start", userId);
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outYearlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -115,7 +114,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in yearly user: [{}] - start", userId);
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inYearlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -129,7 +128,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in quarterly user: [{}] - start", userId);
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inQuarterlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -143,7 +142,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export out quarterly user: [{}] - start", userId);
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outQuarterlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));

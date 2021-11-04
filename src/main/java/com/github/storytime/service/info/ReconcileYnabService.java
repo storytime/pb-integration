@@ -277,7 +277,7 @@ public class ReconcileYnabService {
     }
 
     private CompletableFuture<AppUser> getUserAsync(long userId) {
-        return userService.findUserByIdAsync(userId).thenApply(Optional::get);
+        return userService.findUserByIdAsyncCache(userId).thenApply(Optional::get);
     }
 
     private int getYear(final AppUser appUser) {

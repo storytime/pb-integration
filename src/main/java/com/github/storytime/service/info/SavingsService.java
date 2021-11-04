@@ -58,7 +58,7 @@ public class SavingsService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get savings info as table for user: [{}] - start", userId);
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(this::getUserSavings)
                     .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
@@ -79,7 +79,7 @@ public class SavingsService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get savings info as JSON for user: [{}] - start", userId);
-            return userService.findUserByIdAsync(userId)
+            return userService.findUserByIdAsyncCache(userId)
                     .thenApply(Optional::get)
                     .thenCompose(this::getUserSavings)
                     .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))

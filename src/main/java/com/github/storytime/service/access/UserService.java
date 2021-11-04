@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static com.github.storytime.config.props.CacheNames.USERS_CACHE;
-import static com.github.storytime.config.props.CacheNames.USERS_PERMANENT_CACHE;
+import static com.github.storytime.config.props.CacheNames.*;
 
 @Service
 public class UserService {
@@ -34,8 +33,8 @@ public class UserService {
         return userMsAsyncService.getAllUsers();
     }
 
-    @Cacheable(USERS_CACHE)
-    public CompletableFuture<Optional<AppUser>> findUserByIdAsync(final long userId) {
+    @Cacheable(USER_PERMANENT_CACHE)
+    public CompletableFuture<Optional<AppUser>> findUserByIdAsyncCache(final long userId) {
         return userMsAsyncService.getByIdAsync(userId);
     }
 
