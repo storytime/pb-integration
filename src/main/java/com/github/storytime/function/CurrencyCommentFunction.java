@@ -5,5 +5,5 @@ import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.In
 
 @FunctionalInterface
 public interface CurrencyCommentFunction {
-    void generate(StringBuilder c, CurrencyRates r, Statement s, String before, String after);
+    String generate(CurrencyRates r, Statement s, String before, String after);
 }

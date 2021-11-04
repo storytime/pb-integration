@@ -116,7 +116,7 @@ public class DateService {
         return businessDays.get(businessDays.size() - 1);
     }
 
-    public ZonedDateTime getPbStatementZonedDateTime(String timeZone, XMLGregorianCalendar trandate) {
+    public ZonedDateTime getPbStatementZonedDateTime(final String timeZone, final XMLGregorianCalendar trandate) {
         return of(trandate.getYear(), trandate.getMonth(), trandate.getDay(), 0, 0, 0)
                 .atZone(of(timeZone));
     }

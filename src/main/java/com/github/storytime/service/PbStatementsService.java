@@ -82,7 +82,7 @@ public class PbStatementsService {
         return pbAsyncService.pullPbTransactions(requestToBank)
                 .thenApply(Optional::get)
                 .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
-                .thenApply(stList -> stList.stream().peek(s -> additionalCommentService.handle(s, merchantInfo, appUser.getTimeZone())).toList())
+                .thenApply(stList -> stList.stream().peek(s -> additionalCommentService.addAdditionalComment(s, merchantInfo, appUser.getTimeZone())).toList())
                 .handle(getPbServiceAsyncHandler());
     }
 

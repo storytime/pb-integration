@@ -79,5 +79,4 @@ public class ZenDiffLambdaHolder {
             return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
         };
     }
-
 }
