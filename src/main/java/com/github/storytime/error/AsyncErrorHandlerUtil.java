@@ -1,38 +1,17 @@
 package com.github.storytime.error;
 
-import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.StopWatch;
 
-import java.util.List;
-import java.util.function.BiFunction;
-
 import static com.github.storytime.STUtils.getTime;
-import static java.util.Collections.emptyList;
 
 public interface AsyncErrorHandlerUtil {
 
-    Logger LOGGER = LogManager.getLogger(AsyncErrorHandlerUtil.class);
-
-    static BiFunction<List<Statement>, Throwable, List<Statement>> getPbServiceAsyncHandler() {
-        return (s, t) -> {
-            if (t != null) {
-                LOGGER.error("Async error, cannot continue with PB transactions ", t);
-                return emptyList();
-            }
-            return s;
-        };
-    }
-
-    static BiFunction<Void, Throwable, Void> getZenDiffUpdateHandler() {
-        return (s, t) -> {
-            if (t != null) {
-                LOGGER.error("Async error, cannot continue zen diff update ", t);
-                return null;
-            }
-            return s;
-        };
+    static void logPbCf(long userId,
+                        final Logger logger,
+                        final Throwable e) {
+        if (e != null)
+            logger.error("Async error, cannot continue with PB transactions for user: [{}], error: [{}]", userId, e.getCause(), e);
     }
 
     static void logSavingCf(long userId,
@@ -56,8 +35,8 @@ public interface AsyncErrorHandlerUtil {
     }
 
     static void logCache(final StopWatch st,
-                          final Logger logger,
-                          final Throwable e) {
+                         final Logger logger,
+                         final Throwable e) {
         if (e == null)
             logger.debug("Refresh zend cache time: [{}] - finish", getTime(st));
         else
@@ -71,11 +50,8 @@ public interface AsyncErrorHandlerUtil {
             logger.error("Version time: [{}], error: [{}] - error endpoint ===", getTime(st), e.getMessage(), e);
     }
 
-    static void logReconcileByBudgetCf(final long userId,
-                                       final String budget,
-                                       final StopWatch st,
-                                       final Logger logger,
-                                       final Throwable e) {
+    @Deprecated
+    static void logReconcileByBudgetCf(final long userId, final String budget, final StopWatch st, final Logger logger, final Throwable e) {
         if (e == null)
             logger.debug("Built reconciled YNAB user: [{}], budget: [{}], time [{}] - finish endpoint ===", userId, budget, getTime(st));
         else

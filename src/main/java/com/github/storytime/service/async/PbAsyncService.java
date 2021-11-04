@@ -35,7 +35,7 @@ public class PbAsyncService {
     }
 
     public CompletableFuture<Optional<ResponseEntity<String>>> pullPbAccounts(final Request requestToBank) {
-        LOGGER.debug("Fetching bank accounts  - started");
+        LOGGER.debug("Fetching bank accounts - started");
         return supplyAsync(() -> pbStatementsHttpService.pullPbAccounts(requestToBank), pool);
     }
 }

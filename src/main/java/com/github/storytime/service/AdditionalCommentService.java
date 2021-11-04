@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.db.inner.CurrencyType.USD;
@@ -35,14 +36,20 @@ public class AdditionalCommentService {
         };
     }
 
-    public void addAdditionalComment(final Statement s, final MerchantInfo merchantInfo, final String timeZone) {
+    public List<Statement> addAdditionalComments(final List<Statement> statementList,
+                                                 final MerchantInfo merchantInfo,
+                                                 final String timeZone) {
+        return statementList.stream().peek(statement -> mapCommentForAStatement(merchantInfo, timeZone, statement)).toList();
+    }
+
+    private void mapCommentForAStatement(MerchantInfo merchantInfo, String timeZone, Statement s) {
         final var additionalCommentList = merchantInfo.getAdditionalComment()
                 .stream()
                 .map(ac -> switch (ac) {
                     case PB_CURRENT_BUSINESS_DAY -> mapPbCurrentBusinessDayComment(s, timeZone);
                     case NBU_PREV_MOUTH_LAST_BUSINESS_DAY -> EMPTY;
                 }).toList();
-        s.setCustomComment(String.join(SPACE, additionalCommentList));
+        s.setCustomComment(String.join(SPACE, additionalCommentList) + SPACE);
     }
 
     private String mapPbCurrentBusinessDayComment(final Statement s, final String timeZone) {

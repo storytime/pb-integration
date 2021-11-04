@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 
 import static com.github.storytime.config.props.Constants.CARD_LAST_DIGITS;
 import static com.github.storytime.config.props.Constants.EMPTY;
-import static com.github.storytime.error.AsyncErrorHandlerUtil.getPbServiceAsyncHandler;
+import static com.github.storytime.error.AsyncErrorHandlerUtil.logPbCf;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
@@ -82,8 +82,8 @@ public class PbStatementsService {
         return pbAsyncService.pullPbTransactions(requestToBank)
                 .thenApply(Optional::get)
                 .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
-                .thenApply(stList -> stList.stream().peek(s -> additionalCommentService.addAdditionalComment(s, merchantInfo, appUser.getTimeZone())).toList())
-                .handle(getPbServiceAsyncHandler());
+                .thenApply(stList -> additionalCommentService.addAdditionalComments(stList, merchantInfo, appUser.getTimeZone()))
+                .whenComplete((r, e) -> logPbCf(appUser.getId(), LOGGER, e));
     }
 
 
