@@ -84,6 +84,7 @@ public class ExportMapper {
                             .collect(toMap(Map.Entry::getKey, e -> valueOf(e.getValue().getSum()).setScale(ZERO_SCALE, UP), (o1, o2) -> o1, LinkedHashMap::new));
 
                     defaultResultMap.putAll(unSortedMap);
+
                     final LinkedHashMap<String, String> sortedMapWithValues = defaultResultMap.entrySet()
                             .stream()
                             .sorted(comparingByKey(reverseOrder()))

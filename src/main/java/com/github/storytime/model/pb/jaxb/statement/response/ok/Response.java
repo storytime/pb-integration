@@ -5,7 +5,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-@Deprecated
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
         "merchant",

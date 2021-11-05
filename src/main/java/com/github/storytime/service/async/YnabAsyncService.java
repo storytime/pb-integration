@@ -18,6 +18,7 @@ import java.util.concurrent.Executor;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
+@Deprecated
 @Service
 public class YnabAsyncService {
 

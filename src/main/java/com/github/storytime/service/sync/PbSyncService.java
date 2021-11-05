@@ -1,6 +1,5 @@
 package com.github.storytime.service.sync;
 
-import com.github.storytime.error.AsyncErrorHandlerUtil;
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.api.ms.AppUser;
@@ -27,7 +26,6 @@ import java.util.function.UnaryOperator;
 
 import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTime;
-import static com.github.storytime.error.AsyncErrorHandlerUtil.logExport;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logSync;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.allOf;
@@ -68,13 +66,13 @@ public class PbSyncService {
         userService.findAllAsync()
                 .thenAccept(usersList -> usersList.forEach(user -> {
                             final var selectedMerchants = selectMerchantsFk.apply(merchantService);
-                            final var futureList = selectedMerchants
+                            final var pbCfList = selectedMerchants
                                     .stream()
-                                    .map(m -> getListCompletableFuture(startDateFk, endDateFk, user, m)).toList();
+                                    .map(m -> getListOfPbCf(startDateFk, endDateFk, user, m)).toList();
 
-                            // Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere
-                            allOf(futureList.toArray(new CompletableFuture[selectedMerchants.size()]))
-                                    .thenApply(v -> futureList.stream().map(CompletableFuture::join).toList())
+                            //* Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere */
+                            allOf(pbCfList.toArray(new CompletableFuture[selectedMerchants.size()]))
+                                    .thenApply(v -> pbCfList.stream().map(CompletableFuture::join).toList())
                                     .thenApply(filterAlreadyPushed)
                                     .thenAccept(newPbTrList -> handleAll(newPbTrList, user, selectedMerchants, onSuccessFk, st));
                         })
@@ -109,10 +107,10 @@ public class PbSyncService {
     }
 
 
-    private CompletableFuture<List<Statement>> getListCompletableFuture(final BiFunction<AppUser, MerchantInfo, ZonedDateTime> startDateFunction,
-                                                                        final TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> endDateFunction,
-                                                                        final AppUser user,
-                                                                        final MerchantInfo merch) {
+    private CompletableFuture<List<Statement>> getListOfPbCf(final BiFunction<AppUser, MerchantInfo, ZonedDateTime> startDateFunction,
+                                                             final TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> endDateFunction,
+                                                             final AppUser user,
+                                                             final MerchantInfo merch) {
         final var startDate = startDateFunction.apply(user, merch);
         final var endDate = endDateFunction.calculate(user, merch, startDate);
         return pbStatementsService.getPbTransactions(user, merch, startDate, endDate);

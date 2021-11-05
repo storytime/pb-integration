@@ -22,7 +22,7 @@ public class AdditionalCommentService {
 
     private final CurrencyService currencyService;
     private final DateService dateService;
-    private final CurrencyCommentFunction currencyCommentFunction2;
+    private final CurrencyCommentFunction currencyCommentFunction;
 
     @Autowired
     public AdditionalCommentService(final CurrencyService currencyService,
@@ -30,7 +30,7 @@ public class AdditionalCommentService {
         this.currencyService = currencyService;
         this.dateService = dateService;
 
-        this.currencyCommentFunction2 = (rate, s, b, a) -> {
+        this.currencyCommentFunction = (rate, s, b, a) -> {
             final BigDecimal sum = currencyService.convertDivide(valueOf(substringBefore(s.getCardamount(), SPACE)), rate.getBuyRate());
             return b + sum + a;
         };
@@ -55,7 +55,7 @@ public class AdditionalCommentService {
     private String mapPbCurrentBusinessDayComment(final Statement s, final String timeZone) {
         final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
         return currencyService.pbUsdCashDayRates(startDate, USD)
-                .map(rate -> currencyCommentFunction2.generate(rate, s, BANK_RATE, USD_COMMENT))
+                .map(rate -> currencyCommentFunction.generate(rate, s, BANK_RATE, USD_COMMENT))
                 .orElse(EMPTY);
     }
 

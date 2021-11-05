@@ -1,7 +1,6 @@
 package com.github.storytime.model.pb.jaxb.statement.response.error;
 
 import javax.xml.bind.annotation.XmlRegistry;
-@Deprecated
 @XmlRegistry
 public class ObjectFactory {
 
