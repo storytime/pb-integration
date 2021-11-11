@@ -2,7 +2,6 @@ version: '3.7'
 services:
   pg:
     image: postgres:11-alpine
-    command: postgres -c 'max_connections=500'
     env_file:
       - ./variables.env
     ports:
@@ -15,7 +14,7 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 128MB
+          memory: 168MB
       restart_policy:
         condition: on-failure
 
@@ -77,7 +76,7 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 192MB
+          memory: 200MB
       restart_policy:
         condition: on-failure
 

@@ -63,7 +63,7 @@ public class AsyncThreadConfig implements AsyncConfigurer, SchedulingConfigurer 
     }
 
     @Override
-    public void configureTasks(@NotNull ScheduledTaskRegistrar taskRegistrar) {
+    public void configureTasks(@NotNull final ScheduledTaskRegistrar taskRegistrar) {
         taskRegistrar.setScheduler(scheduledTaskExecutor());
     }
 }
