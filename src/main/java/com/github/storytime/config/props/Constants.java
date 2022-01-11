@@ -81,6 +81,7 @@ public class Constants {
     public static final double INITIAL_VALUE = 0D;
     public static final String TOTAL_EXPORT = "Total";
     public static final String MEDIAN = "Median";
+    public static final String AVG_VALUED = "Averg";
     public static final int YEAR_INDEX_BEGIN = 2;
     public static final int YEAR_END_INDEX = 4;
     public static final String DATE_SEPARATOR = "-";

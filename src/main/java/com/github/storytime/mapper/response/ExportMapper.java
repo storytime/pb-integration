@@ -77,7 +77,7 @@ public class ExportMapper {
                             .stream()
                             .collect(groupingBy(ExportTransaction::date, summarizingDouble(ExportTransaction::amount)));
 
-                    final Map<String, String> resultMap = createHeader(defaultResultMap.size(), entry.getKey(), groupedByDate);
+                    final Map<String, String> resultHeaderMap = createHeader(defaultResultMap.size(), entry.getKey(), groupedByDate);
                     final LinkedHashMap<String, BigDecimal> unSortedMap = groupedByDate
                             .entrySet()
                             .stream()
@@ -90,8 +90,8 @@ public class ExportMapper {
                             .sorted(comparingByKey(reverseOrder()))
                             .collect(toMap(Map.Entry::getKey, e -> digitsFormatter.formatAmount(e.getValue()), (o1, o2) -> o1, LinkedHashMap::new));
 
-                    resultMap.putAll(sortedMapWithValues);
-                    return resultMap;
+                    resultHeaderMap.putAll(sortedMapWithValues);
+                    return resultHeaderMap;
                 }).toList();
 
     }
@@ -103,6 +103,7 @@ public class ExportMapper {
         headersMap.put(CATEGORY, categoryId);
         headersMap.put(TOTAL_EXPORT, this.getTotal(groupedByDate));
         headersMap.put(MEDIAN, this.getAvg(groupedByDate, maxResultSize));
+        headersMap.put(AVG_VALUED, this.getAvg(groupedByDate, groupedByDate.size()));
         return headersMap;
     }
 
