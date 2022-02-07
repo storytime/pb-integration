@@ -45,7 +45,7 @@ jobs:
           docker_layer_caching: false
       - run:
           name: Get artifacts list
-          command: curl https://circleci.com/api/v1.1/project/bitbucket/boevry/pb-integration/$(( $CIRCLE_BUILD_NUM - 1 ))/artifacts?circle-token=$CIRCLE_TOKEN | grep -o 'https://[^"]*' > ~/project/artifacts.txt
+          command: curl https://circleci.com/api/v1.1/project/github/storytime/pb-integration/$(( $CIRCLE_BUILD_NUM - 1 ))/artifacts?circle-token=$CIRCLE_TOKEN | grep -o 'https://[^"]*' > ~/project/artifacts.txt
       - run:
           name: Download and move artifacts
           command: |
