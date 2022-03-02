@@ -1,6 +1,6 @@
 # README #
 
-[![](https://circleci.com/bb/boevry/pb-integration.svg?style=svg)](https://circleci.com/bb/boevry/pb-integration "Build and status")
+[![CircleCI](https://circleci.com/gh/storytime/pb-integration/tree/master.svg?style=svg)](https://circleci.com/gh/storytime/pb-integration/tree/master)
 [![](https://sonarcloud.io/api/project_badges/measure?project=pb-integration&metric=alert_status)](https://sonarcloud.io/dashboard?id=pb-integration "DEV Quality status")
 [![](https://images.microbadger.com/badges/version/openjdk:8-jre-alpine.svg)](https://microbadger.com/images/openjdk:8-jre-alpine "Main jre version")
 [![](https://images.microbadger.com/badges/image/bobobo/pb-integration.svg)](https://microbadger.com/images/bobobo/pb-integration "MASTER Full container size")
