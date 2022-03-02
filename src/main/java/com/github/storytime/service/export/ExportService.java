@@ -53,18 +53,18 @@ public class ExportService {
         this.zenAsyncService = zenAsyncService;
         this.exportMapper = exportMapper;
 
-        quarter.put("01", "1");
-        quarter.put("02", "1");
-        quarter.put("03", "1");
-        quarter.put("04", "2");
-        quarter.put("05", "2");
-        quarter.put("06", "2");
-        quarter.put("07", "3");
-        quarter.put("08", "3");
-        quarter.put("09", "3");
-        quarter.put("10", "4");
-        quarter.put("11", "4");
-        quarter.put("12", "4");
+        quarter.put(JAN, Q1);
+        quarter.put(FEB, Q1);
+        quarter.put(MAR, Q1);
+        quarter.put(APR, Q2);
+        quarter.put(MAY, Q2);
+        quarter.put(JUN, Q2);
+        quarter.put(JUL, Q3);
+        quarter.put(AUG, Q3);
+        quarter.put(SEP, Q3);
+        quarter.put(OCT, Q4);
+        quarter.put(NOV, Q4);
+        quarter.put(DEC, Q4);
     }
 
     public CompletableFuture<List<Map<String, String>>> getOutMonthlyData(final long userId) {

@@ -63,16 +63,16 @@ public class PbToZenTransactionMapper {
                                   final byte[] trDateBytes,
                                   final Long card,
                                   final String appcode,
-                                  final String terminal,
-                                  final String transactionDesc) {
+                                  final String terminal) {
+                                 // final String transactionDesc) {
         final var userIdBytes = Long.toString(userId).getBytes();
         final var trAmountByes = String.valueOf(amount).getBytes();
         final var cardBytes = Long.toString(card).getBytes();
         final var appCodeBytes = appcode.getBytes();
         final var descBytes = terminal.getBytes();
-        final var transactionDescBytes = transactionDesc.getBytes();
+      //  final var transactionDescBytes = transactionDesc.getBytes();
         final var capacity = userIdBytes.length + trDateBytes.length +
-                trAmountByes.length + cardBytes.length + appCodeBytes.length + descBytes.length + transactionDescBytes.length;
+                trAmountByes.length + cardBytes.length + appCodeBytes.length + descBytes.length;// + transactionDescBytes.length;
 
         final var idBytes = ByteBuffer.allocate(capacity)
                 .put(userIdBytes)
@@ -81,7 +81,7 @@ public class PbToZenTransactionMapper {
                 .put(cardBytes)
                 .put(appCodeBytes)
                 .put(descBytes)
-                .put(transactionDescBytes)
+        //       .put(transactionDescBytes)
                 .array();
 
         return UUID.nameUUIDFromBytes(idBytes).toString();
@@ -100,7 +100,7 @@ public class PbToZenTransactionMapper {
         final var trDate = dateService.toZenFormat(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone());
         final var appCode = Optional.ofNullable(pbTr.getAppcode()).orElse(EMPTY);
         final var createdTime = dateService.xmlDateTimeToZoned(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
-        final var idTr = createIdForZen(u.getId(), opAmount, trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode(), pbTr.getTerminal(), transactionDesc);
+        final var idTr = createIdForZen(u.getId(), opAmount, trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode(), pbTr.getTerminal());
         final var userId = zenResponseMapper.findUserId(zenDiff);
         final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
         final var merchantId = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);

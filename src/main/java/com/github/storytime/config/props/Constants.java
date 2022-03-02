@@ -90,6 +90,23 @@ public class Constants {
     public static final int MONTH_BEGIN_INDEX = 5;
     public static final int MONTH_END_INDEX = 7;
 
+    public static final String JAN = "01";
+    public static final String FEB = "02";
+    public static final String APR = "04";
+    public static final String MAR = "03";
+    public static final String MAY = "05";
+    public static final String JUN = "06";
+    public static final String JUL = "07";
+    public static final String AUG = "08";
+    public static final String SEP = "09";
+    public static final String OCT = "10";
+    public static final String NOV = "11";
+    public static final String DEC = "12";
+    public static final String Q1 = "1";
+    public static final String Q2 = "2";
+    public static final String Q3 = "3";
+    public static final String Q4 = "4";
+
     private Constants() {
     }
 }
