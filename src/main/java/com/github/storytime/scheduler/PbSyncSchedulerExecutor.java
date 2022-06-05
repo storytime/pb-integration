@@ -30,8 +30,8 @@ public class PbSyncSchedulerExecutor {
 
     private static final Logger LOGGER = getLogger(PbSyncSchedulerExecutor.class);
     private final PbSyncService pbSyncService;
-    private final Function<MerchantService, List<MerchantInfo>> selectFirstPrioMerchantsFk;
-    private final Function<MerchantService, List<MerchantInfo>> selectSecondPrioMerchantsFk;
+   // private final Function<MerchantService, List<MerchantInfo>> selectFirstPrioMerchantsFk;
+   // private final Function<MerchantService, List<MerchantInfo>> selectSecondPrioMerchantsFk;
     private final Function<MerchantService, List<MerchantInfo>> selectGeneralPrioMerchantsFk;
     private final UnaryOperator<List<List<Statement>>> ifWasPushedFk;
     private final BiConsumer<List<List<Statement>>, List<MerchantInfo>> onSuccessFk;
@@ -45,9 +45,9 @@ public class PbSyncSchedulerExecutor {
                                    final DateService dateService,
                                    final PbSyncLambdaHolder pbSyncLambdaHolder) {
         this.pbSyncService = pbSyncService;
-        this.selectFirstPrioMerchantsFk = ms -> ms.getAllEnabledMerchantsBySyncPriority(FIRST);
-        this.selectSecondPrioMerchantsFk = ms -> ms.getAllEnabledMerchantsBySyncPriority(SECOND);
-        this.selectGeneralPrioMerchantsFk = MerchantService::getAllEnabledMerchantsWithPriority;
+        //this.selectFirstPrioMerchantsFk = ms -> ms.getAllEnabledMerchants();
+       // this.selectSecondPrioMerchantsFk = ms -> ms.getAllEnabledMerchantsBySyncPriority(SECOND);
+        this.selectGeneralPrioMerchantsFk = MerchantService::getAllEnabledMerchants;
         this.ifWasPushedFk = pbSyncLambdaHolder.getRegularSyncMapper(pbSyncLambdaHolder.ifWasMapped(), alreadyMappedPbZenTransaction);
         this.onSuccessFk = pbSyncLambdaHolder.onRegularSyncSuccess(alreadyMappedPbZenTransaction, merchantService);
         this.startDateFk = pbSyncLambdaHolder.getStartDate(dateService);
@@ -57,18 +57,21 @@ public class PbSyncSchedulerExecutor {
     @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
     public void firstPrioritySync() {
         LOGGER.debug("Starting first priority sync");
-        pbSyncService.sync(selectFirstPrioMerchantsFk, ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
-    }
-
-    @Scheduled(fixedRateString = "${sync.second.priority.period.millis}", initialDelayString = "${sync.second.priority.delay.millis}")
-    public void secondPrioritySync() {
-        LOGGER.debug("Starting second priority sync");
-        pbSyncService.sync(selectSecondPrioMerchantsFk, ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
-    }
-
-    @Scheduled(fixedRateString = "${sync.general.priority.period.millis}", initialDelayString = "${sync.general.priority.delay.millis}")
-    public void generalPrioritySync() {
-        LOGGER.debug("Starting general priority sync");
         pbSyncService.sync(selectGeneralPrioMerchantsFk, ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
     }
+
+    /**
+     * not need for AWS SQS version
+     */
+//    @Scheduled(fixedRateString = "${sync.second.priority.period.millis}", initialDelayString = "${sync.second.priority.delay.millis}")
+//    public void secondPrioritySync() {
+//        LOGGER.debug("Starting second priority sync");
+//        pbSyncService.sync(selectSecondPrioMerchantsFk, ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
+//    }
+//
+//    @Scheduled(fixedRateString = "${sync.general.priority.period.millis}", initialDelayString = "${sync.general.priority.delay.millis}")
+//    public void generalPrioritySync() {
+//        LOGGER.debug("Starting general priority sync");
+//        pbSyncService.sync(selectGeneralPrioMerchantsFk, ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
+//    }
 }

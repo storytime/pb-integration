@@ -24,7 +24,7 @@ public class UserService {
     }
 
     @Cacheable(USERS_CACHE)
-    public CompletableFuture<List<AppUser>> findAllAsync() {
+    public CompletableFuture<List<AppUser>> findAllUsersAsync() {
         return userMsAsyncService.getAllUsers();
     }
 

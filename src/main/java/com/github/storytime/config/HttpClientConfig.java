@@ -22,8 +22,10 @@ public class HttpClientConfig {
     private final Logbook logbook;
     @Value("${http.connect.timeout.millis}")
     private int httpConnectTimeoutMillis;
+
     @Value("${http.connect.manager,timeout.millis}")
     private int httpConnectManagerTimeoutMillis;
+
     @Value("${http.request.timeout.millis}")
     private int httpRequestTimeoutMillis;
 
