@@ -12,9 +12,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.github.storytime.config.props.Constants.API_PREFIX;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
-@Deprecated
 @RestController
 public class ReconcileController {
 
@@ -25,27 +23,27 @@ public class ReconcileController {
         this.reconcileYnabService = reconcileYnabService;
     }
 
-    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info", produces = TEXT_PLAIN_VALUE)
-    public CompletableFuture<String> reconcile(@PathVariable("userId") long userId,
-                                               @PathVariable("budgetName") final String budgetName) {
-        return reconcileYnabService.reconcileTableByBudget(userId, budgetName);
-    }
-
-    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info/{year}/{mouth}", produces = TEXT_PLAIN_VALUE)
-    public CompletableFuture<String> reconcileByDate(@PathVariable("userId") long userId,
-                                                     @PathVariable("budgetName") final String budgetName,
-                                                     @PathVariable("year") int year,
-                                                     @PathVariable("mouth") int mouth) {
-        return reconcileYnabService.reconcileTableByBudgetForDate(userId, budgetName, year, mouth);
-    }
-
-    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/all", produces = TEXT_PLAIN_VALUE)
-    public CompletableFuture<String> reconcileAll(@PathVariable("userId") long userId) {
-        return reconcileYnabService.reconcileTableDefaultAll(userId);
-    }
+//    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info", produces = TEXT_PLAIN_VALUE)
+//    public CompletableFuture<String> reconcile(@PathVariable("userId") long userId,
+//                                               @PathVariable("budgetName") final String budgetName) {
+//        return reconcileYnabService.reconcileTableByBudget(userId, budgetName);
+//    }
+//
+//    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info/{year}/{mouth}", produces = TEXT_PLAIN_VALUE)
+//    public CompletableFuture<String> reconcileByDate(@PathVariable("userId") long userId,
+//                                                     @PathVariable("budgetName") final String budgetName,
+//                                                     @PathVariable("year") int year,
+//                                                     @PathVariable("mouth") int mouth) {
+//        return reconcileYnabService.reconcileTableByBudgetForDate(userId, budgetName, year, mouth);
+//    }
+//
+//    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/all", produces = TEXT_PLAIN_VALUE)
+//    public CompletableFuture<String> reconcileAll(@PathVariable("userId") long userId) {
+//        return reconcileYnabService.reconcileTableDefaultAll(userId);
+//    }
 
     @GetMapping(value = API_PREFIX + "/reconcile/{userId}/pb", produces = APPLICATION_JSON_VALUE)
-    public CompletableFuture<ResponseEntity<PbZenReconcileResponse>> reconcilePbZen(@PathVariable("userId") long userId) {
+    public CompletableFuture<ResponseEntity<PbZenReconcileResponse>> reconcilePbZen(@PathVariable("userId") String userId) {
         return reconcileYnabService.reconcilePbJson(userId);
     }
 }

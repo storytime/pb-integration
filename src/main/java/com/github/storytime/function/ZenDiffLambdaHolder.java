@@ -1,7 +1,6 @@
 package com.github.storytime.function;
 
-import com.github.storytime.model.api.ms.AppUser;
-import com.github.storytime.model.db.YnabSyncConfig;
+import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.zen.ZenSyncRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -21,7 +20,7 @@ public class ZenDiffLambdaHolder {
     public ZenDiffLambdaHolder() {
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getInitialFunction(final AppUser u) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getInitialFunction(final AwsUser u) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(now().getEpochSecond());
             final Long zenLastSyncTimestamp = u.getZenLastSyncTimestamp();
@@ -39,18 +38,18 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getYnabFunction(final AppUser user,
-                                                                final long clientSyncTime,
-                                                                final YnabSyncConfig ynabSyncConfig) {
-        return () -> {
-            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(clientSyncTime);
-            zenSyncRequest.setForceFetch(of(TAG, ACCOUNT));
-            zenSyncRequest.setServerTimestamp(ynabSyncConfig.getLastSync());
-            return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
-        };
-    }
+//    public Supplier<HttpEntity<ZenSyncRequest>> getYnabFunction(final AppUser user,
+//                                                                final long clientSyncTime,
+//                                                                final YnabSyncConfig ynabSyncConfig) {
+//        return () -> {
+//            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(clientSyncTime);
+//            zenSyncRequest.setForceFetch(of(TAG, ACCOUNT));
+//            zenSyncRequest.setServerTimestamp(ynabSyncConfig.getLastSync());
+//            return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
+//        };
+//    }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getSavingsFunction(final AppUser u) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getSavingsFunction(final AwsUser u) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
@@ -60,7 +59,7 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getAccountAndTags(final AppUser u, long startDate) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getAccountAndTags(final AwsUser u, long startDate) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())
@@ -70,7 +69,7 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getAccount(final AppUser u, long startDate) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getAccount(final AwsUser u, long startDate) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())

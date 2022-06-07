@@ -1,7 +1,7 @@
 package com.github.storytime.service.http;
 
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.model.api.ms.AppUser;
+import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.model.zen.ZenSyncRequest;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTime;
+import static com.github.storytime.STUtils.getTimeAndReset;
 import static com.github.storytime.other.Utils.createHeader;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
@@ -36,16 +36,16 @@ public class ZenDiffHttpService {
         this.customConfig = customConfig;
     }
 
-    public Optional<ZenResponse> pushToZen(final AppUser u, final ZenDiffRequest request) {
+    public Optional<ZenResponse> pushToZen(final AwsUser u, final ZenDiffRequest request) {
         final var st = createSt();
         try {
             final var diffObject = new HttpEntity<>(request, createHeader(u.getZenAuthToken()));
             final var zenResponseResponseEntity = restTemplate.postForEntity(customConfig.getZenDiffUrl(), diffObject, ZenResponse.class);
             final var body = ofNullable(zenResponseResponseEntity.getBody());
-            LOGGER.info("Finish! Updated zen diff with: [{}], was pushed to zen for user id: [{}], time: [{}] - finish", request.getTransaction(), u.getId(), getTime(st));
+            LOGGER.info("Finish! Updated zen diff with: [{}], was pushed to zen for user id: [{}], time: [{}] - finish", request.getTransaction(), u.getId(), getTimeAndReset(st));
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot push zen diff, time: [{}], request: [{}] - error", getTime(st), e.getMessage());
+            LOGGER.error("Cannot push zen diff, time: [{}], request: [{}] - error", getTimeAndReset(st), e.getMessage());
             return empty();
         }
     }
@@ -55,10 +55,10 @@ public class ZenDiffHttpService {
         try {
             final var httpEntity = function.get();
             final var body = ofNullable(restTemplate.postForEntity(customConfig.getZenDiffUrl(), httpEntity, ZenResponse.class).getBody());
-            LOGGER.debug("Zen diff was fetched time: [{}] - finish!", getTime(st));
+            LOGGER.debug("Zen diff was fetched time: [{}] - finish!", getTimeAndReset(st));
             return body;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch zen diff, time: [{}], error: [{}]", getTime(st), e.getMessage());
+            LOGGER.error("Cannot fetch zen diff, time: [{}], error: [{}]", getTimeAndReset(st), e.getMessage());
             return empty();
         }
     }

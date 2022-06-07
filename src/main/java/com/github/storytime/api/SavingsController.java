@@ -25,12 +25,12 @@ public class SavingsController {
     }
 
     @GetMapping(value = API_PREFIX + "/savings/{userId}/info", produces = TEXT_PLAIN_VALUE)
-    public CompletableFuture<String> getAllSavingsAsTable(@PathVariable("userId") long userId) {
+    public CompletableFuture<String> getAllSavingsAsTable(@PathVariable("userId") String userId) {
         return savingsService.getAllSavingsAsTable(userId);
     }
 
     @GetMapping(value = API_PREFIX + "/savings/{userId}/json", produces = APPLICATION_JSON_VALUE)
-    public CompletableFuture<ResponseEntity<SavingsInfoResponse>> getAllSavingsAsJson(@PathVariable("userId") long userId) {
+    public CompletableFuture<ResponseEntity<SavingsInfoResponse>> getAllSavingsAsJson(@PathVariable("userId") String userId) {
         return savingsService.getAllSavingsJson(userId);
     }
 }

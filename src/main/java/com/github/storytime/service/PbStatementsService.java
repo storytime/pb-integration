@@ -4,10 +4,9 @@ import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.mapper.response.PbResponseMapper;
-import com.github.storytime.model.api.ms.AppUser;
-import com.github.storytime.model.db.MerchantInfo;
+import com.github.storytime.model.aws.AwsMerchant;
+import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.access.MerchantService;
 import com.github.storytime.service.async.PbAsyncService;
 import com.github.storytime.service.utils.DateService;
 import org.apache.logging.log4j.LogManager;
@@ -42,36 +41,59 @@ public class PbStatementsService {
     private final CustomConfig customConfig;
     private final PbRequestBuilder pbRequestBuilder;
     private final PbResponseMapper pbResponseMapper;
-    private final MerchantService merchantService;
+    // private final MerchantService merchantService;
     private final PbAsyncService pbAsyncService;
 
     @Autowired
     public PbStatementsService(
             final CustomConfig customConfig,
             final PbResponseMapper pbResponseMapper,
-            final MerchantService merchantService,
+            // final MerchantService merchantService,
             final PbRequestBuilder statementRequestBuilder,
             final AdditionalCommentService additionalCommentService,
             final DateService dateService,
             final PbAsyncService pbAsyncService) {
         this.customConfig = customConfig;
         this.pbResponseMapper = pbResponseMapper;
-        this.merchantService = merchantService;
+        // this.merchantService = merchantService;
         this.pbRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
         this.dateService = dateService;
         this.pbAsyncService = pbAsyncService;
     }
 
-    public CompletableFuture<List<Statement>> getPbTransactions(final AppUser appUser,
-                                                                final MerchantInfo merchantInfo,
-                                                                final ZonedDateTime startDate,
-                                                                final ZonedDateTime endDate) {
+//    public CompletableFuture<List<Statement>> getPbTransactions(final AppUser appUser,
+//                                                                final MerchantInfo merchantInfo,
+//                                                                final ZonedDateTime startDate,
+//                                                                final ZonedDateTime endDate) {
+//
+//        LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync: [{}], card: [{}]",
+//                appUser.getId(),
+//                ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY),
+//                merchantInfo.getId(),
+//                merchantInfo.getMerchantId(),
+//                dateService.millisToIsoFormat(startDate),
+//                dateService.millisToIsoFormat(endDate),
+//                right(merchantInfo.getCardNumber(), CARD_LAST_DIGITS)
+//        );
+//
+//        final var requestToBank = pbRequestBuilder.buildStatementRequest(merchantInfo, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
+//        return pbAsyncService.pullPbTransactions(requestToBank)
+//                .thenApply(Optional::get)
+//                .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
+//                .thenApply(stList -> additionalCommentService.addAdditionalComments(stList, merchantInfo, appUser.getTimeZone()))
+//                .whenComplete((r, e) -> logPbCf(appUser.getId(), LOGGER, e));
+//    }
+
+    public CompletableFuture<List<Statement>> getAwsPbTransactions(final AwsUser appUser,
+                                                                   final AwsMerchant merchantInfo,
+                                                                   final ZonedDateTime startDate,
+                                                                   final ZonedDateTime endDate) {
 
         LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync: [{}], card: [{}]",
                 appUser.getId(),
                 ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY),
-                merchantInfo.getId(),
+                merchantInfo.getMerchantId(),
                 merchantInfo.getMerchantId(),
                 dateService.millisToIsoFormat(startDate),
                 dateService.millisToIsoFormat(endDate),
@@ -82,13 +104,13 @@ public class PbStatementsService {
         return pbAsyncService.pullPbTransactions(requestToBank)
                 .thenApply(Optional::get)
                 .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
-                .thenApply(stList -> additionalCommentService.addAdditionalComments(stList, merchantInfo, appUser.getTimeZone()))
+                .thenApply(stList -> additionalCommentService.addAdditionalAwsComments(stList, merchantInfo, appUser.getTimeZone()))
                 .whenComplete((r, e) -> logPbCf(appUser.getId(), LOGGER, e));
     }
 
 
-    private List<Statement> handleResponse(final AppUser u,
-                                           final MerchantInfo m,
+    private List<Statement> handleResponse(final AwsUser u,
+                                           final AwsMerchant m,
                                            final ZonedDateTime startDate,
                                            final ZonedDateTime endDate,
                                            final ResponseEntity<String> body) {
@@ -109,7 +131,7 @@ public class PbStatementsService {
 
             final var now = dateService.getUserStarDateInMillis(u);
             if (rollBackStartDateMillis > (now - customConfig.getMaxRollbackPeriod())) {
-                merchantService.save(m.setSyncStartDate(rollBackStartDateMillis));
+                m.setSyncStartDate(rollBackStartDateMillis);
             } else {
                 LOGGER.error("Desc: [{}] mId: [{}] invalid signature, failed to rollback from: [{}] to: [{}] date is too big", mDesc, mId, sDate, rollBackTime);
             }
@@ -122,7 +144,7 @@ public class PbStatementsService {
     public List<Statement> filterNewPbTransactions(final ZonedDateTime start,
                                                    final ZonedDateTime end,
                                                    final List<Statement> pbStatements,
-                                                   final AppUser appUser) {
+                                                   final AwsUser appUser) {
         final Comparator<ZonedDateTime> comparator = comparing(zdt -> zdt.truncatedTo(MILLIS));
         // sometimes new transactions can be available with delay, so we need to change start time of filtering
         final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
@@ -132,7 +154,7 @@ public class PbStatementsService {
     }
 
     public Predicate<Statement> getStatementComparatorPredicate(final ZonedDateTime end,
-                                                                final AppUser appUser,
+                                                                final AwsUser appUser,
                                                                 final Comparator<ZonedDateTime> comparator,
                                                                 final ZonedDateTime searchStartTime) {
         return t -> {

@@ -1,45 +1,44 @@
 package com.github.storytime.service.utils;
 
-import com.github.storytime.model.db.CustomPayee;
-import com.github.storytime.repository.CustomPayeeRepository;
+import com.github.storytime.model.aws.AwsCustomPayee;
+import com.github.storytime.model.aws.AwsUser;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static com.github.storytime.config.props.CacheNames.CUSTOM_PAYEE;
 import static com.github.storytime.config.props.Constants.EMPTY;
 import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
 public class CustomPayeeService {
 
     private static final Logger LOGGER = getLogger(CustomPayeeService.class);
-    private final CustomPayeeRepository customPayeeRepository;
 
-    @Autowired
-    public CustomPayeeService(final CustomPayeeRepository customPayeeRepository) {
-        this.customPayeeRepository = customPayeeRepository;
-    }
 
-    public String getNicePayee(final String maybePayee) {
+    public String getNicePayee(final String maybePayee, AwsUser u) {
         var originalPayee = ofNullable(maybePayee).orElse(EMPTY);
-        var nicePayee = findAll()
+        var userPayeeList = Optional.ofNullable(u.getAwsCustomPayee())
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(not(p -> StringUtils.isEmpty(p.getPayee())))
+                .collect(Collectors.toList());
+
+        var nicePayee = userPayeeList
                 .stream()
                 .filter(cp -> originalPayee.contains(cp.getContainsValue()))
                 .findAny()
-                .map(CustomPayee::getPayee)
+                .map(AwsCustomPayee::getPayee)
                 .orElse(originalPayee).trim();
 
         LOGGER.debug("Nice payee is: [{}] for original: [{}]", nicePayee, originalPayee);
         return nicePayee;
     }
 
-    @Cacheable(CUSTOM_PAYEE)
-    public List<CustomPayee> findAll() {
-        return customPayeeRepository.findAll();
-    }
 }

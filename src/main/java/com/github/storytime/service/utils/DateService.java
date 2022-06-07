@@ -1,6 +1,6 @@
 package com.github.storytime.service.utils;
 
-import com.github.storytime.model.api.ms.AppUser;
+import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,25 +52,30 @@ public class DateService {
         return minfinDateTimeFormatter.format(zonedDateTime);
     }
 
-    public ZonedDateTime millisUserDate(Long millis, AppUser u) {
+    public ZonedDateTime millisUserDate(Long millis, AwsUser u) {
         final Instant instant = ofEpochMilli(millis);
         return ofInstant(instant, of(u.getTimeZone()));
     }
 
-    public ZonedDateTime secToUserDate(Long secs, AppUser u) {
+    public ZonedDateTime millisAwsUserDate(Long millis, AwsUser u) {
+        final Instant instant = ofEpochMilli(millis);
+        return ofInstant(instant, of(u.getTimeZone()));
+    }
+
+    public ZonedDateTime secToUserDate(Long secs, AwsUser u) {
         final Instant instant = ofEpochSecond(secs);
         return ofInstant(instant, of(u.getTimeZone()));
     }
 
-    public String toPbFormat(Long millis, AppUser u) {
+    public String toPbFormat(Long millis, AwsUser u) {
         return pbDateTimeFormatter.format(millisUserDate(millis, u));
     }
 
-    public String millisToIsoFormat(Long millis, AppUser u) {
-        return isoDateTimeFormatter.format(millisUserDate(millis, u));
+    public String millisToIsoFormat(Long millis, AwsUser u) {
+        return isoDateTimeFormatter.format(millisAwsUserDate(millis, u));
     }
 
-    public String secsToIsoFormat(Long secs, AppUser u) {
+    public String secsToIsoFormat(Long secs, AwsUser u) {
         return isoDateTimeFormatter.format(secToUserDate(secs, u));
     }
 
@@ -121,7 +126,7 @@ public class DateService {
                 .atZone(of(timeZone));
     }
 
-    public long getStartOfMouthInSeconds(int year, int mouth, final AppUser u) {
+    public long getStartOfMouthInSeconds(int year, int mouth, final AwsUser u) {
         return YearMonth.of(year, mouth)
                 .atDay(1)
                 .atStartOfDay(of(u.getTimeZone()))
@@ -129,7 +134,7 @@ public class DateService {
                 .getEpochSecond();
     }
 
-    public long getEndOfMouthInSeconds(int year, int mouth, final AppUser u) {
+    public long getEndOfMouthInSeconds(int year, int mouth, final AwsUser u) {
         return YearMonth.of(year, mouth)
                 .atEndOfMonth()
                 .atStartOfDay(of(u.getTimeZone()))
@@ -138,7 +143,7 @@ public class DateService {
                 .getEpochSecond();
     }
 
-    public long getUserStarDateInMillis(final AppUser appUser) {
+    public long getUserStarDateInMillis(final AwsUser appUser) {
         return now().withZoneSameInstant(of(appUser.getTimeZone())).toInstant().toEpochMilli();
     }
 }

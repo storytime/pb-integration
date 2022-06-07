@@ -3,7 +3,7 @@ package com.github.storytime.service;
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.mapper.response.PbAccountBalanceResponseMapper;
 import com.github.storytime.mapper.response.PbResponseMapper;
-import com.github.storytime.model.db.MerchantInfo;
+import com.github.storytime.model.aws.AwsMerchant;
 import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.service.async.PbAsyncService;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +37,7 @@ public class PbAccountService {
         this.pbResponseMapper = pbResponseMapper;
     }
 
-    public CompletableFuture<List<PbAccountBalance>> getPbAsyncAccounts(final List<MerchantInfo> merchantInfos) {
+    public CompletableFuture<List<PbAccountBalance>> getPbAsyncAccounts(final List<AwsMerchant> merchantInfos) {
         final List<CompletableFuture<PbAccountBalance>> pbAccountCf = merchantInfos
                 .stream()
                 .map(this::getPbAsyncAccounts).toList();
@@ -48,7 +48,7 @@ public class PbAccountService {
         //Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere
     }
 
-    public CompletableFuture<PbAccountBalance> getPbAsyncAccounts(final MerchantInfo m) {
+    public CompletableFuture<PbAccountBalance> getPbAsyncAccounts(final AwsMerchant m) {
         return pbAsyncService.pullPbAccounts(pbRequestBuilder.buildAccountRequest(m))
                 .thenApply(r -> r.map(pbResponseMapper::mapAccountRequestBody).orElse(DEFAULT_ACC_BALANCE))
                 .thenApply(r -> pbAccountBalanceResponseMapper.buildSimpleObject(r, m));

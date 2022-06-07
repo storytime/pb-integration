@@ -1,7 +1,8 @@
 package com.github.storytime.mapper.pb;
 
 import com.github.storytime.mapper.response.ZenResponseMapper;
-import com.github.storytime.model.api.ms.AppUser;
+import com.github.storytime.model.aws.AwsCustomPayee;
+import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
@@ -50,7 +51,7 @@ public class PbToZenTransactionMapper {
 
     public List<TransactionItem> mapPbTransactionToZen(final List<Statement> statementList,
                                                        final ZenResponse zenDiff,
-                                                       final AppUser u) {
+                                                       final AwsUser u) {
 
         return statementList
                 .stream()
@@ -58,14 +59,14 @@ public class PbToZenTransactionMapper {
                 .filter(Objects::nonNull).toList();
     }
 
-    private String createIdForZen(final long userId,
+    private String createIdForZen(final String userId,
                                   final Double amount,
                                   final byte[] trDateBytes,
                                   final Long card,
                                   final String appcode,
                                   final String terminal) {
                                  // final String transactionDesc) {
-        final var userIdBytes = Long.toString(userId).getBytes();
+        final var userIdBytes = userId.getBytes();
         final var trAmountByes = String.valueOf(amount).getBytes();
         final var cardBytes = Long.toString(card).getBytes();
         final var appCodeBytes = appcode.getBytes();
@@ -87,7 +88,7 @@ public class PbToZenTransactionMapper {
         return UUID.nameUUIDFromBytes(idBytes).toString();
     }
 
-    public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser u, final Statement pbTr) {
+    public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AwsUser u, final Statement pbTr) {
         final var newZenTr = new TransactionItem();
         final var transactionDesc = regExpService.normalizeDescription(pbTr.getDescription());
         final var opAmount = valueOf(substringBefore(pbTr.getAmount(), SPACE));
@@ -102,7 +103,7 @@ public class PbToZenTransactionMapper {
         final var createdTime = dateService.xmlDateTimeToZoned(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
         final var idTr = createIdForZen(u.getId(), opAmount, trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode(), pbTr.getTerminal());
         final var userId = zenResponseMapper.findUserId(zenDiff);
-        final var nicePayee = customPayeeService.getNicePayee(transactionDesc);
+        final var nicePayee = customPayeeService.getNicePayee(transactionDesc, u);
         final var merchantId = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);
 
         newZenTr.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
@@ -124,6 +125,15 @@ public class PbToZenTransactionMapper {
         newZenTr.setOutcomeInstrument(currency);
         newZenTr.setViewed(false);
         newZenTr.setMerchant(merchantId);
+
+        //add payeer to users list /TODO
+        Optional<AwsCustomPayee> first = u.getAwsCustomPayee()
+                .stream()
+                .filter(t -> t.getContainsValue().equals(transactionDesc))
+                .findFirst();
+
+        if(first.isEmpty())
+            u.getAwsCustomPayee().add(new AwsCustomPayee(EMPTY, transactionDesc));
 
         // transaction in different currency
         final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);

@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Optional;
 
 import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTime;
+import static com.github.storytime.STUtils.getTimeAndReset;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -36,10 +36,10 @@ public class PbStatementsHttpService {
         try {
             final var pbTransactionsUrl = customConfig.getPbTransactionsUrl();
             final var response = of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
-            LOGGER.debug("Fetched bank transactions, time: [{}] - finish", getTime(st));
+            LOGGER.debug("Fetched bank transactions, time: [{}] - finish", getTimeAndReset(st));
             return response;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch bank transactions, time: [{}], errors: [{}] - error", e.getMessage(), getTime(st), e);
+            LOGGER.error("Cannot fetch bank transactions, time: [{}], errors: [{}] - error", e.getMessage(), getTimeAndReset(st), e);
             return empty();
         }
     }
@@ -49,10 +49,10 @@ public class PbStatementsHttpService {
         try {
             final var pbAccountsUrl = customConfig.getPbAccountsUrl();
             final var response = of(restTemplate.postForEntity(pbAccountsUrl, requestToBank, String.class));
-            LOGGER.debug("Fetched bank account, time: [{}] - finish", getTime(st));
+            LOGGER.debug("Fetched bank account, time: [{}] - finish", getTimeAndReset(st));
             return response;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch bank account, time: [{}], errors: [{}] - error", e.getMessage(), getTime(st), e);
+            LOGGER.error("Cannot fetch bank account, time: [{}], errors: [{}] - error", e.getMessage(), getTimeAndReset(st), e);
             return empty();
         }
     }

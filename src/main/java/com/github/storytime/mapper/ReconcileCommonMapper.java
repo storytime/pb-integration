@@ -22,26 +22,26 @@ import static java.util.Comparator.comparing;
 @Component
 public class ReconcileCommonMapper {
 
-    private final YnabCommonMapper ynabCommonMapper;
-
-    @Autowired
-    public ReconcileCommonMapper(final YnabCommonMapper ynabCommonMapper) {
-        this.ynabCommonMapper = ynabCommonMapper;
-    }
-
-    public List<ZenYnabAccountReconcileProxyObject> mapInfoForAccountTable(final List<AccountItem> zenAccs,
-                                                                           final List<YnabAccounts> ynabAccs,
-                                                                           final List<PbAccountBalance> pbAccs) {
-        return zenAccs
-                .stream()
-                .map(zenAcc -> ynabAccs.stream()
-                        .filter(yA -> yA.getName().equalsIgnoreCase(zenAcc.getTitle())).toList()
-                        .stream()
-                        .map(yAcc -> this.mapToZenYnabPbAcc(pbAccs, zenAcc, zenAcc.getTitle(), yAcc)).toList()).toList()
-                .stream()
-                .flatMap(Collection::stream)
-                .sorted(comparing(ZenYnabAccountReconcileProxyObject::getPbAmount)).toList();
-    }
+//    private final YnabCommonMapper ynabCommonMapper;
+//
+//    @Autowired
+//    public ReconcileCommonMapper(final YnabCommonMapper ynabCommonMapper) {
+//        this.ynabCommonMapper = ynabCommonMapper;
+//    }
+//
+//    public List<ZenYnabAccountReconcileProxyObject> mapInfoForAccountTable(final List<AccountItem> zenAccs,
+//                                                                           final List<YnabAccounts> ynabAccs,
+//                                                                           final List<PbAccountBalance> pbAccs) {
+//        return zenAccs
+//                .stream()
+//                .map(zenAcc -> ynabAccs.stream()
+//                        .filter(yA -> yA.getName().equalsIgnoreCase(zenAcc.getTitle())).toList()
+//                        .stream()
+//                        .map(yAcc -> this.mapToZenYnabPbAcc(pbAccs, zenAcc, zenAcc.getTitle(), yAcc)).toList()).toList()
+//                .stream()
+//                .flatMap(Collection::stream)
+//                .sorted(comparing(ZenYnabAccountReconcileProxyObject::getPbAmount)).toList();
+//    }
 
 
     public List<PbZenReconcile> mapInfoForAccountJson(final List<AccountItem> zenAccs,
@@ -62,26 +62,26 @@ public class ReconcileCommonMapper {
         return new PbZenReconcile(accountName, bankBal.toString(), zenBal.toString(), diff);
     }
 
-    public ZenYnabAccountReconcileProxyObject mapToZenYnabPbAcc(final List<PbAccountBalance> pbAccs,
-                                                                final AccountItem zenAcc,
-                                                                final String zenAccTitle,
-                                                                final YnabAccounts yAcc) {
-        var ynabBal = ynabCommonMapper.parseYnabBal(valueOf(yAcc.getBalance()));
-        var zenBal = BigDecimal.valueOf(zenAcc.getBalance());
-        var zenYnabDiff = zenBal.subtract(ynabBal).setScale(CURRENCY_SCALE, HALF_DOWN);
-        var status = zenYnabDiff.longValue() == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
-
-        final Optional<PbAccountBalance> pbAcc = pbAccs.stream()
-                .filter(pbAccountBalance -> pbAccountBalance.getAccount().equalsIgnoreCase(zenAccTitle))
-                .findFirst();
-
-        if (pbAcc.isPresent()) {
-            final BigDecimal pbBal = pbAcc.get().getBalance();
-            var zenPbDiff = pbBal.subtract(zenBal).setScale(CURRENCY_SCALE, HALF_DOWN);
-            var fullStatus = (zenYnabDiff.longValue() + zenPbDiff.longValue()) == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
-            return new ZenYnabAccountReconcileProxyObject(zenAccTitle, zenBal.toString(), ynabBal.toString(), pbBal.toString(), zenPbDiff.toString(), zenYnabDiff.toString(), fullStatus);
-        } else {
-            return new ZenYnabAccountReconcileProxyObject(zenAccTitle, zenBal.toString(), ynabBal.toString(), X, X, zenYnabDiff.toString(), status);
-        }
-    }
+//    public ZenYnabAccountReconcileProxyObject mapToZenYnabPbAcc(final List<PbAccountBalance> pbAccs,
+//                                                                final AccountItem zenAcc,
+//                                                                final String zenAccTitle,
+//                                                                final YnabAccounts yAcc) {
+//        var ynabBal = ynabCommonMapper.parseYnabBal(valueOf(yAcc.getBalance()));
+//        var zenBal = BigDecimal.valueOf(zenAcc.getBalance());
+//        var zenYnabDiff = zenBal.subtract(ynabBal).setScale(CURRENCY_SCALE, HALF_DOWN);
+//        var status = zenYnabDiff.longValue() == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
+//
+//        final Optional<PbAccountBalance> pbAcc = pbAccs.stream()
+//                .filter(pbAccountBalance -> pbAccountBalance.getAccount().equalsIgnoreCase(zenAccTitle))
+//                .findFirst();
+//
+//        if (pbAcc.isPresent()) {
+//            final BigDecimal pbBal = pbAcc.get().getBalance();
+//            var zenPbDiff = pbBal.subtract(zenBal).setScale(CURRENCY_SCALE, HALF_DOWN);
+//            var fullStatus = (zenYnabDiff.longValue() + zenPbDiff.longValue()) == ZERO_DIIF ? RECONCILE_OK : RECONCILE_NOT_OK;
+//            return new ZenYnabAccountReconcileProxyObject(zenAccTitle, zenBal.toString(), ynabBal.toString(), pbBal.toString(), zenPbDiff.toString(), zenYnabDiff.toString(), fullStatus);
+//        } else {
+//            return new ZenYnabAccountReconcileProxyObject(zenAccTitle, zenBal.toString(), ynabBal.toString(), X, X, zenYnabDiff.toString(), status);
+//        }
+//    }
 }

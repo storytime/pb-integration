@@ -1,10 +1,10 @@
 package com.github.storytime.service.export;
 
 import com.github.storytime.mapper.response.ExportMapper;
-import com.github.storytime.model.api.ms.AppUser;
+import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.export.ExportTransaction;
 import com.github.storytime.model.zen.TransactionItem;
-import com.github.storytime.service.access.UserService;
+import com.github.storytime.service.AwsUserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTime;
+import static com.github.storytime.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logExport;
 import static com.github.storytime.mapper.response.ExportMapper.*;
@@ -32,7 +32,7 @@ public class ExportService {
     private static final Logger LOGGER = getLogger(ExportService.class);
     private final static Map<String, String> quarter = new TreeMap<>();
 
-    private final UserService userService;
+    private final AwsUserAsyncService awsUserAsyncService;
     private final ZenAsyncService zenAsyncService;
     private final ExportMapper exportMapper;
 
@@ -46,10 +46,10 @@ public class ExportService {
     private final Predicate<TransactionItem> transactionInSelectPredicate = t -> t.getOutcome() == INITIAL_VALUE;
 
     @Autowired
-    public ExportService(final UserService userService,
+    public ExportService(final AwsUserAsyncService awsUserAsyncService,
                          final ExportMapper exportMapper,
                          final ZenAsyncService zenAsyncService) {
-        this.userService = userService;
+        this.awsUserAsyncService = awsUserAsyncService;
         this.zenAsyncService = zenAsyncService;
         this.exportMapper = exportMapper;
 
@@ -67,92 +67,92 @@ public class ExportService {
         quarter.put(DEC, Q4);
     }
 
-    public CompletableFuture<List<Map<String, String>>> getOutMonthlyData(final long userId) {
+    public CompletableFuture<List<Map<String, String>>> getOutMonthlyData(final String userId) {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export out monthly user: [{}] - start", userId);
 
-            return userService.findUserByIdAsyncCache(userId)
+            return awsUserAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outMonthlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot collect get export out monthly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot collect get export out monthly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
             return completedFuture(emptyList());
         }
     }
 
-    public CompletableFuture<List<Map<String, String>>> getInMonthlyData(final long userId) {
+    public CompletableFuture<List<Map<String, String>>> getInMonthlyData(final String userId) {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in monthly user: [{}] - start", userId);
-            return userService.findUserByIdAsyncCache(userId)
+            return awsUserAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inMonthlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot collect get export in monthly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot collect get export in monthly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
             return completedFuture(emptyList());
         }
     }
 
-    public CompletableFuture<List<Map<String, String>>> getOutYearlyData(final long userId) {
+    public CompletableFuture<List<Map<String, String>>> getOutYearlyData(final String userId) {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export out yearly user: [{}] - start", userId);
-            return userService.findUserByIdAsyncCache(userId)
+            return awsUserAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outYearlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot collect get export out yearly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot collect get export out yearly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
             return completedFuture(emptyList());
         }
     }
 
-    public CompletableFuture<List<Map<String, String>>> getInYearlyData(final long userId) {
+    public CompletableFuture<List<Map<String, String>>> getInYearlyData(final String userId) {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in yearly user: [{}] - start", userId);
-            return userService.findUserByIdAsyncCache(userId)
+            return awsUserAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inYearlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot collect get export in yearly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot collect get export in yearly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
             return completedFuture(emptyList());
         }
     }
 
-    public CompletableFuture<List<Map<String, String>>> getInQuarterData(final long userId) {
+    public CompletableFuture<List<Map<String, String>>> getInQuarterData(final String userId) {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in quarterly user: [{}] - start", userId);
-            return userService.findUserByIdAsyncCache(userId)
+            return awsUserAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inQuarterlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot collect get export in quarterly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot collect get export in quarterly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
             return completedFuture(emptyList());
         }
     }
 
-    public CompletableFuture<List<Map<String, String>>> getOutQuarterlyData(final long userId) {
+    public CompletableFuture<List<Map<String, String>>> getOutQuarterlyData(final String userId) {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export out quarterly user: [{}] - start", userId);
-            return userService.findUserByIdAsyncCache(userId)
+            return awsUserAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outQuarterlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
         } catch (Exception e) {
-            LOGGER.error("Cannot collect get export out quarterly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTime(st), e.getCause(), e);
+            LOGGER.error("Cannot collect get export out quarterly user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
             return completedFuture(emptyList());
         }
     }
 
-    private CompletableFuture<List<Map<String, String>>> getExportData(final AppUser appUser,
+    private CompletableFuture<List<Map<String, String>>> getExportData(final AwsUser appUser,
                                                                        final Function<TransactionItem, ExportTransaction> transactionMapper,
                                                                        final Predicate<TransactionItem> transactionFilter) {
         return zenAsyncService

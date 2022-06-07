@@ -3,6 +3,7 @@ package com.github.storytime.mapper;
 import com.github.storytime.config.props.Constants;
 import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
+import com.github.storytime.model.aws.AWSCurrencyType;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.CurrencyService;
@@ -14,8 +15,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static com.github.storytime.config.props.Constants.*;
-import static com.github.storytime.model.db.inner.CurrencyType.EUR;
-import static com.github.storytime.model.db.inner.CurrencyType.USD;
 import static java.math.BigDecimal.ZERO;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
@@ -80,8 +79,8 @@ public class SavingsInfoMapper {
         final var balance = accountItem.getBalance();
         final var startDate = now(systemDefault()).with(MIN);
         final var bal = valueOf(balance);
-        final var inUah = instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
-                instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) : bal;
+        final var inUah = instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
+                instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) : bal;
 
         return new SavingsInfo()
                 .setBalance(bal.setScale(ZERO_SCALE, HALF_DOWN))

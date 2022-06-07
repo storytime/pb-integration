@@ -1,6 +1,6 @@
 package com.github.storytime.function;
 
-import com.github.storytime.model.db.CurrencyRates;
+import com.github.storytime.model.aws.AwsCurrencyRates;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
@@ -13,9 +13,9 @@ import static java.util.Optional.empty;
 @Deprecated
 public class FunctionUtils {
 
-    public static Supplier<Optional<? extends CurrencyRates>> logAndGetEmpty(final Logger logger,
-                                                                             final Level level,
-                                                                             final String msg) {
+    public static Supplier<Optional<? extends AwsCurrencyRates>> logAndGetEmpty(final Logger logger,
+                                                                                final Level level,
+                                                                                final String msg) {
         return () -> {
             logger.log(level, msg);
             return empty();

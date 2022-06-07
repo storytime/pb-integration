@@ -1,63 +1,4 @@
 version: '3.7'
-services:
-  pg:
-    image: postgres:11-alpine
-    env_file:
-      - ./variables.env
-    ports:
-      - 5432:5432
-    volumes:
-      - db-vol:/var/lib/postgresql/data
-    networks:
-      - backend
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 168MB
-      restart_policy:
-        condition: on-failure
-
-  pg-admin-web-ui:
-    image: dpage/pgadmin4
-    env_file:
-      - ./variables.env
-    volumes:
-      - pg-admin-vol:/var/lib/pgadmin
-    networks:
-      - backend
-    ports:
-      - 5050:80
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 128MB
-      restart_policy:
-        condition: on-failure
-
-  app-sync-users-ms:
-    image: bobobo/app-sync-users-ms:latest
-    env_file:
-      - ./app-sync-users-ms-variables.env
-    ports:
-      - 10090:9000
-    logging:
-      driver: json-file
-    depends_on:
-      - pg
-    volumes:
-      - app-sync-users-ms-log-vol:/home/app/logs
-    networks:
-      - backend
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          memory: 162MB
-      restart_policy:
-        condition: on-failure
-
   pb-integration:
     image: bobobo/pb-integration:latest
     env_file:
@@ -87,27 +28,6 @@ volumes:
     driver_opts:
       type: none
       device: /home/appuser/pb-integration/logs/app-sync
-      o: bind
-
-  db-vol:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/appuser/pb-integration/database
-      o: bind
-
-  pg-admin-vol:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/appuser/pb-integration/pg-web-admin
-      o: bind
-
-  app-sync-users-ms-log-vol:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/appuser/pb-integration/logs/app-sync-users-ms
       o: bind
 
 networks:

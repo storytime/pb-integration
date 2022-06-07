@@ -27,5 +27,4 @@ public class ApplicationConfig {
                 "class path resource [custom.properties]"
         );
     }
-
 }

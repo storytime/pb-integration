@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTime;
+import static com.github.storytime.STUtils.getTimeAndReset;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -34,10 +34,10 @@ public class CurrencyHttpService {
         try {
             final var forEntity = restTemplate.getForEntity(customConfig.getPbCashUrl(), CashResponse[].class);
             final var cashResponses = Optional.of(List.of(ofNullable(forEntity.getBody()).orElse(new CashResponse[]{})));
-            LOGGER.debug("Pulled PB cash rate, time: [{}] - finish", getTime(st));
+            LOGGER.debug("Pulled PB cash rate, time: [{}] - finish", getTimeAndReset(st));
             return cashResponses;
         } catch (Exception e) {
-            LOGGER.error("Cannot get PB cash, time: [{}], error: [{}]", getTime(st), e.getMessage(), e);
+            LOGGER.error("Cannot get PB cash, time: [{}], error: [{}]", getTimeAndReset(st), e.getMessage(), e);
             return empty();
         }
     }
