@@ -1,7 +1,7 @@
 package com.github.storytime.api;
 
 import com.github.storytime.model.api.PbZenReconcileResponse;
-import com.github.storytime.service.info.ReconcileYnabService;
+import com.github.storytime.service.info.ReconcileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,34 +16,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 public class ReconcileController {
 
-    private final ReconcileYnabService reconcileYnabService;
+    private final ReconcileService reconcileService;
 
     @Autowired
-    public ReconcileController(final ReconcileYnabService reconcileYnabService) {
-        this.reconcileYnabService = reconcileYnabService;
+    public ReconcileController(final ReconcileService reconcileService) {
+        this.reconcileService = reconcileService;
     }
 
-//    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info", produces = TEXT_PLAIN_VALUE)
-//    public CompletableFuture<String> reconcile(@PathVariable("userId") long userId,
-//                                               @PathVariable("budgetName") final String budgetName) {
-//        return reconcileYnabService.reconcileTableByBudget(userId, budgetName);
-//    }
-//
-//    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/{budgetName}/info/{year}/{mouth}", produces = TEXT_PLAIN_VALUE)
-//    public CompletableFuture<String> reconcileByDate(@PathVariable("userId") long userId,
-//                                                     @PathVariable("budgetName") final String budgetName,
-//                                                     @PathVariable("year") int year,
-//                                                     @PathVariable("mouth") int mouth) {
-//        return reconcileYnabService.reconcileTableByBudgetForDate(userId, budgetName, year, mouth);
-//    }
-//
-//    @GetMapping(value = API_PREFIX + "/reconcile/{userId}/all", produces = TEXT_PLAIN_VALUE)
-//    public CompletableFuture<String> reconcileAll(@PathVariable("userId") long userId) {
-//        return reconcileYnabService.reconcileTableDefaultAll(userId);
-//    }
 
     @GetMapping(value = API_PREFIX + "/reconcile/{userId}/pb", produces = APPLICATION_JSON_VALUE)
     public CompletableFuture<ResponseEntity<PbZenReconcileResponse>> reconcilePbZen(@PathVariable("userId") String userId) {
-        return reconcileYnabService.reconcilePbJson(userId);
+        return reconcileService.reconcilePbJson(userId);
     }
 }

@@ -9,6 +9,7 @@ public class Constants {
     public static final String END_DATE = "ed";
     public static final String CARD = "card";
     public static final String EMPTY = "";
+    public static final String UNDERSCORE = "_";
     public static final String CMT = "cmt";
     public static final int TEST = 0;
     public static final int XML_VERSION = 1;

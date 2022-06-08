@@ -1,6 +1,7 @@
 package com.github.storytime.model.pb.jaxb.request;
 
 import javax.xml.bind.annotation.XmlRegistry;
+
 @XmlRegistry
 public class ObjectFactory {
 

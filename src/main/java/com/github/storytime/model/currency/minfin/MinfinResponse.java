@@ -1,7 +1,13 @@
 package com.github.storytime.model.currency.minfin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MinfinResponse {
 
     @JsonProperty("eur")
@@ -12,30 +18,6 @@ public class MinfinResponse {
 
     @JsonProperty("rub")
     private Rub rub;
-
-    public Eur getEur() {
-        return eur;
-    }
-
-    public void setEur(Eur eur) {
-        this.eur = eur;
-    }
-
-    public Usd getUsd() {
-        return usd;
-    }
-
-    public void setUsd(Usd usd) {
-        this.usd = usd;
-    }
-
-    public Rub getRub() {
-        return rub;
-    }
-
-    public void setRub(Rub rub) {
-        this.rub = rub;
-    }
 
     @Override
     public String toString() {

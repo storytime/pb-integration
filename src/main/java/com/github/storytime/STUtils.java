@@ -4,10 +4,8 @@ package com.github.storytime;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.text.DecimalFormat;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.valueOf;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class STUtils {
@@ -29,6 +27,6 @@ public class STUtils {
     }
 
     public static String getTime(final StopWatch st) {
-        return  st.getTime() > 1000 ? df.format(st.getTime(SECONDS)).concat(" sec") : valueOf(st.getTime()).concat(" ms");
+        return st.getTime() > 1000 ? df.format(st.getTime(SECONDS)).concat(" sec") : valueOf(st.getTime()).concat(" ms");
     }
 }

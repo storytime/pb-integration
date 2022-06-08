@@ -2,8 +2,8 @@ package com.github.storytime.mapper;
 
 import com.github.storytime.config.props.Constants;
 import com.github.storytime.mapper.response.ZenResponseMapper;
+import com.github.storytime.model.AWSCurrencyType;
 import com.github.storytime.model.api.SavingsInfo;
-import com.github.storytime.model.aws.AWSCurrencyType;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.CurrencyService;

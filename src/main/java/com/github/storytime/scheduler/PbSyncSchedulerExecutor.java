@@ -49,7 +49,7 @@ public class PbSyncSchedulerExecutor {
 
     @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
     public void awsSync() {
-        LOGGER.debug("Starting sync");
+        LOGGER.debug("#################### Starting sync");
         pbSyncService.sync(ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
     }
 

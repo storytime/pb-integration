@@ -1,7 +1,13 @@
 package com.github.storytime.model.currency.minfin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Usd {
 
     @JsonProperty("date")
@@ -21,54 +27,6 @@ public class Usd {
 
     @JsonProperty("bid")
     private String bid;
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getTrendBid() {
-        return trendBid;
-    }
-
-    public void setTrendBid(String trendBid) {
-        this.trendBid = trendBid;
-    }
-
-    public String getAsk() {
-        return ask;
-    }
-
-    public void setAsk(String ask) {
-        this.ask = ask;
-    }
-
-    public String getTrendAsk() {
-        return trendAsk;
-    }
-
-    public void setTrendAsk(String trendAsk) {
-        this.trendAsk = trendAsk;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public String getBid() {
-        return bid;
-    }
-
-    public void setBid(String bid) {
-        this.bid = bid;
-    }
 
     @Override
     public String toString() {

@@ -3,8 +3,6 @@ version: '3.7'
     image: bobobo/pb-integration:latest
     env_file:
       - ./variables.env
-    depends_on:
-      - app-sync-users-ms
     ports:
       - 10080:8080
     logging:

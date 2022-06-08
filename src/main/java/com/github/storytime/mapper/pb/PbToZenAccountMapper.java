@@ -24,7 +24,8 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.apache.commons.lang3.StringUtils.right;
@@ -131,6 +132,6 @@ public class PbToZenAccountMapper {
                 .collect(collectingAndThen(toCollection(() -> new TreeSet<>(comparing(Statement::getCard))), ArrayList::new))
                 .stream()
                 .map(s -> right(String.valueOf(s.getCard()), CARD_LAST_DIGITS))
-                .collect(toUnmodifiableList());
+                .toList();
     }
 }

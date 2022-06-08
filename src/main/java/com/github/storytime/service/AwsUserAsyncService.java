@@ -41,8 +41,7 @@ public class AwsUserAsyncService {
     }
 
     @CacheEvict(value = USERS_CACHE, allEntries = true)
-    public CompletableFuture<Optional<AwsUser>> updateUser(final AwsUser appUser, final long time) {
-        appUser.setZenLastSyncTimestamp(time);
+    public CompletableFuture<Optional<AwsUser>> updateUser(final AwsUser appUser) {
         return supplyAsync(() -> dynamoDbUserService.saveUser(appUser), cfThreadPool);
     }
 

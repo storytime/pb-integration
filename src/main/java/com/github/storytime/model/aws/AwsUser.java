@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamoDBTable(tableName = "app-user-prod")
@@ -32,8 +33,7 @@ public class AwsUser {
     private String timeZone;
 
     @DynamoDBAttribute
-    @Accessors
-    private Long zenLastSyncTimestamp;
+    private long zenLastSyncTimestamp;
 
     @DynamoDBAttribute
     private boolean zenSyncEnabled;

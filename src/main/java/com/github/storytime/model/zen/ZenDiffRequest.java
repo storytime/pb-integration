@@ -1,9 +1,17 @@
 package com.github.storytime.model.zen;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
+@Data
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ZenDiffRequest {
 
@@ -11,41 +19,4 @@ public class ZenDiffRequest {
     private long lastServerTimestamp;
     private List<AccountItem> account;
     private List<TransactionItem> transaction;
-
-    public List<TransactionItem> getTransaction() {
-        return transaction;
-    }
-
-    public ZenDiffRequest setTransaction(List<TransactionItem> transaction) {
-        this.transaction = transaction;
-        return this;
-    }
-
-    public List<AccountItem> getAccount() {
-
-        return account;
-    }
-
-    public ZenDiffRequest setAccount(List<AccountItem> account) {
-        this.account = account;
-        return this;
-    }
-
-    public Long getCurrentClientTimestamp() {
-        return currentClientTimestamp;
-    }
-
-    public ZenDiffRequest setCurrentClientTimestamp(Long currentClientTimestamp) {
-        this.currentClientTimestamp = currentClientTimestamp;
-        return this;
-    }
-
-    public long getLastServerTimestamp() {
-        return lastServerTimestamp;
-    }
-
-    public ZenDiffRequest setLastServerTimestamp(long lastServerTimestamp) {
-        this.lastServerTimestamp = lastServerTimestamp;
-        return this;
-    }
 }

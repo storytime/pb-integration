@@ -38,17 +38,6 @@ public class ZenDiffLambdaHolder {
         };
     }
 
-//    public Supplier<HttpEntity<ZenSyncRequest>> getYnabFunction(final AppUser user,
-//                                                                final long clientSyncTime,
-//                                                                final YnabSyncConfig ynabSyncConfig) {
-//        return () -> {
-//            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(clientSyncTime);
-//            zenSyncRequest.setForceFetch(of(TAG, ACCOUNT));
-//            zenSyncRequest.setServerTimestamp(ynabSyncConfig.getLastSync());
-//            return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
-//        };
-//    }
-
     public Supplier<HttpEntity<ZenSyncRequest>> getSavingsFunction(final AwsUser u) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()

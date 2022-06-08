@@ -56,13 +56,6 @@ public class ZenAsyncService {
         LOGGER.debug("Fetching ZEN accounts for user: [{}] - start", appUser.getId());
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate)), pool);
     }
-//
-//    public CompletableFuture<YnabToZenSyncHolder> zenDiffByUserForYnab(final AppUser appUser,
-//                                                                       final long clientSyncTime,
-//                                                                       final YnabSyncConfig config) {
-//        LOGGER.debug("Fetching ZEN diff for YNAB budget config: [{}], last sync [{}], tags method [{}] - start", config.getBudgetName(), config.getLastSync(), config.getTagsSyncProperties());
-//        return supplyAsync(() -> new YnabToZenSyncHolder(zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getYnabFunction(appUser, clientSyncTime, config)), config), pool);
-//    }
 
     public CompletableFuture<Optional<ZenResponse>> pushToZen(final AwsUser appUser,
                                                               final ZenDiffRequest request) {

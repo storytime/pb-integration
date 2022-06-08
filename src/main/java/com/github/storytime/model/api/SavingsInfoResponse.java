@@ -1,27 +1,19 @@
 package com.github.storytime.model.api;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
 import java.util.List;
 
+@Data
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class SavingsInfoResponse {
 
     private List<SavingsInfo> savings;
     private String total;
 
-    public List<SavingsInfo> getSavings() {
-        return savings;
-    }
-
-    public SavingsInfoResponse setSavings(final List<SavingsInfo> savings) {
-        this.savings = savings;
-        return this;
-    }
-
-    public String getTotal() {
-        return total;
-    }
-
-    public SavingsInfoResponse setTotal(final String total) {
-        this.total = total;
-        return this;
-    }
 }

@@ -101,25 +101,6 @@ public class PbRequestBuilder {
     }
 
 
-//    public Request buildStatementRequest(final MerchantInfo m,
-//                                         final String startDate,
-//                                         final String endDate) {
-//        final Integer merchantId = m.getMerchantId();
-//        final String password = m.getPassword();
-//        final String card = m.getCardNumber();
-//
-//        final Request.Data.Payment payment = buildDataPayment();
-//        buildAccountDataPaymentProperties(payment.getProp(), startDate, endDate, card);
-//        final Request.Data data = buildRequestData();
-//        data.setPayment(payment);
-//
-//        final String signature = pbSignatureGeneratorService.generateStatementSignature(startDate, endDate, card, password);
-//        final Request.Merchant merchant = buildMerchant(merchantId, signature);
-//
-//        return buildRequestRoot(merchant, data);
-//    }
-
-
     public Request buildStatementRequest(final AwsMerchant m,
                                          final String startDate,
                                          final String endDate) {

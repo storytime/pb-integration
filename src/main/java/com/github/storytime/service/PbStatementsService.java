@@ -41,7 +41,6 @@ public class PbStatementsService {
     private final CustomConfig customConfig;
     private final PbRequestBuilder pbRequestBuilder;
     private final PbResponseMapper pbResponseMapper;
-    // private final MerchantService merchantService;
     private final PbAsyncService pbAsyncService;
 
     @Autowired
@@ -61,29 +60,6 @@ public class PbStatementsService {
         this.dateService = dateService;
         this.pbAsyncService = pbAsyncService;
     }
-
-//    public CompletableFuture<List<Statement>> getPbTransactions(final AppUser appUser,
-//                                                                final MerchantInfo merchantInfo,
-//                                                                final ZonedDateTime startDate,
-//                                                                final ZonedDateTime endDate) {
-//
-//        LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync: [{}], card: [{}]",
-//                appUser.getId(),
-//                ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY),
-//                merchantInfo.getId(),
-//                merchantInfo.getMerchantId(),
-//                dateService.millisToIsoFormat(startDate),
-//                dateService.millisToIsoFormat(endDate),
-//                right(merchantInfo.getCardNumber(), CARD_LAST_DIGITS)
-//        );
-//
-//        final var requestToBank = pbRequestBuilder.buildStatementRequest(merchantInfo, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
-//        return pbAsyncService.pullPbTransactions(requestToBank)
-//                .thenApply(Optional::get)
-//                .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
-//                .thenApply(stList -> additionalCommentService.addAdditionalComments(stList, merchantInfo, appUser.getTimeZone()))
-//                .whenComplete((r, e) -> logPbCf(appUser.getId(), LOGGER, e));
-//    }
 
     public CompletableFuture<List<Statement>> getAwsPbTransactions(final AwsUser appUser,
                                                                    final AwsMerchant merchantInfo,

@@ -1,4 +1,4 @@
-package com.github.storytime.model.db.inner;
+package com.github.storytime.model;
 
 
 /**

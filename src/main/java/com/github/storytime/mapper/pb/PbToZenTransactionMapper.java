@@ -65,13 +65,13 @@ public class PbToZenTransactionMapper {
                                   final Long card,
                                   final String appcode,
                                   final String terminal) {
-                                 // final String transactionDesc) {
+        // final String transactionDesc) {
         final var userIdBytes = userId.getBytes();
         final var trAmountByes = String.valueOf(amount).getBytes();
         final var cardBytes = Long.toString(card).getBytes();
         final var appCodeBytes = appcode.getBytes();
         final var descBytes = terminal.getBytes();
-      //  final var transactionDescBytes = transactionDesc.getBytes();
+        //  final var transactionDescBytes = transactionDesc.getBytes();
         final var capacity = userIdBytes.length + trDateBytes.length +
                 trAmountByes.length + cardBytes.length + appCodeBytes.length + descBytes.length;// + transactionDescBytes.length;
 
@@ -82,7 +82,7 @@ public class PbToZenTransactionMapper {
                 .put(cardBytes)
                 .put(appCodeBytes)
                 .put(descBytes)
-        //       .put(transactionDescBytes)
+                //       .put(transactionDescBytes)
                 .array();
 
         return UUID.nameUUIDFromBytes(idBytes).toString();
@@ -133,7 +133,7 @@ public class PbToZenTransactionMapper {
                 .findFirst();
 
         if(first.isEmpty())
-            u.getAwsCustomPayee().add(new AwsCustomPayee(EMPTY, transactionDesc));
+            u.getAwsCustomPayee().add(new AwsCustomPayee(UNDERSCORE, transactionDesc));
 
         // transaction in different currency
         final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);

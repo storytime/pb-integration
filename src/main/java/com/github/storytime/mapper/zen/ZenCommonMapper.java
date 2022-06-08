@@ -59,7 +59,7 @@ public class ZenCommonMapper {
     }
 
     public List<TransactionItem> flatToParentCategoryTransactionList(final List<TagItem> zenTags,
-                                                                     final List<TransactionItem> trList){
+                                                                     final List<TransactionItem> trList) {
         return trList.stream().map(tagItem -> flatToParentCategoryName(zenTags, tagItem)).toList();
     }
 

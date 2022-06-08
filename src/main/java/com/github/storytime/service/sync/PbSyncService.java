@@ -42,13 +42,11 @@ public class PbSyncService {
 
     @Autowired
     public PbSyncService(
-            //final MerchantService merchantService,
             final PbStatementsService pbStatementsService,
             final ZenAsyncService zenAsyncService,
             final PbToZenMapper pbToZenMapper,
             final AwsUserAsyncService awsUserAsyncService,
             final AwsSqsPublisherService awsSqsPublisherService) {
-        // this.merchantService = merchantService;
         this.zenAsyncService = zenAsyncService;
         this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
@@ -74,8 +72,8 @@ public class PbSyncService {
             List<CompletableFuture<String>> allUsersMerchantLevelCf = allCfList.stream().map(CompletableFuture::join).toList();
             CompletableFuture<Void> syncDoneCf = allOf(allUsersMerchantLevelCf.toArray(new CompletableFuture[allUsersMerchantLevelCf.size()]));
             syncDoneCf.thenAccept(allDone -> {
-                LOGGER.info("== All sync done time: [{}]", getTimeAndReset(st));
                 awsSqsPublisherService.publishFinishMessage();
+                LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st));
             });
         });
     }
@@ -106,16 +104,16 @@ public class PbSyncService {
                                                   final AwsUser user,
                                                   final List<AwsMerchant> selectedMerchants,
                                                   final BiConsumer<List<List<Statement>>, String> onSuccessFk,
-                                                  StopWatch st
-    ) {
+                                                  StopWatch st) {
 
-        if (newPbTrList.isEmpty()) {
+        var allTrList = newPbTrList.stream().flatMap(List::stream).toList();
+        if (allTrList.isEmpty()) {
             LOGGER.debug("No new transaction for user: [{}], merch: [{}] time: [{}] - nothing to push - sync finished", user.getId(), selectedMerchants.size(), getTime(st));
             //onSuccessFk.accept(emptyList(), selectedMerchants);
-            return new CompletableFuture<>();
+            return CompletableFuture.completedFuture("Hello");
         }
 
-        LOGGER.info("User: [{}] has: [{}] transactions to push, time: [{}]", user.getId(), newPbTrList.size(), getTime(st));
+        LOGGER.info("User: [{}] has: [{}] transactions to push, time: [{}]", user.getId(), allTrList.size(), getTime(st));
 
         // step by step in one thread
         return zenAsyncService.zenDiffByUserForPb(user)
@@ -124,7 +122,7 @@ public class PbSyncService {
                 .thenApply(Optional::get)
                 .thenCompose(tr -> zenAsyncService.pushToZen(user, tr))
                 .thenApply(Optional::get)
-                .thenCompose(zr -> awsUserAsyncService.updateUser(user, zr.getServerTimestamp()))
+                .thenCompose(zr -> awsUserAsyncService.updateUser(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
                 .thenApply(AwsUser::getId)
                 //.thenAccept(x -> onSuccessFk.accept(newPbTrList))

@@ -1,9 +1,15 @@
 package com.github.storytime.model.currency.pb.archive;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PbRatesResponse {
 
     @JsonProperty("date")
@@ -20,46 +26,6 @@ public class PbRatesResponse {
 
     @JsonProperty("baseCurrencyLit")
     private String baseCurrencyLit;
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getBank() {
-        return bank;
-    }
-
-    public void setBank(String bank) {
-        this.bank = bank;
-    }
-
-    public List<ExchangeRateItem> getExchangeRate() {
-        return exchangeRate;
-    }
-
-    public void setExchangeRate(List<ExchangeRateItem> exchangeRate) {
-        this.exchangeRate = exchangeRate;
-    }
-
-    public int getBaseCurrency() {
-        return baseCurrency;
-    }
-
-    public void setBaseCurrency(int baseCurrency) {
-        this.baseCurrency = baseCurrency;
-    }
-
-    public String getBaseCurrencyLit() {
-        return baseCurrencyLit;
-    }
-
-    public void setBaseCurrencyLit(String baseCurrencyLit) {
-        this.baseCurrencyLit = baseCurrencyLit;
-    }
 
     @Override
     public String toString() {

@@ -1,7 +1,8 @@
 package com.github.storytime.service;
 
 import com.github.storytime.function.CurrencyCommentFunction;
-import com.github.storytime.model.aws.AWSCurrencyType;
+import com.github.storytime.model.AWSCurrencyType;
+import com.github.storytime.model.AwsAdditionalComment;
 import com.github.storytime.model.aws.AwsMerchant;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.utils.DateService;
@@ -47,8 +48,8 @@ public class AdditionalCommentService {
         final var additionalCommentList = merchantInfo.getAwsAdditionalComment()
                 .stream()
                 .map(ac -> switch (ac) {
-                    case "PB_CURRENT_BUSINESS_DAY" -> mapPbCurrentBusinessDayComment(s, timeZone);
-                    case "NBU_PREV_MOUTH_LAST_BUSINESS_DAY" -> EMPTY;
+                    case AwsAdditionalComment.PB_CURRENT_BUSINESS_DAY -> mapPbCurrentBusinessDayComment(s, timeZone);
+                    case AwsAdditionalComment.NBU_PREV_MOUTH_LAST_BUSINESS_DAY -> EMPTY;
                     default -> EMPTY;
                 }).toList();
         s.setCustomComment(String.join(SPACE, additionalCommentList) + SPACE);

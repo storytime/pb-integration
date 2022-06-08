@@ -43,21 +43,11 @@ public class PbSyncLambdaHolder {
         return s -> not(s::contains);
     }
 
-//    public BiFunction<AppUser, MerchantInfo, ZonedDateTime> getStartDate(final DateService dateService) {
-//        return (user, merchant) -> dateService.millisUserDate(merchant.getSyncStartDate(), user);
-//    }
 
     public BiFunction<AwsUser, AwsMerchant, ZonedDateTime> getAwsStartDate(final DateService dateService) {
         return (user, merchant) -> dateService.millisAwsUserDate(merchant.getSyncStartDate(), user);
     }
 
-//    public TrioFunction<AppUser, MerchantInfo, ZonedDateTime, ZonedDateTime> getEndDate() {
-//        return (appUser, merchantInfo, startDate) -> {
-//            final var period = ofMillis(merchantInfo.getSyncPeriod());
-//            final var now = now().withZoneSameInstant(of(appUser.getTimeZone()));
-//            return between(startDate, now).toMillis() < merchantInfo.getSyncPeriod() ? now : startDate.plus(period);
-//        };
-//    }
 
     public TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> getAwsEndDate() {
         return (appUser, merchantInfo, startDate) -> {

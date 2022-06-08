@@ -1,10 +1,15 @@
 package com.github.storytime.model.zen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-import javax.annotation.Generated;
-
-@Generated("com.robohorse.robopojogenerator")
+@Data
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class InstrumentItem {
 
     @JsonProperty("symbol")
@@ -24,54 +29,6 @@ public class InstrumentItem {
 
     @JsonProperty("changed")
     private int changed;
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public double getRate() {
-        return rate;
-    }
-
-    public void setRate(double rate) {
-        this.rate = rate;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getShortTitle() {
-        return shortTitle;
-    }
-
-    public void setShortTitle(String shortTitle) {
-        this.shortTitle = shortTitle;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getChanged() {
-        return changed;
-    }
-
-    public void setChanged(int changed) {
-        this.changed = changed;
-    }
 
     @Override
     public String toString() {

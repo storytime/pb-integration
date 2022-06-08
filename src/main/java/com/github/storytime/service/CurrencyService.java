@@ -2,8 +2,8 @@ package com.github.storytime.service;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.github.storytime.mapper.response.AwsCurrencyResponseMapper;
+import com.github.storytime.model.AwsCurrencySource;
 import com.github.storytime.model.aws.AwsCurrencyRates;
-import com.github.storytime.model.db.inner.AwsCurrencySource;
 import com.github.storytime.service.async.CurrencyAsyncService;
 import com.github.storytime.service.http.DynamoDbCurrencyService;
 import org.apache.logging.log4j.Logger;

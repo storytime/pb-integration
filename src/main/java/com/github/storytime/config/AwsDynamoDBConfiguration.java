@@ -35,9 +35,9 @@ public class AwsDynamoDBConfiguration {
         return AmazonDynamoDBClientBuilder
                 .standard()
                 .withEndpointConfiguration(
-                   new AwsClientBuilder.EndpointConfiguration(dynamodbEndpoint,awsRegion))
+                        new AwsClientBuilder.EndpointConfiguration(dynamodbEndpoint, awsRegion))
                 .withCredentials(new AWSStaticCredentialsProvider(
-                   new BasicAWSCredentials(dynamodbAccessKey,dynamodbSecretKey)))
+                        new BasicAWSCredentials(dynamodbAccessKey, dynamodbSecretKey)))
                 .build();
     }
 }
