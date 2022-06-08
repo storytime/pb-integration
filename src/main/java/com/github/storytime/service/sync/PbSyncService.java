@@ -125,7 +125,7 @@ public class PbSyncService {
                 .thenCompose(zr -> awsUserAsyncService.updateUser(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
                 .thenApply(AwsUser::getId)
-                //.thenAccept(x -> onSuccessFk.accept(newPbTrList))
+               // .thenApply(x -> onSuccessFk.accept(newPbTrList))
                 .whenComplete((r, e) -> logSync(user.getId(), st, LOGGER, e));
     }
 

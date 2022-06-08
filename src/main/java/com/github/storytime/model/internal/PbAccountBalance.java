@@ -15,4 +15,5 @@ public class PbAccountBalance {
 
     private String account;
     private BigDecimal balance;
+
 }

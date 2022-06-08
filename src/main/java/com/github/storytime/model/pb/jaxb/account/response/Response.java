@@ -8,94 +8,18 @@
 
 package com.github.storytime.model.pb.jaxb.account.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
 import javax.xml.bind.annotation.*;
 
 
-/**
- * <p>Java class for anonymous complex type.
- *
- * <p>The following schema fragment specifies the expected content contained within this class.
- *
- * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="merchant">
- *           &lt;complexType>
- *             &lt;complexContent>
- *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                 &lt;sequence>
- *                   &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}int"/>
- *                   &lt;element name="signature" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                 &lt;/sequence>
- *               &lt;/restriction>
- *             &lt;/complexContent>
- *           &lt;/complexType>
- *         &lt;/element>
- *         &lt;element name="data">
- *           &lt;complexType>
- *             &lt;complexContent>
- *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                 &lt;sequence>
- *                   &lt;element name="oper" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                   &lt;element name="info">
- *                     &lt;complexType>
- *                       &lt;complexContent>
- *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                           &lt;sequence>
- *                             &lt;element name="cardbalance">
- *                               &lt;complexType>
- *                                 &lt;complexContent>
- *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                     &lt;sequence>
- *                                       &lt;element name="card">
- *                                         &lt;complexType>
- *                                           &lt;complexContent>
- *                                             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                                               &lt;sequence>
- *                                                 &lt;element name="account" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                                                 &lt;element name="card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                                                 &lt;element name="acc_name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="acc_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="currency" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="card_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="main_card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
- *                                                 &lt;element name="card_stat" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                                 &lt;element name="src" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                               &lt;/sequence>
- *                                             &lt;/restriction>
- *                                           &lt;/complexContent>
- *                                         &lt;/complexType>
- *                                       &lt;/element>
- *                                       &lt;element name="av_balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
- *                                       &lt;element name="bal_date" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="bal_dyn" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *                                       &lt;element name="balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
- *                                       &lt;element name="fin_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
- *                                       &lt;element name="trade_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
- *                                     &lt;/sequence>
- *                                   &lt;/restriction>
- *                                 &lt;/complexContent>
- *                               &lt;/complexType>
- *                             &lt;/element>
- *                           &lt;/sequence>
- *                         &lt;/restriction>
- *                       &lt;/complexContent>
- *                     &lt;/complexType>
- *                   &lt;/element>
- *                 &lt;/sequence>
- *               &lt;/restriction>
- *             &lt;/complexContent>
- *           &lt;/complexType>
- *         &lt;/element>
- *       &lt;/sequence>
- *       &lt;attribute name="version" type="{http://www.w3.org/2001/XMLSchema}float" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
- */
+@Data
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
         "merchant",
@@ -106,134 +30,17 @@ public class Response {
 
     @XmlElement(required = true)
     protected Response.Merchant merchant;
+
     @XmlElement(required = true)
     protected Response.Data data;
+
     @XmlAttribute(name = "version")
     protected Float version;
 
-    /**
-     * Gets the value of the merchant property.
-     *
-     * @return possible object is
-     * {@link Response.Merchant }
-     */
-    public Response.Merchant getMerchant() {
-        return merchant;
-    }
-
-    /**
-     * Sets the value of the merchant property.
-     *
-     * @param value allowed object is
-     *              {@link Response.Merchant }
-     */
-    public void setMerchant(Response.Merchant value) {
-        this.merchant = value;
-    }
-
-    /**
-     * Gets the value of the data property.
-     *
-     * @return possible object is
-     * {@link Response.Data }
-     */
-    public Response.Data getData() {
-        return data;
-    }
-
-    /**
-     * Sets the value of the data property.
-     *
-     * @param value allowed object is
-     *              {@link Response.Data }
-     */
-    public void setData(Response.Data value) {
-        this.data = value;
-    }
-
-    /**
-     * Gets the value of the version property.
-     *
-     * @return possible object is
-     * {@link Float }
-     */
-    public Float getVersion() {
-        return version;
-    }
-
-    /**
-     * Sets the value of the version property.
-     *
-     * @param value allowed object is
-     *              {@link Float }
-     */
-    public void setVersion(Float value) {
-        this.version = value;
-    }
-
-
-    /**
-     * <p>Java class for anonymous complex type.
-     *
-     * <p>The following schema fragment specifies the expected content contained within this class.
-     *
-     * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;sequence>
-     *         &lt;element name="oper" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *         &lt;element name="info">
-     *           &lt;complexType>
-     *             &lt;complexContent>
-     *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                 &lt;sequence>
-     *                   &lt;element name="cardbalance">
-     *                     &lt;complexType>
-     *                       &lt;complexContent>
-     *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                           &lt;sequence>
-     *                             &lt;element name="card">
-     *                               &lt;complexType>
-     *                                 &lt;complexContent>
-     *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *                                     &lt;sequence>
-     *                                       &lt;element name="account" type="{http://www.w3.org/2001/XMLSchema}long"/>
-     *                                       &lt;element name="card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-     *                                       &lt;element name="acc_name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="acc_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="currency" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="card_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="main_card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-     *                                       &lt;element name="card_stat" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                       &lt;element name="src" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                                     &lt;/sequence>
-     *                                   &lt;/restriction>
-     *                                 &lt;/complexContent>
-     *                               &lt;/complexType>
-     *                             &lt;/element>
-     *                             &lt;element name="av_balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
-     *                             &lt;element name="bal_date" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="bal_dyn" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *                             &lt;element name="balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
-     *                             &lt;element name="fin_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
-     *                             &lt;element name="trade_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
-     *                           &lt;/sequence>
-     *                         &lt;/restriction>
-     *                       &lt;/complexContent>
-     *                     &lt;/complexType>
-     *                   &lt;/element>
-     *                 &lt;/sequence>
-     *               &lt;/restriction>
-     *             &lt;/complexContent>
-     *           &lt;/complexType>
-     *         &lt;/element>
-     *       &lt;/sequence>
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
-     * </pre>
-     */
+    @lombok.Data
+    @Accessors(chain = true)
+    @AllArgsConstructor
+    @NoArgsConstructor
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
             "oper",
@@ -243,101 +50,14 @@ public class Response {
 
         @XmlElement(required = true)
         protected String oper;
+
         @XmlElement(required = true)
         protected Response.Data.Info info;
 
-        /**
-         * Gets the value of the oper property.
-         *
-         * @return possible object is
-         * {@link String }
-         */
-        public String getOper() {
-            return oper;
-        }
-
-        /**
-         * Sets the value of the oper property.
-         *
-         * @param value allowed object is
-         *              {@link String }
-         */
-        public void setOper(String value) {
-            this.oper = value;
-        }
-
-        /**
-         * Gets the value of the info property.
-         *
-         * @return possible object is
-         * {@link Response.Data.Info }
-         */
-        public Response.Data.Info getInfo() {
-            return info;
-        }
-
-        /**
-         * Sets the value of the info property.
-         *
-         * @param value allowed object is
-         *              {@link Response.Data.Info }
-         */
-        public void setInfo(Response.Data.Info value) {
-            this.info = value;
-        }
-
-
-        /**
-         * <p>Java class for anonymous complex type.
-         *
-         * <p>The following schema fragment specifies the expected content contained within this class.
-         *
-         * <pre>
-         * &lt;complexType>
-         *   &lt;complexContent>
-         *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *       &lt;sequence>
-         *         &lt;element name="cardbalance">
-         *           &lt;complexType>
-         *             &lt;complexContent>
-         *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                 &lt;sequence>
-         *                   &lt;element name="card">
-         *                     &lt;complexType>
-         *                       &lt;complexContent>
-         *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-         *                           &lt;sequence>
-         *                             &lt;element name="account" type="{http://www.w3.org/2001/XMLSchema}long"/>
-         *                             &lt;element name="card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-         *                             &lt;element name="acc_name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="acc_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="currency" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="card_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="main_card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-         *                             &lt;element name="card_stat" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                             &lt;element name="src" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                           &lt;/sequence>
-         *                         &lt;/restriction>
-         *                       &lt;/complexContent>
-         *                     &lt;/complexType>
-         *                   &lt;/element>
-         *                   &lt;element name="av_balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
-         *                   &lt;element name="bal_date" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="bal_dyn" type="{http://www.w3.org/2001/XMLSchema}string"/>
-         *                   &lt;element name="balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
-         *                   &lt;element name="fin_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
-         *                   &lt;element name="trade_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
-         *                 &lt;/sequence>
-         *               &lt;/restriction>
-         *             &lt;/complexContent>
-         *           &lt;/complexType>
-         *         &lt;/element>
-         *       &lt;/sequence>
-         *     &lt;/restriction>
-         *   &lt;/complexContent>
-         * &lt;/complexType>
-         * </pre>
-         */
+        @lombok.Data
+        @Accessors(chain = true)
+        @AllArgsConstructor
+        @NoArgsConstructor
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
                 "cardbalance"
@@ -347,68 +67,10 @@ public class Response {
             @XmlElement(required = true)
             protected Response.Data.Info.Cardbalance cardbalance;
 
-            /**
-             * Gets the value of the cardbalance property.
-             *
-             * @return possible object is
-             * {@link Response.Data.Info.Cardbalance }
-             */
-            public Response.Data.Info.Cardbalance getCardbalance() {
-                return cardbalance;
-            }
-
-            /**
-             * Sets the value of the cardbalance property.
-             *
-             * @param value allowed object is
-             *              {@link Response.Data.Info.Cardbalance }
-             */
-            public void setCardbalance(Response.Data.Info.Cardbalance value) {
-                this.cardbalance = value;
-            }
-
-
-            /**
-             * <p>Java class for anonymous complex type.
-             *
-             * <p>The following schema fragment specifies the expected content contained within this class.
-             *
-             * <pre>
-             * &lt;complexType>
-             *   &lt;complexContent>
-             *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *       &lt;sequence>
-             *         &lt;element name="card">
-             *           &lt;complexType>
-             *             &lt;complexContent>
-             *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-             *                 &lt;sequence>
-             *                   &lt;element name="account" type="{http://www.w3.org/2001/XMLSchema}long"/>
-             *                   &lt;element name="card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-             *                   &lt;element name="acc_name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="acc_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="currency" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="card_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="main_card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-             *                   &lt;element name="card_stat" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                   &lt;element name="src" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *                 &lt;/sequence>
-             *               &lt;/restriction>
-             *             &lt;/complexContent>
-             *           &lt;/complexType>
-             *         &lt;/element>
-             *         &lt;element name="av_balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
-             *         &lt;element name="bal_date" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="bal_dyn" type="{http://www.w3.org/2001/XMLSchema}string"/>
-             *         &lt;element name="balance" type="{http://www.w3.org/2001/XMLSchema}float"/>
-             *         &lt;element name="fin_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
-             *         &lt;element name="trade_limit" type="{http://www.w3.org/2001/XMLSchema}float"/>
-             *       &lt;/sequence>
-             *     &lt;/restriction>
-             *   &lt;/complexContent>
-             * &lt;/complexType>
-             * </pre>
-             */
+            @lombok.Data
+            @Accessors(chain = true)
+            @AllArgsConstructor
+            @NoArgsConstructor
             @XmlAccessorType(XmlAccessType.FIELD)
             @XmlType(name = "", propOrder = {
                     "card",
@@ -423,160 +85,28 @@ public class Response {
 
                 @XmlElement(required = true)
                 protected Response.Data.Info.Cardbalance.Card card;
+
                 @XmlElement(name = "av_balance")
                 protected float avBalance;
+
                 @XmlElement(name = "bal_date")
                 protected String balDate;
+
                 @XmlElement(name = "bal_dyn")
                 protected String balDyn;
+
                 protected float balance;
+
                 @XmlElement(name = "fin_limit")
                 protected float finLimit;
+
                 @XmlElement(name = "trade_limit")
                 protected float tradeLimit;
 
-                /**
-                 * Gets the value of the card property.
-                 *
-                 * @return possible object is
-                 * {@link Response.Data.Info.Cardbalance.Card }
-                 */
-                public Response.Data.Info.Cardbalance.Card getCard() {
-                    return card;
-                }
-
-                /**
-                 * Sets the value of the card property.
-                 *
-                 * @param value allowed object is
-                 *              {@link Response.Data.Info.Cardbalance.Card }
-                 */
-                public void setCard(Response.Data.Info.Cardbalance.Card value) {
-                    this.card = value;
-                }
-
-                /**
-                 * Gets the value of the avBalance property.
-                 */
-                public float getAvBalance() {
-                    return avBalance;
-                }
-
-                /**
-                 * Sets the value of the avBalance property.
-                 */
-                public void setAvBalance(float value) {
-                    this.avBalance = value;
-                }
-
-                /**
-                 * Gets the value of the balDate property.
-                 *
-                 * @return possible object is
-                 * {@link String }
-                 */
-                public String getBalDate() {
-                    return balDate;
-                }
-
-                /**
-                 * Sets the value of the balDate property.
-                 *
-                 * @param value allowed object is
-                 *              {@link String }
-                 */
-                public void setBalDate(String value) {
-                    this.balDate = value;
-                }
-
-                /**
-                 * Gets the value of the balDyn property.
-                 *
-                 * @return possible object is
-                 * {@link String }
-                 */
-                public String getBalDyn() {
-                    return balDyn;
-                }
-
-                /**
-                 * Sets the value of the balDyn property.
-                 *
-                 * @param value allowed object is
-                 *              {@link String }
-                 */
-                public void setBalDyn(String value) {
-                    this.balDyn = value;
-                }
-
-                /**
-                 * Gets the value of the balance property.
-                 */
-                public float getBalance() {
-                    return balance;
-                }
-
-                /**
-                 * Sets the value of the balance property.
-                 */
-                public void setBalance(float value) {
-                    this.balance = value;
-                }
-
-                /**
-                 * Gets the value of the finLimit property.
-                 */
-                public float getFinLimit() {
-                    return finLimit;
-                }
-
-                /**
-                 * Sets the value of the finLimit property.
-                 */
-                public void setFinLimit(float value) {
-                    this.finLimit = value;
-                }
-
-                /**
-                 * Gets the value of the tradeLimit property.
-                 */
-                public float getTradeLimit() {
-                    return tradeLimit;
-                }
-
-                /**
-                 * Sets the value of the tradeLimit property.
-                 */
-                public void setTradeLimit(float value) {
-                    this.tradeLimit = value;
-                }
-
-
-                /**
-                 * <p>Java class for anonymous complex type.
-                 *
-                 * <p>The following schema fragment specifies the expected content contained within this class.
-                 *
-                 * <pre>
-                 * &lt;complexType>
-                 *   &lt;complexContent>
-                 *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-                 *       &lt;sequence>
-                 *         &lt;element name="account" type="{http://www.w3.org/2001/XMLSchema}long"/>
-                 *         &lt;element name="card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-                 *         &lt;element name="acc_name" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="acc_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="currency" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="card_type" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="main_card_number" type="{http://www.w3.org/2001/XMLSchema}long"/>
-                 *         &lt;element name="card_stat" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *         &lt;element name="src" type="{http://www.w3.org/2001/XMLSchema}string"/>
-                 *       &lt;/sequence>
-                 *     &lt;/restriction>
-                 *   &lt;/complexContent>
-                 * &lt;/complexType>
-                 * </pre>
-                 */
+                @lombok.Data
+                @Accessors(chain = true)
+                @AllArgsConstructor
+                @NoArgsConstructor
                 @XmlAccessorType(XmlAccessType.FIELD)
                 @XmlType(name = "", propOrder = {
                         "account",
@@ -592,212 +122,41 @@ public class Response {
                 public static class Card {
 
                     protected long account;
+
                     @XmlElement(name = "card_number")
                     protected long cardNumber;
+
                     @XmlElement(name = "acc_name")
                     protected String accName;
+
                     @XmlElement(name = "acc_type")
                     protected String accType;
+
                     @XmlElement(required = true)
                     protected String currency;
+
                     @XmlElement(name = "card_type")
                     protected String cardType;
+
                     @XmlElement(name = "main_card_number")
                     protected long mainCardNumber;
+
                     @XmlElement(name = "card_stat")
                     protected String cardStat;
+
                     @XmlElement(required = true)
                     protected String src;
 
-                    /**
-                     * Gets the value of the account property.
-                     */
-                    public long getAccount() {
-                        return account;
-                    }
-
-                    /**
-                     * Sets the value of the account property.
-                     */
-                    public void setAccount(long value) {
-                        this.account = value;
-                    }
-
-                    /**
-                     * Gets the value of the cardNumber property.
-                     */
-                    public long getCardNumber() {
-                        return cardNumber;
-                    }
-
-                    /**
-                     * Sets the value of the cardNumber property.
-                     */
-                    public void setCardNumber(long value) {
-                        this.cardNumber = value;
-                    }
-
-                    /**
-                     * Gets the value of the accName property.
-                     *
-                     * @return possible object is
-                     * {@link String }
-                     */
-                    public String getAccName() {
-                        return accName;
-                    }
-
-                    /**
-                     * Sets the value of the accName property.
-                     *
-                     * @param value allowed object is
-                     *              {@link String }
-                     */
-                    public void setAccName(String value) {
-                        this.accName = value;
-                    }
-
-                    /**
-                     * Gets the value of the accType property.
-                     *
-                     * @return possible object is
-                     * {@link String }
-                     */
-                    public String getAccType() {
-                        return accType;
-                    }
-
-                    /**
-                     * Sets the value of the accType property.
-                     *
-                     * @param value allowed object is
-                     *              {@link String }
-                     */
-                    public void setAccType(String value) {
-                        this.accType = value;
-                    }
-
-                    /**
-                     * Gets the value of the currency property.
-                     *
-                     * @return possible object is
-                     * {@link String }
-                     */
-                    public String getCurrency() {
-                        return currency;
-                    }
-
-                    /**
-                     * Sets the value of the currency property.
-                     *
-                     * @param value allowed object is
-                     *              {@link String }
-                     */
-                    public void setCurrency(String value) {
-                        this.currency = value;
-                    }
-
-                    /**
-                     * Gets the value of the cardType property.
-                     *
-                     * @return possible object is
-                     * {@link String }
-                     */
-                    public String getCardType() {
-                        return cardType;
-                    }
-
-                    /**
-                     * Sets the value of the cardType property.
-                     *
-                     * @param value allowed object is
-                     *              {@link String }
-                     */
-                    public void setCardType(String value) {
-                        this.cardType = value;
-                    }
-
-                    /**
-                     * Gets the value of the mainCardNumber property.
-                     */
-                    public long getMainCardNumber() {
-                        return mainCardNumber;
-                    }
-
-                    /**
-                     * Sets the value of the mainCardNumber property.
-                     */
-                    public void setMainCardNumber(long value) {
-                        this.mainCardNumber = value;
-                    }
-
-                    /**
-                     * Gets the value of the cardStat property.
-                     *
-                     * @return possible object is
-                     * {@link String }
-                     */
-                    public String getCardStat() {
-                        return cardStat;
-                    }
-
-                    /**
-                     * Sets the value of the cardStat property.
-                     *
-                     * @param value allowed object is
-                     *              {@link String }
-                     */
-                    public void setCardStat(String value) {
-                        this.cardStat = value;
-                    }
-
-                    /**
-                     * Gets the value of the src property.
-                     *
-                     * @return possible object is
-                     * {@link String }
-                     */
-                    public String getSrc() {
-                        return src;
-                    }
-
-                    /**
-                     * Sets the value of the src property.
-                     *
-                     * @param value allowed object is
-                     *              {@link String }
-                     */
-                    public void setSrc(String value) {
-                        this.src = value;
-                    }
-
                 }
-
             }
-
         }
-
     }
 
 
-    /**
-     * <p>Java class for anonymous complex type.
-     *
-     * <p>The following schema fragment specifies the expected content contained within this class.
-     *
-     * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;sequence>
-     *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}int"/>
-     *         &lt;element name="signature" type="{http://www.w3.org/2001/XMLSchema}string"/>
-     *       &lt;/sequence>
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
-     * </pre>
-     */
+    @lombok.Data
+    @Accessors(chain = true)
+    @AllArgsConstructor
+    @NoArgsConstructor
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
             "id",
@@ -806,43 +165,9 @@ public class Response {
     public static class Merchant {
 
         protected int id;
+
         @XmlElement(required = true)
         protected String signature;
 
-        /**
-         * Gets the value of the id property.
-         */
-        public int getId() {
-            return id;
-        }
-
-        /**
-         * Sets the value of the id property.
-         */
-        public void setId(int value) {
-            this.id = value;
-        }
-
-        /**
-         * Gets the value of the signature property.
-         *
-         * @return possible object is
-         * {@link String }
-         */
-        public String getSignature() {
-            return signature;
-        }
-
-        /**
-         * Sets the value of the signature property.
-         *
-         * @param value allowed object is
-         *              {@link String }
-         */
-        public void setSignature(String value) {
-            this.signature = value;
-        }
-
     }
-
 }
