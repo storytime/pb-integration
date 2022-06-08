@@ -130,7 +130,7 @@ public class Response {
                     @XmlAttribute(name = "description")
                     protected String description;
 
-                    @XmlAttribute(name = "description")
+                    @XmlAttribute(name = "customComment")
                     protected String customComment;
 
 

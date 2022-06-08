@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
@@ -27,6 +28,7 @@ import java.util.function.UnaryOperator;
 import static com.github.storytime.STUtils.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logSync;
 import static java.util.concurrent.CompletableFuture.allOf;
+import static java.util.function.Predicate.not;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
@@ -99,8 +101,21 @@ public class PbSyncService {
         //* Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere */
         CompletableFuture<CompletableFuture<String>> completableFutureCompletableFuture = allOf(pbCfList.toArray(new CompletableFuture[selectedMerchants.size()]))
                 .thenApply(v -> pbCfList.stream().map(CompletableFuture::join).toList())
-                //.thenApply(filterAlreadyPushed)
-                .thenApply(newPbTrList -> handleAwsAll(newPbTrList, awsUser, selectedMerchants, onSuccessFk, st));
+                .thenCompose((List<List<Statement>> userLevel) -> {
+                    CompletableFuture<List<List<Statement>>> listCompletableFuture = awsStatementService
+                            .getAllStatementsByUser(awsUser.getId())
+                            .thenApply((AwsPbStatement dny) -> {
+                                Set<String> alreadyPushed = dny.getAlreadyPushed();
+                                List<List<Statement>> lists = userLevel.stream().map((List<Statement> merchantLevel) -> merchantLevel
+                                        .stream()
+                                        .filter(ap -> !alreadyPushed.contains(AwsStatementService.generateUniqString(ap)))
+                                        .toList()).filter(not(List::isEmpty)).toList();
+                                return lists;
+                            });
+
+                    return listCompletableFuture;
+                })
+                .thenApply((List<List<Statement>> newPbTrList) -> handleAwsAll(newPbTrList, awsUser, selectedMerchants, onSuccessFk, st));
 
         return completableFutureCompletableFuture;
     }

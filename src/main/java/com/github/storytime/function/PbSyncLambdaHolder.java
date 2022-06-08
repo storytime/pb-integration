@@ -18,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
-import static com.github.storytime.model.aws.AwsPbStatement.builder;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
@@ -96,7 +95,7 @@ public class PbSyncLambdaHolder {
                                         .stream().map(AwsStatementService::generateUniqString).collect(toSet());
 
                                 Set<String> combined = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed().stream()).collect(Collectors.toSet());
-                                return awsStatementService.save(builder().userId(userId).alreadyPushed(combined).build());
+                                return awsStatementService.save(AwsPbStatement.builder().userId(userId).alreadyPushed(combined).build());
                             }
                     );
             return optionalCompletableFuture;
