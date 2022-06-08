@@ -1,28 +1,38 @@
 package com.github.storytime.function;
 
 import com.github.storytime.model.aws.AwsMerchant;
+import com.github.storytime.model.aws.AwsPbStatement;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.AwsStatementService;
 import com.github.storytime.service.utils.DateService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.*;
+import java.util.stream.Collectors;
 
+import static com.github.storytime.model.aws.AwsPbStatement.builder;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+import static java.util.stream.Stream.concat;
 
 @Component
 public class PbSyncLambdaHolder {
+
+    @Autowired
+    private AwsStatementService awsStatementService;
 
     public UnaryOperator<List<List<Statement>>> getRegularSyncMapper(
             final Function<Set<Statement>, Predicate<Statement>> filterFk,
@@ -73,11 +83,23 @@ public class PbSyncLambdaHolder {
         };
     }
 
-    public BiConsumer<List<List<Statement>>, String> onAwsDbRegularSyncSuccess(final AwsStatementService awsStatementService) {
-        return (List<List<Statement>> pushedByNotCached, String userId) -> {
-            Set<Statement> collect = pushedByNotCached.stream().flatMap(Collection::stream).collect(toUnmodifiableSet());
+    public BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onAwsDbRegularSyncSuccess(final AwsStatementService awsStatementService) {
 
-            awsStatementService.saveAll(Collections.emptyList());
+        return (List<List<Statement>> pushedByNotCached, String userId) -> {
+
+            CompletableFuture<Optional<AwsPbStatement>> optionalCompletableFuture = awsStatementService.getAllStatementsByUser(userId)
+                    .thenCompose(dfStatements -> {
+                                Set<String> pushedByNotCachedMapped = pushedByNotCached
+                                        .stream()
+                                        .flatMap(Collection::stream)
+                                        .collect(toUnmodifiableSet())
+                                        .stream().map(AwsStatementService::generateUniqString).collect(toSet());
+
+                                Set<String> combined = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed().stream()).collect(Collectors.toSet());
+                                return awsStatementService.save(builder().userId(userId).alreadyPushed(combined).build());
+                            }
+                    );
+            return optionalCompletableFuture;
         };
     }
 }

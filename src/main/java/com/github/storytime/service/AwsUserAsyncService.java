@@ -28,7 +28,7 @@ public class AwsUserAsyncService {
     @Autowired
     private Executor cfThreadPool;
 
-    @Cacheable(USERS_PERMANENT_CACHE)
+//    @Cacheable(USERS_PERMANENT_CACHE)
     public CompletableFuture<List<AwsUser>> getAllUsers() {
         LOGGER.debug("Fetching all users from dynamo db - start");
         return supplyAsync(dynamoDbUserService::getAwsAllUsers, cfThreadPool);

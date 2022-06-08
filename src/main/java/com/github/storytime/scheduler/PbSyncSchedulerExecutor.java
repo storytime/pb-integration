@@ -3,6 +3,7 @@ package com.github.storytime.scheduler;
 import com.github.storytime.function.PbSyncLambdaHolder;
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.model.aws.AwsMerchant;
+import com.github.storytime.model.aws.AwsPbStatement;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.AwsStatementService;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
@@ -29,7 +32,7 @@ public class PbSyncSchedulerExecutor {
 
     private final PbSyncService pbSyncService;
     private final UnaryOperator<List<List<Statement>>> ifWasPushedFk;
-    private final BiConsumer<List<List<Statement>>, String> onSuccessFk;
+    private final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk;
     private final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk;
     private final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk;
 

@@ -29,7 +29,7 @@ public class CustomPayeeService {
                 .orElse(Collections.emptyList())
                 .stream()
                 .filter(not(p -> isEmpty(p.getPayee())))
-                .filter(not(p -> isEmpty(UNDERSCORE)))
+                .filter(not(p -> p.getPayee().equals(UNDERSCORE)))
                 .collect(Collectors.toList());
 
         var nicePayee = userPayeeList

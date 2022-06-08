@@ -18,9 +18,18 @@ public class AwsStatementRepository {
         return dynamoDBMapper.scan(AwsPbStatement.class, new DynamoDBScanExpression());
     }
 
-    public List<AwsPbStatement> save(List<AwsPbStatement> statementList) {
+    public List<AwsPbStatement> getAllByUser(DynamoDBScanExpression scanExpression) {
+        return dynamoDBMapper.scan(AwsPbStatement.class, scanExpression);
+    }
+
+    public List<AwsPbStatement> saveAll(List<AwsPbStatement> statementList) {
         dynamoDBMapper.save(statementList);
         return statementList;
+    }
+
+    public AwsPbStatement save(AwsPbStatement awsPbStatements) {
+        dynamoDBMapper.save(awsPbStatements);
+        return awsPbStatements;
     }
 
 }
