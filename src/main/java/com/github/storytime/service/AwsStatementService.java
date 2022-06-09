@@ -20,16 +20,20 @@ public class AwsStatementService {
 
     private static final Logger LOGGER = LogManager.getLogger(AwsStatementService.class);
 
-    @Autowired
-    private DynamoDbStatementService dynamoDbStatementService;
+    private final DynamoDbStatementService dynamoDbStatementService;
+
+    private final Executor cfThreadPool;
 
     @Autowired
-    private Executor cfThreadPool;
-
-    public CompletableFuture<List<AwsPbStatement>> getAllUsers() {
-        LOGGER.debug("Fetching all statements from dynamo db - start");
-        return supplyAsync(dynamoDbStatementService::getAllStatements, cfThreadPool);
+    public AwsStatementService(DynamoDbStatementService dynamoDbStatementService, Executor cfThreadPool) {
+        this.dynamoDbStatementService = dynamoDbStatementService;
+        this.cfThreadPool = cfThreadPool;
     }
+
+    public static String generateUniqString(Response.Data.Info.Statements.Statement pbSt) {
+        return pbSt.getAppcode() + pbSt.getTerminal() + pbSt.getCardamount() + pbSt.getAmount();
+    }
+
 
     public CompletableFuture<AwsPbStatement> getAllStatementsByUser(String userId) {
         return supplyAsync(() -> dynamoDbStatementService.getAllStatementsForUser(userId), cfThreadPool);
@@ -41,10 +45,6 @@ public class AwsStatementService {
 
     public CompletableFuture<Optional<AwsPbStatement>> save(final AwsPbStatement statement) {
         return supplyAsync(() -> dynamoDbStatementService.save(statement), cfThreadPool);
-    }
-
-    public static String generateUniqString(Response.Data.Info.Statements.Statement pbSt) {
-        return pbSt.getAppcode() + pbSt.getTerminal() + pbSt.getCardamount() + pbSt.getAmount();
     }
 
 }

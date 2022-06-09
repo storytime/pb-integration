@@ -20,7 +20,6 @@ public class DynamoDbCurrencyService {
 
     private static final Logger LOGGER = getLogger(DynamoDbCurrencyService.class);
 
-    @Autowired
     private final AwsCurrencyRepository awsCurrencyRepository;
 
     @Autowired

@@ -19,8 +19,8 @@ public class DynamoDbStatementService {
 
     private static final Logger LOGGER = getLogger(DynamoDbStatementService.class);
 
-    @Autowired
-    private AwsStatementRepository awsStatementRepository;
+
+    private final AwsStatementRepository awsStatementRepository;
 
     @Autowired
     public DynamoDbStatementService(final AwsStatementRepository awsStatementRepository) {

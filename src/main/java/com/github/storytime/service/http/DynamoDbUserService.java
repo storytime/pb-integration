@@ -19,8 +19,7 @@ public class DynamoDbUserService {
 
     private static final Logger LOGGER = getLogger(DynamoDbUserService.class);
 
-    @Autowired
-    private AwsUserRepository awsUserRepository;
+    private final AwsUserRepository awsUserRepository;
 
     @Autowired
     public DynamoDbUserService(final AwsUserRepository awsUserRepository) {

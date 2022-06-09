@@ -47,14 +47,12 @@ public class PbStatementsService {
     public PbStatementsService(
             final CustomConfig customConfig,
             final PbResponseMapper pbResponseMapper,
-            // final MerchantService merchantService,
             final PbRequestBuilder statementRequestBuilder,
             final AdditionalCommentService additionalCommentService,
             final DateService dateService,
             final PbAsyncService pbAsyncService) {
         this.customConfig = customConfig;
         this.pbResponseMapper = pbResponseMapper;
-        // this.merchantService = merchantService;
         this.pbRequestBuilder = statementRequestBuilder;
         this.additionalCommentService = additionalCommentService;
         this.dateService = dateService;

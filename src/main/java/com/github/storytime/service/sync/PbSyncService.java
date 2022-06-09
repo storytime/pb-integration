@@ -20,10 +20,8 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
-import java.util.function.UnaryOperator;
 
 import static com.github.storytime.STUtils.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logSync;
@@ -62,35 +60,34 @@ public class PbSyncService {
     }
 
     @Async
-    public void sync(final UnaryOperator<List<List<Statement>>> filterAlreadyPushed,
-                     final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
+    public void sync(final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
                      final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk,
                      final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk) {
 
-
         final var st = createSt();
-
-        final CompletableFuture<List<CompletableFuture<CompletableFuture<String>>>> allUsersSyncCf = awsUserAsyncService.getAllUsers()
-                .thenApply(awsUserList -> awsUserList.stream().map(user -> {   //one for each user
-                    return doSyncForAwsEachUser(filterAlreadyPushed, onSuccessFk, startDateFk, endDateFk, user);
+        final CompletableFuture<List<CompletableFuture<String>>> allUsersSyncCf = awsUserAsyncService.getAllUsers()
+                .thenApply(awsUsers -> awsUsers.stream().map(user -> {   //one for each user
+                    return doSyncForAwsEachUser(onSuccessFk, startDateFk, endDateFk, user);
                 }).toList());
 
-        allUsersSyncCf.thenAccept(allCfList -> {
+
+        allUsersSyncCf.thenCompose(allCfList -> {
             // cheap, join for all started sync, threads thenApply(newPbTrList -> handleAwsAll(newPbTrList, awsUser, selectedMerchants, onSuccessFk, st))
-            List<CompletableFuture<String>> allUsersMerchantLevelCf = allCfList.stream().map(CompletableFuture::join).toList();
-            CompletableFuture<Void> syncDoneCf = allOf(allUsersMerchantLevelCf.toArray(new CompletableFuture[allUsersMerchantLevelCf.size()]));
-            syncDoneCf.thenAccept(allDone -> {
-                awsSqsPublisherService.publishFinishMessage();
-                LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st));
-            });
-        });
+            return allOf(allCfList.toArray(new CompletableFuture[allCfList.size()]))
+                    .thenCompose(allDone -> awsSqsPublisherService.publishFinishMessage());
+        }).thenCompose(x -> awsSqsPublisherService.publishFinishMessage())
+                .thenAccept(x -> LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st)));
     }
 
-    private CompletableFuture<CompletableFuture<String>> doSyncForAwsEachUser(final UnaryOperator<List<List<Statement>>> filterAlreadyPushed,
-                                                                              final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
-                                                                              final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk,
-                                                                              final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk,
-                                                                              final AwsUser awsUser) {
+    private void pushToSqs(StopWatch st) {
+        awsSqsPublisherService.publishFinishMessage();
+        LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st));
+    }
+
+    private CompletableFuture<String> doSyncForAwsEachUser(final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
+                                                           final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk,
+                                                           final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk,
+                                                           final AwsUser awsUser) {
 
         final var st = createSt();
         final var selectedMerchants = awsUser.getAwsMerchant();
@@ -99,35 +96,30 @@ public class PbSyncService {
                 .map(m -> getAwsListOfPbCf(startDateFk, endDateFk, awsUser, m)).toList();
 
         //* Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere */
-        CompletableFuture<CompletableFuture<String>> completableFutureCompletableFuture = allOf(pbCfList.toArray(new CompletableFuture[selectedMerchants.size()]))
+        return allOf(pbCfList.toArray(new CompletableFuture[selectedMerchants.size()]))
                 .thenApply(v -> pbCfList.stream().map(CompletableFuture::join).toList())
-                .thenCompose((List<List<Statement>> userLevel) -> {
-                    CompletableFuture<List<List<Statement>>> listCompletableFuture = awsStatementService
-                            .getAllStatementsByUser(awsUser.getId())
-                            .thenApply((AwsPbStatement dny) -> {
-                                Set<String> alreadyPushed = dny.getAlreadyPushed();
-                                List<List<Statement>> lists = userLevel.stream().map((List<Statement> merchantLevel) -> merchantLevel
-                                        .stream()
-                                        .filter(ap -> !alreadyPushed.contains(AwsStatementService.generateUniqString(ap)))
-                                        .toList()).filter(not(List::isEmpty)).toList();
-                                return lists;
-                            });
+                .thenCompose(userLevelStatementsUnFiltered -> filterUserLevelStatements(awsUser, userLevelStatementsUnFiltered))
+                .thenCompose(userLevelStatementsFiltered -> handleAllForUser(userLevelStatementsFiltered, awsUser, selectedMerchants, onSuccessFk, st));
+    }
 
-                    return listCompletableFuture;
-                })
-                .thenApply((List<List<Statement>> newPbTrList) -> handleAwsAll(newPbTrList, awsUser, selectedMerchants, onSuccessFk, st));
-
-        return completableFutureCompletableFuture;
+    private CompletableFuture<List<List<Statement>>> filterUserLevelStatements(AwsUser awsUser, List<List<Statement>> userLevelStatements) {
+        return awsStatementService
+                .getAllStatementsByUser(awsUser.getId())
+                .thenApply((AwsPbStatement dbData) -> userLevelStatements.stream().map(merchantLevel -> merchantLevel
+                        .stream()
+                        .filter(ap -> !dbData.getAlreadyPushed().contains(AwsStatementService.generateUniqString(ap)))
+                        .toList()).filter(not(List::isEmpty)).toList());
     }
 
 
-    public CompletableFuture<String> handleAwsAll(final List<List<Statement>> newPbTrList,
-                                                  final AwsUser user,
-                                                  final List<AwsMerchant> selectedMerchants,
-                                                  final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
-                                                  StopWatch st) {
+    public CompletableFuture<String> handleAllForUser(final List<List<Statement>> newPbTrList,
+                                                      final AwsUser user,
+                                                      final List<AwsMerchant> selectedMerchants,
+                                                      final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
+                                                      final StopWatch st) {
 
         var allTrList = newPbTrList.stream().flatMap(List::stream).toList();
+
         if (allTrList.isEmpty()) {
             LOGGER.debug("No new transaction for user: [{}], merch: [{}] time: [{}] - nothing to push - sync finished", user.getId(), selectedMerchants.size(), getTime(st));
             return awsUserAsyncService.updateUser(user)
@@ -138,8 +130,7 @@ public class PbSyncService {
         LOGGER.info("User: [{}] has: [{}] transactions to push, time: [{}]", user.getId(), allTrList.size(), getTime(st));
 
         // step by step in one thread
-
-        CompletableFuture<String> objectCompletableFuture = zenAsyncService.zenDiffByUserForPb(user)
+        return zenAsyncService.zenDiffByUserForPb(user)
                 .thenApply(Optional::get)
                 .thenApply(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbTrList, zenDiff, user))
                 .thenApply(Optional::get)
@@ -152,8 +143,6 @@ public class PbSyncService {
                 .thenApply(Optional::get)
                 .thenApply(AwsPbStatement::getId)
                 .whenComplete((r, e) -> logSync(user.getId(), st, LOGGER, e));
-
-        return objectCompletableFuture;
     }
 
 

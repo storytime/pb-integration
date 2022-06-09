@@ -19,9 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.UnaryOperator;
 
 import static org.apache.logging.log4j.LogManager.getLogger;
 
@@ -31,7 +29,6 @@ public class PbSyncSchedulerExecutor {
     private static final Logger LOGGER = getLogger(PbSyncSchedulerExecutor.class);
 
     private final PbSyncService pbSyncService;
-    private final UnaryOperator<List<List<Statement>>> ifWasPushedFk;
     private final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk;
     private final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk;
     private final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk;
@@ -43,7 +40,6 @@ public class PbSyncSchedulerExecutor {
                                    final AwsStatementService awsStatementService,
                                    final PbSyncLambdaHolder pbSyncLambdaHolder) {
         this.pbSyncService = pbSyncService;
-        this.ifWasPushedFk = pbSyncLambdaHolder.getRegularSyncMapper(pbSyncLambdaHolder.ifWasMapped(), alreadyMappedPbZenTransaction);
         this.onSuccessFk = pbSyncLambdaHolder.onAwsDbRegularSyncSuccess(awsStatementService);
         this.startDateFk = pbSyncLambdaHolder.getAwsStartDate(dateService);
         this.endDateFk = pbSyncLambdaHolder.getAwsEndDate();
@@ -53,7 +49,7 @@ public class PbSyncSchedulerExecutor {
     @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
     public void awsSync() {
         LOGGER.debug("#################### Starting sync");
-        pbSyncService.sync(ifWasPushedFk, onSuccessFk, startDateFk, endDateFk);
+        pbSyncService.sync(onSuccessFk, startDateFk, endDateFk);
     }
 
 }

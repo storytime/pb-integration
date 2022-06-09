@@ -14,7 +14,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static com.github.storytime.config.props.CacheNames.*;
+import static com.github.storytime.config.props.CacheNames.USERS_CACHE;
+import static com.github.storytime.config.props.CacheNames.USER_PERMANENT_CACHE;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
@@ -28,7 +29,7 @@ public class AwsUserAsyncService {
     @Autowired
     private Executor cfThreadPool;
 
-//    @Cacheable(USERS_PERMANENT_CACHE)
+    //    @Cacheable(USERS_PERMANENT_CACHE)
     public CompletableFuture<List<AwsUser>> getAllUsers() {
         LOGGER.debug("Fetching all users from dynamo db - start");
         return supplyAsync(dynamoDbUserService::getAwsAllUsers, cfThreadPool);

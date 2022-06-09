@@ -132,7 +132,7 @@ public class PbToZenTransactionMapper {
                 .filter(t -> t.getContainsValue().equals(transactionDesc))
                 .findFirst();
 
-        if(first.isEmpty())
+        if (first.isEmpty())
             u.getAwsCustomPayee().add(new AwsCustomPayee(UNDERSCORE, transactionDesc));
 
         // transaction in different currency
