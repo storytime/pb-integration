@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
@@ -35,7 +34,6 @@ public class PbSyncSchedulerExecutor {
 
     @Autowired
     public PbSyncSchedulerExecutor(final PbSyncService pbSyncService,
-                                   final Set<Statement> alreadyMappedPbZenTransaction,
                                    final DateService dateService,
                                    final AwsStatementService awsStatementService,
                                    final PbSyncLambdaHolder pbSyncLambdaHolder) {

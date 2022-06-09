@@ -75,14 +75,9 @@ public class PbSyncService {
             // cheap, join for all started sync, threads thenApply(newPbTrList -> handleAwsAll(newPbTrList, awsUser, selectedMerchants, onSuccessFk, st))
             return allOf(allCfList.toArray(new CompletableFuture[allCfList.size()]))
                     .thenCompose(allDone -> awsSqsPublisherService.publishFinishMessage());
-        }).thenCompose(x -> awsSqsPublisherService.publishFinishMessage())
-                .thenAccept(x -> LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st)));
+        }).thenAccept(x -> LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st)));
     }
 
-    private void pushToSqs(StopWatch st) {
-        awsSqsPublisherService.publishFinishMessage();
-        LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st));
-    }
 
     private CompletableFuture<String> doSyncForAwsEachUser(final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
                                                            final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk,
