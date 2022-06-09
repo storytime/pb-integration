@@ -15,7 +15,7 @@ version: '3.7'
       replicas: 1
       resources:
         limits:
-          memory: 200MB
+          memory: 100MB
       restart_policy:
         condition: on-failure
 
