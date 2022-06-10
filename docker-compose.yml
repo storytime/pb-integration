@@ -1,4 +1,5 @@
 version: '3.7'
+services:
   pb-integration:
     image: bobobo/pb-integration-aws:latest
     env_file:
@@ -8,24 +9,24 @@ version: '3.7'
     logging:
       driver: json-file
     volumes:
-      - pb-log-vol:/home/app/logs
+      - pb-aws-log-vol:/home/app/logs
     networks:
       - backend
     deploy:
       replicas: 1
       resources:
         limits:
-          memory: 100MB
+          memory: 150MB
       restart_policy:
         condition: on-failure
 
 #PLEASE NOTE!  dirs for volumes must be created
 volumes:
-  pb-log-vol:
+  pb-aws-log-vol:
     driver: local
     driver_opts:
       type: none
-      device: /home/appuser/pb-sync-aws/log
+      device: /home/appuser/pb-sync-aws/logs
       o: bind
 
 networks:
