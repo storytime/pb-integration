@@ -1,6 +1,6 @@
 version: '3.7'
   pb-integration:
-    image: bobobo/pb-integration:latest
+    image: bobobo/pb-integration-aws:latest
     env_file:
       - ./variables.env
     ports:
