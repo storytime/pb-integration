@@ -57,13 +57,13 @@ jobs:
           command: docker login -u $DOCKER_USER -p $DOCKER_PASS
       - run:
           name: Build docker image
-          command: docker build -t bobobo/pb-integration:$(( $CIRCLE_BUILD_NUM + 944 )) -t bobobo/pb-integration:latest .
+          command: docker build -t bobobo/pb-integration-aws:$(( $CIRCLE_BUILD_NUM + 944 )) -t bobobo/pb-integration-aws:latest .
       - run:
           name: Tag docker image
-          command: docker tag bobobo/pb-integration:$(( $CIRCLE_BUILD_NUM + 944 )) bobobo/pb-integration:latest
+          command: docker tag bobobo/pb-integration-aws:$(( $CIRCLE_BUILD_NUM + 944 )) bobobo/pb-integration-aws:latest
       - run:
           name: Push docker image
-          command: docker push bobobo/pb-integration:latest && docker push bobobo/pb-integration:$(( $CIRCLE_BUILD_NUM + 944 ))
+          command: docker push bobobo/pb-integration-aws:latest && docker push bobobo/pb-integration-aws:$(( $CIRCLE_BUILD_NUM + 944 ))
 
   ### DEVELOP (clean build and do sonar tests)
   build_and_verify_on_sonar:
@@ -111,8 +111,10 @@ workflows:
             branches:
               only:
                 - master
+                - aws
       - build_prod_artifact:
           filters:
             branches:
               only:
                 - master
+                - aws
