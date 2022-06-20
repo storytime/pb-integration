@@ -1,6 +1,7 @@
 package com.github.storytime.mapper.response;
 
 import com.github.storytime.config.CustomConfig;
+import com.github.storytime.error.exception.PbInvalidIpException;
 import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.model.pb.jaxb.account.response.Response;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
@@ -24,7 +25,7 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class PbResponseMapper {
 
     private static final Logger LOGGER = getLogger(PbResponseMapper.class);
-    private static final String SIGNATURE = "signature";
+
     private final Unmarshaller jaxbStatementErrorUnmarshaller;
     private final Unmarshaller jaxbStatementOkUnmarshaller;
     private final Unmarshaller jaxbAccountOkUnmarshaller;
@@ -45,8 +46,13 @@ public class PbResponseMapper {
     public List<Statement> mapStatementRequestBody(final ResponseEntity<String> responseEntity) {
 
         final var body = ofNullable(responseEntity.getBody()).orElse(EMPTY);
+
         if (body.contains(customConfig.getPbBankSignature())) {
-            throw new PbSignatureException("Invalid signature");
+            throw new PbSignatureException(INVALID_SIGNATURE_ERROR);
+        }
+
+        if (body.contains(INVALID_IP)) {
+            throw new PbInvalidIpException(INVALID_IP_ERROR);
         }
 
         try {

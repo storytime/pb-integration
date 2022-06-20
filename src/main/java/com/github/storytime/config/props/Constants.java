@@ -91,6 +91,11 @@ public class Constants {
     public static final int MONTH_BEGIN_INDEX = 5;
     public static final int MONTH_END_INDEX = 7;
 
+    public static final String SIGNATURE = "signature";
+    public static final String INVALID_IP = "invalid ip";
+    public static final String INVALID_SIGNATURE_ERROR = "Invalid signature";
+    public static final String INVALID_IP_ERROR = "Invalid ip";
+
     public static final String JAN = "01";
     public static final String FEB = "02";
     public static final String APR = "04";

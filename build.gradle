@@ -30,15 +30,12 @@ dependencies {
     implementation("org.zalando:logbook-spring-boot-starter:2.14.0")
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("ru.lanwen.verbalregex:java-verbal-expressions:1.8")
-//    implementation("org.flywaydb:flyway-core:8.5.5")
-    implementation('org.springframework.boot:spring-boot-starter-actuator')
     implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
     implementation("com.sun.xml.bind:jaxb-core:2.3.0.1")
     implementation("javax.validation:validation-api:2.0.1.Final")
     implementation("one.util:streamex:0.8.1")
     implementation 'org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE'
-    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb
-    implementation 'com.amazonaws:aws-java-sdk-dynamodb:1.12.233'
+    implementation 'com.amazonaws:aws-java-sdk-dynamodb:1.12.243'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
