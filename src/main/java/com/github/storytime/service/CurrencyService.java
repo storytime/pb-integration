@@ -18,8 +18,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTimeAndReset;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.CacheNames.CURRENCY_CACHE;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.AwsCurrencySource.PB_CASH;
@@ -38,7 +38,7 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class CurrencyService {
 
     private static final Logger LOGGER = getLogger(CurrencyService.class);
-    public static final String DYNAMO_REQUEST_TYPE = ":type";
+
     private final CurrencyAsyncService currencyAsyncService;
     private final AwsCurrencyResponseMapper awsCurrencyResponseMapper;
     private final DynamoDbCurrencyService dynamoDbCurrencyService;

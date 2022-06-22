@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static com.github.storytime.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.config.props.Constants.N_A;
 import static com.github.storytime.config.props.Constants.VERSION_PROPERTIES;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logVersionCf;

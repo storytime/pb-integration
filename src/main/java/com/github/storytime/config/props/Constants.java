@@ -103,7 +103,12 @@ public class Constants {
     public static final String TARGET_BANK = "<[^>]*";
     public static final String DYNAMO_REQUEST_SOURCE = ":source";
     public static final String DYNAMO_REQUEST_ID = ":id";
+    public static final String DYNAMO_REQUEST_TYPE = ":type";
     public static final int SEARCH_LIMIT = 1;
+    public static final int MILLIS_IN_SEC = 1000;
+    public static final String SEC = " sec";
+    public static final String MS = " ms";
+    public static final String LOGS_TIME_FORMAT = "#####.#####";
 
     private Constants() {
     }

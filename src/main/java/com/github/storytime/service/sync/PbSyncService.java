@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
-import static com.github.storytime.STUtils.*;
+import static com.github.storytime.service.utils.STUtils.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.*;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.function.Predicate.not;

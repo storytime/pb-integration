@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTimeAndReset;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logReconcilePbJson;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpStatus.NO_CONTENT;

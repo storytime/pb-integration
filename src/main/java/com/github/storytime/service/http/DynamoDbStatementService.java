@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTimeAndReset;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.Constants.DYNAMO_REQUEST_ID;
 import static com.github.storytime.config.props.Constants.SEARCH_LIMIT;
 import static org.apache.logging.log4j.LogManager.getLogger;

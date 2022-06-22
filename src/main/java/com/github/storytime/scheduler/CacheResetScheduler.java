@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.github.storytime.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.config.props.CacheNames.*;
 import static com.github.storytime.config.props.Constants.INITIAL_TIMESTAMP;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logCache;

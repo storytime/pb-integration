@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTimeAndReset;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.Constants.TOTAL;
 import static com.github.storytime.config.props.Constants.UAH;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logSavingCf;

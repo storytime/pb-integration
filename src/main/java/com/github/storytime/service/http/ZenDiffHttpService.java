@@ -14,8 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.github.storytime.STUtils.createSt;
-import static com.github.storytime.STUtils.getTimeAndReset;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.other.Utils.createHeader;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
