@@ -5,7 +5,7 @@ import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.api.SavingsInfoResponse;
 import com.github.storytime.model.aws.AwsUser;
-import com.github.storytime.service.AwsUserAsyncService;
+import com.github.storytime.service.aws.AwsUserAsyncService;
 import com.github.storytime.service.DigitsFormatter;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;

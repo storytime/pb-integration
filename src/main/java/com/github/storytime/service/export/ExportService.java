@@ -4,7 +4,7 @@ import com.github.storytime.mapper.response.ExportMapper;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.export.ExportTransaction;
 import com.github.storytime.model.zen.TransactionItem;
-import com.github.storytime.service.AwsUserAsyncService;
+import com.github.storytime.service.aws.AwsUserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,7 +2,6 @@ package com.github.storytime.service;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.github.storytime.mapper.response.AwsCurrencyResponseMapper;
-import com.github.storytime.model.AwsCurrencySource;
 import com.github.storytime.model.aws.AwsCurrencyRates;
 import com.github.storytime.service.async.CurrencyAsyncService;
 import com.github.storytime.service.http.DynamoDbCurrencyService;
@@ -23,6 +22,7 @@ import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.CacheNames.CURRENCY_CACHE;
 import static com.github.storytime.config.props.Constants.*;
+import static com.github.storytime.model.AwsCurrencySource.PB_CASH;
 import static java.lang.Math.abs;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
@@ -38,6 +38,7 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class CurrencyService {
 
     private static final Logger LOGGER = getLogger(CurrencyService.class);
+    public static final String DYNAMO_REQUEST_TYPE = ":type";
     private final CurrencyAsyncService currencyAsyncService;
     private final AwsCurrencyResponseMapper awsCurrencyResponseMapper;
     private final DynamoDbCurrencyService dynamoDbCurrencyService;
@@ -73,8 +74,7 @@ public class CurrencyService {
         try {
             LOGGER.debug("Getting PB rate: [{}] - started", currencyType);
             final long beggingOfTheDay = startDate.with(MIN).toInstant().toEpochMilli();
-            //final var rate = awsCurrencyRepository.getAllRates(PB_CASH, currencyType, beggingOfTheDay)
-            final var rate = fetchCurrencyRate(beggingOfTheDay, AwsCurrencySource.PB_CASH, currencyType)
+            final var rate = fetchCurrencyRate(beggingOfTheDay, PB_CASH, currencyType)
                     .thenApply(dbRate -> dbRate.or(() -> fetchCurrencyRate(startDate, currencyType)))
                     .join();
             LOGGER.debug("Getting PB rate: [{}], time: [{}] - finish", currencyType, getTimeAndReset(st));
@@ -91,8 +91,8 @@ public class CurrencyService {
 
         LOGGER.debug("Fetching rate from dynamo db - start");
         final Map<String, AttributeValue> eav = new HashMap<>();
-        eav.put(":type", new AttributeValue().withS(type));
-        eav.put(":source", new AttributeValue().withS(source));
+        eav.put(DYNAMO_REQUEST_TYPE, new AttributeValue().withS(type));
+        eav.put(DYNAMO_REQUEST_SOURCE, new AttributeValue().withS(source));
 
         return supplyAsync(() -> dynamoDbCurrencyService.getRateFromDynamo(eav, startDate), cfThreadPool);
     }

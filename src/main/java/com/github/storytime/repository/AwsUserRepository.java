@@ -11,8 +11,12 @@ import java.util.List;
 @Repository
 public class AwsUserRepository {
 
+    private final DynamoDBMapper dynamoDBMapper;
+
     @Autowired
-    private DynamoDBMapper dynamoDBMapper;
+    public AwsUserRepository(DynamoDBMapper dynamoDBMapper) {
+        this.dynamoDBMapper = dynamoDBMapper;
+    }
 
     public List<AwsUser> getAllUsers() {
         return dynamoDBMapper.scan(AwsUser.class, new DynamoDBScanExpression());

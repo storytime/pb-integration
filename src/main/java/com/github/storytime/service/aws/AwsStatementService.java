@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.aws;
 
 import com.github.storytime.model.aws.AwsPbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response;

@@ -126,8 +126,8 @@ public class PbToZenTransactionMapper {
         newZenTr.setViewed(false);
         newZenTr.setMerchant(merchantId);
 
-        //add payeer to users list /TODO
-        Optional<AwsCustomPayee> first = u.getAwsCustomPayee()
+        //add payeer to users list TODO
+        final Optional<AwsCustomPayee> first = u.getAwsCustomPayee()
                 .stream()
                 .filter(t -> t.getContainsValue().equals(transactionDesc))
                 .findFirst();

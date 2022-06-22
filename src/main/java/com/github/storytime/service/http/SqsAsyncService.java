@@ -14,7 +14,6 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class SqsAsyncService {
 
     private static final Logger LOGGER = getLogger(SqsAsyncService.class);
-
     private final QueueMessagingTemplate queueMessagingTemplate;
     private final AwsSqsConfig awsSqsConfig;
 

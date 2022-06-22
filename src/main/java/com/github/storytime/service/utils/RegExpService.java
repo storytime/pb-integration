@@ -1,9 +1,11 @@
 package com.github.storytime.service.utils;
 
+import com.github.storytime.config.props.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.lanwen.verbalregex.VerbalExpression;
 
+import static com.github.storytime.config.props.Constants.*;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
@@ -13,6 +15,7 @@ public class RegExpService {
 
     private static final int GROUP_2 = 2;
     private static final int GROUP_1 = 1;
+
     private final VerbalExpression cashWithdrawal;
     private final VerbalExpression internalTransfer;
     private final VerbalExpression internalTransferCard;
@@ -65,11 +68,11 @@ public class RegExpService {
 
     public String normalizeDescription(final String desc) {
         return ofNullable(desc).orElse(EMPTY)
-                .replace("&quot;", "\"")
-                .replace("&apos;", SPACE)
-                .replace("&gt;", SPACE)
-                .replace("&lt;", SPACE)
-                .replace("<[^>]*", SPACE)
+                .replace(QUOT_BANK, Constants.QUOT)
+                .replace(APOS_BANK, SPACE)
+                .replace(GT_BANK, SPACE)
+                .replace(LT_BANK, SPACE)
+                .replace(TARGET_BANK, SPACE)
                 .trim();
     }
 }

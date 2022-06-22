@@ -18,7 +18,6 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class DynamoDbUserService {
 
     private static final Logger LOGGER = getLogger(DynamoDbUserService.class);
-
     private final AwsUserRepository awsUserRepository;
 
     @Autowired
@@ -38,7 +37,7 @@ public class DynamoDbUserService {
         }
     }
 
-    public Optional<AwsUser> getById(String id) {
+    public Optional<AwsUser> getById(final String id) {
         final var st = createSt();
         try {
             final var user = awsUserRepository.findById(id);
@@ -50,7 +49,7 @@ public class DynamoDbUserService {
         }
     }
 
-    public Optional<AwsUser> saveUser(AwsUser user) {
+    public Optional<AwsUser> saveUser(final AwsUser user) {
         final var st = createSt();
         try {
             awsUserRepository.save(user);

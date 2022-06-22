@@ -12,14 +12,14 @@ import java.util.*;
 
 import static com.github.storytime.STUtils.createSt;
 import static com.github.storytime.STUtils.getTimeAndReset;
+import static com.github.storytime.config.props.Constants.DYNAMO_REQUEST_ID;
+import static com.github.storytime.config.props.Constants.SEARCH_LIMIT;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
 public class DynamoDbStatementService {
 
     private static final Logger LOGGER = getLogger(DynamoDbStatementService.class);
-
-
     private final AwsStatementRepository awsStatementRepository;
 
     @Autowired
@@ -40,17 +40,17 @@ public class DynamoDbStatementService {
     }
 
 
-    public AwsPbStatement getAllStatementsForUser(String userId) {
+    public AwsPbStatement getAllStatementsForUser(final String userId) {
         final var st = createSt();
         try {
 
             final Map<String, AttributeValue> eav = new HashMap<>();
-            eav.put(":id", new AttributeValue().withS(userId));
+            eav.put(DYNAMO_REQUEST_ID, new AttributeValue().withS(userId));
 
             final DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
                     .withFilterExpression("userId = :id")
                     .withExpressionAttributeValues(eav)
-                    .withLimit(1);
+                    .withLimit(SEARCH_LIMIT);
 
             final var allStatement = awsStatementRepository.getAllByUser(scanExpression);
             LOGGER.debug("Pulled user statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
@@ -61,7 +61,7 @@ public class DynamoDbStatementService {
         }
     }
 
-    public List<AwsPbStatement> saveAllStatements(List<AwsPbStatement> statementList) {
+    public List<AwsPbStatement> saveAllStatements(final List<AwsPbStatement> statementList) {
         final var st = createSt();
         try {
             awsStatementRepository.saveAll(statementList);
@@ -73,7 +73,7 @@ public class DynamoDbStatementService {
         }
     }
 
-    public Optional<AwsPbStatement> save(AwsPbStatement awsPbStatement) {
+    public Optional<AwsPbStatement> save(final AwsPbStatement awsPbStatement) {
         final var st = createSt();
         try {
             awsStatementRepository.save(awsPbStatement);

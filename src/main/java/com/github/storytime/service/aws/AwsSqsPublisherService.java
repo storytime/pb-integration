@@ -1,5 +1,6 @@
-package com.github.storytime.service;
+package com.github.storytime.service.aws;
 
+import com.github.storytime.service.CurrencyService;
 import com.github.storytime.service.http.SqsAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

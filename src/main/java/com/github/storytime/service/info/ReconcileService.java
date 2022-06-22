@@ -4,7 +4,7 @@ import com.github.storytime.mapper.ReconcileCommonMapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
 import com.github.storytime.model.api.PbZenReconcileResponse;
 import com.github.storytime.model.aws.AwsUser;
-import com.github.storytime.service.AwsUserAsyncService;
+import com.github.storytime.service.aws.AwsUserAsyncService;
 import com.github.storytime.service.PbAccountService;
 import com.github.storytime.service.async.ZenAsyncService;
 import com.github.storytime.service.utils.DateService;

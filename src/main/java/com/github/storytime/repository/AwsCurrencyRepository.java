@@ -11,8 +11,12 @@ import java.util.List;
 @Repository
 public class AwsCurrencyRepository {
 
+    private final DynamoDBMapper dynamoDBMapper;
+
     @Autowired
-    private DynamoDBMapper dynamoDBMapper;
+    public AwsCurrencyRepository(DynamoDBMapper dynamoDBMapper) {
+        this.dynamoDBMapper = dynamoDBMapper;
+    }
 
     public List<AwsCurrencyRates> findByTypeSourceAndDate(DynamoDBScanExpression scanExpression) {
         return dynamoDBMapper.scan(AwsCurrencyRates.class, scanExpression);

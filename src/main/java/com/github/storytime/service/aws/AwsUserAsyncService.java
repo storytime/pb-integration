@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.aws;
 
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.service.http.DynamoDbUserService;

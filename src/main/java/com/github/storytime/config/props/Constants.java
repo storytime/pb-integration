@@ -31,7 +31,6 @@ public class Constants {
     public static final int CURRENCY_SCALE = 2;
     public static final int PERCENTS_SCALE = 2;
     public static final String UAH_STR = "UAH";
-    public static final int COMMENT_SIZE = 50;
     public static final String USD_COMMENT = "$";
     public static final String BANK_RATE = "";
     public static final int EMPTY_AMOUNT = 0;
@@ -46,28 +45,15 @@ public class Constants {
     public static final String PERCENT = "%";
     public static final String SLASH_SEPARATOR = " / ";
     public static final String PROJECT_TAG = "#";
-    public static final int YNAB_AMOUNT_CONST = 1000;
-    public static final String DOT = ".";
-    public static final String RECONCILE_OK = "OK";
-    public static final String RECONCILE_NOT_OK = "Not OK!";
-    public static final long ZERO_DIIF = 0L;
     public static final String CARDNUM = "cardnum";
     public static final String COUNTRY = "country";
     public static final String UA = "UA";
-    public static final long EPOCH_MILLI_FIX = 2146078276;
-    public static final String CLEARED = "cleared";
-    public static final String YNAB_IGNORE = "#";
-    public static final String UNCATEGORIZED = "Uncategorized";
     public static final long INITIAL_TIMESTAMP = 0L;
     public static final String ACCOUNT = "account";
     public static final String INSTRUMENT = "instrument";
     public static final String TAG = "tag";
     public static final String USER = "user";
-    public static final String SLASH = "/";
     public static final BigDecimal DEFAULT_ACC_BALANCE = BigDecimal.valueOf(0);
-    public static final String SPLITTER = "; ";
-    public static final String PR = "[";
-    public static final String SUF = "]";
     public static final String SPLITTER_EMPTY = "(?<=.)";
     public static final int START_INCLUSIVE = 0;
     public static final int ZERO = 0;
@@ -75,9 +61,6 @@ public class Constants {
     public static final double EMPTY_BAL = 0d;
     public static final int USD_ID = 1;
     public static final int EUR_ID = 3;
-    public static final String YNAB_CATEGORIES = "/categories";
-    public static final String YNAB_TRANSACTIONS = "/transactions";
-    public static final String YNAB_ACCOUNTS = "/accounts";
     public static final String CATEGORY = "Category";
     public static final double INITIAL_VALUE = 0D;
     public static final String TOTAL_EXPORT = "Total";
@@ -112,6 +95,15 @@ public class Constants {
     public static final String Q2 = "2";
     public static final String Q3 = "3";
     public static final String Q4 = "4";
+    public static final String QUOT = "\"";
+    public static final String QUOT_BANK = "&quot;";
+    public static final String APOS_BANK = "&apos;";
+    public static final String GT_BANK = "&gt;";
+    public static final String LT_BANK = "&lt;";
+    public static final String TARGET_BANK = "<[^>]*";
+    public static final String DYNAMO_REQUEST_SOURCE = ":source";
+    public static final String DYNAMO_REQUEST_ID = ":id";
+    public static final int SEARCH_LIMIT = 1;
 
     private Constants() {
     }

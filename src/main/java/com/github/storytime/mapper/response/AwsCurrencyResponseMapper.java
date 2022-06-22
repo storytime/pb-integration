@@ -7,13 +7,15 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
+import static com.github.storytime.model.AwsCurrencySource.PB_CASH;
+
 @Component
 public class AwsCurrencyResponseMapper {
 
     public AwsCurrencyRates mapPbCashCurrencyRates(final ZonedDateTime now,
                                                    final String currencyType,
                                                    final CashResponse response) {
-        return buildRate("PB_CASH", now, currencyType, new BigDecimal(response.getBuy()), new BigDecimal(response.getSale()));
+        return buildRate(PB_CASH, now, currencyType, new BigDecimal(response.getBuy()), new BigDecimal(response.getSale()));
     }
 
 
@@ -22,7 +24,7 @@ public class AwsCurrencyResponseMapper {
                                       final String currencyType,
                                       final BigDecimal sellPrate,
                                       final BigDecimal buyPrate) {
-        return new AwsCurrencyRates().builder()
+        return AwsCurrencyRates.builder()
                 .currencySource(cs)
                 .currencyType(currencyType)
                 .dateTime(date.toInstant().toEpochMilli())

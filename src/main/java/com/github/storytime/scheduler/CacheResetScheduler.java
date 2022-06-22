@@ -1,6 +1,6 @@
 package com.github.storytime.scheduler;
 
-import com.github.storytime.service.AwsUserAsyncService;
+import com.github.storytime.service.aws.AwsUserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

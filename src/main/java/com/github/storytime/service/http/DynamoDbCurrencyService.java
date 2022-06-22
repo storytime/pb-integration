@@ -19,7 +19,6 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class DynamoDbCurrencyService {
 
     private static final Logger LOGGER = getLogger(DynamoDbCurrencyService.class);
-
     private final AwsCurrencyRepository awsCurrencyRepository;
 
     @Autowired
@@ -49,7 +48,7 @@ public class DynamoDbCurrencyService {
         }
     }
 
-    public AwsCurrencyRates saveRate(AwsCurrencyRates rate) {
+    public AwsCurrencyRates saveRate(final AwsCurrencyRates rate) {
         final var st = createSt();
         try {
             AwsCurrencyRates savedRate = awsCurrencyRepository.saveRate(rate);

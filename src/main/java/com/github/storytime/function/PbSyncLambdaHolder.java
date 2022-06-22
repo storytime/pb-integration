@@ -4,7 +4,7 @@ import com.github.storytime.model.aws.AwsMerchant;
 import com.github.storytime.model.aws.AwsPbStatement;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.AwsStatementService;
+import com.github.storytime.service.aws.AwsStatementService;
 import com.github.storytime.service.utils.DateService;
 import org.springframework.stereotype.Component;
 
