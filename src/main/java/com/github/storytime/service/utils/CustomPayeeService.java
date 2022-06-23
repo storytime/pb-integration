@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.github.storytime.config.props.Constants.EMPTY;
 import static com.github.storytime.config.props.Constants.UNDERSCORE;
@@ -29,7 +28,7 @@ public class CustomPayeeService {
                 .stream()
                 .filter(not(p -> isEmpty(p.getPayee())))
                 .filter(not(p -> p.getPayee().equals(UNDERSCORE)))
-                .collect(Collectors.toList());
+                .toList();
 
         var nicePayee = userPayeeList
                 .stream()

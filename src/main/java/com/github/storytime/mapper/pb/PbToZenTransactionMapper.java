@@ -65,15 +65,13 @@ public class PbToZenTransactionMapper {
                                   final Long card,
                                   final String appcode,
                                   final String terminal) {
-        // final String transactionDesc) {
         final var userIdBytes = userId.getBytes();
         final var trAmountByes = String.valueOf(amount).getBytes();
         final var cardBytes = Long.toString(card).getBytes();
         final var appCodeBytes = appcode.getBytes();
         final var descBytes = terminal.getBytes();
-        //  final var transactionDescBytes = transactionDesc.getBytes();
         final var capacity = userIdBytes.length + trDateBytes.length +
-                trAmountByes.length + cardBytes.length + appCodeBytes.length + descBytes.length;// + transactionDescBytes.length;
+                trAmountByes.length + cardBytes.length + appCodeBytes.length + descBytes.length;
 
         final var idBytes = ByteBuffer.allocate(capacity)
                 .put(userIdBytes)
@@ -82,7 +80,6 @@ public class PbToZenTransactionMapper {
                 .put(cardBytes)
                 .put(appCodeBytes)
                 .put(descBytes)
-                //       .put(transactionDescBytes)
                 .array();
 
         return UUID.nameUUIDFromBytes(idBytes).toString();

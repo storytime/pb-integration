@@ -79,15 +79,19 @@ public class SavingsInfoMapper {
         final var balance = accountItem.getBalance();
         final var startDate = now(systemDefault()).with(MIN);
         final var bal = valueOf(balance);
-        final var inUah = instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
-                instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) : bal;
+        final var inUah =
+                instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
+                instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
+                bal;
 
-        return new SavingsInfo()
-                .setBalance(bal.setScale(ZERO_SCALE, HALF_DOWN))
-                .setCurrencySymbol(zenCurrencySymbol)
-                .setTitle(accountItem.getTitle().trim())
-                .setInUah(inUah.setScale(ZERO_SCALE, HALF_DOWN))
-                .setInUahStr(digitsFormatter.formatAmount(inUah.setScale(ZERO_SCALE, HALF_DOWN)))
-                .setBalanceStr(digitsFormatter.formatAmount(bal.setScale(ZERO_SCALE, HALF_DOWN)));
+        return SavingsInfo
+                .builder()
+                .balance(bal.setScale(ZERO_SCALE, HALF_DOWN))
+                .currencySymbol(zenCurrencySymbol)
+                .title(accountItem.getTitle().trim())
+                .inUah(inUah.setScale(ZERO_SCALE, HALF_DOWN))
+                .inUahStr(digitsFormatter.formatAmount(inUah.setScale(ZERO_SCALE, HALF_DOWN)))
+                .balanceStr(digitsFormatter.formatAmount(bal.setScale(ZERO_SCALE, HALF_DOWN)))
+                .build();
     }
 }

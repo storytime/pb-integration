@@ -5,8 +5,8 @@ import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.api.SavingsInfoResponse;
 import com.github.storytime.model.aws.AwsUser;
-import com.github.storytime.service.aws.AwsUserAsyncService;
 import com.github.storytime.service.DigitsFormatter;
+import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.Constants.TOTAL;
 import static com.github.storytime.config.props.Constants.UAH;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logSavingCf;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
@@ -35,19 +35,19 @@ public class SavingsService {
 
     private static final Logger LOGGER = getLogger(SavingsService.class);
 
-    private final AwsUserAsyncService awsUserAsyncService;
+    private final UserAsyncService userAsyncService;
     private final ZenAsyncService zenAsyncService;
     private final SavingsInfoMapper savingsInfoMapper;
     private final ZenResponseMapper zenResponseMapper;
     private final DigitsFormatter digitsFormatter;
 
     @Autowired
-    public SavingsService(final AwsUserAsyncService awsUserAsyncService,
+    public SavingsService(final UserAsyncService userAsyncService,
                           final SavingsInfoMapper savingsInfoMapper,
                           final ZenResponseMapper zenResponseMapper,
                           final DigitsFormatter digitsFormatter,
                           final ZenAsyncService zenAsyncService) {
-        this.awsUserAsyncService = awsUserAsyncService;
+        this.userAsyncService = userAsyncService;
         this.zenAsyncService = zenAsyncService;
         this.zenResponseMapper = zenResponseMapper;
         this.savingsInfoMapper = savingsInfoMapper;
@@ -58,7 +58,7 @@ public class SavingsService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get savings info as table for user: [{}] - start", userId);
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(this::getUserSavings)
                     .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
@@ -79,7 +79,7 @@ public class SavingsService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get savings info as JSON for user: [{}] - start", userId);
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(this::getUserSavings)
                     .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
@@ -88,7 +88,7 @@ public class SavingsService {
                             .setTotal(digitsFormatter.formatAmount(savingsInfoMapper.getTotalInUah(updatedSavings))))
                     .thenApply(r -> new ResponseEntity<>(r, OK))
                     .whenComplete((t, e) -> logSavingCf(userId, st, LOGGER, e));
-        } catch (Throwable e) {
+        } catch (final Exception e) {
             LOGGER.error("Cannot get savings info as JSON for user: [{}], time: [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
             return completedFuture(new ResponseEntity<>(NO_CONTENT));
         }

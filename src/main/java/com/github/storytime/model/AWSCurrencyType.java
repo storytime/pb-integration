@@ -1,9 +1,12 @@
 package com.github.storytime.model;
 
-/**
- * Values is saved in db by name, so names changed not allowed
- */
-public interface AWSCurrencyType {
-    String USD = "USD";
-    String EUR = "EUR";
+
+public final class AWSCurrencyType {
+    
+    public static final String USD = "USD";
+    public static final String EUR = "EUR";
+
+    private AWSCurrencyType() {
+        throw new IllegalStateException("Utility class");
+    }
 }

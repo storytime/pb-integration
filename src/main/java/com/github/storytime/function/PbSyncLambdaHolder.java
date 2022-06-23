@@ -1,10 +1,11 @@
 package com.github.storytime.function;
 
+import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
 import com.github.storytime.model.aws.AwsMerchant;
 import com.github.storytime.model.aws.AwsPbStatement;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.aws.AwsStatementService;
+import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.utils.DateService;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
@@ -32,7 +32,6 @@ public class PbSyncLambdaHolder {
         return (user, merchant) -> dateService.millisAwsUserDate(merchant.getSyncStartDate(), user);
     }
 
-
     public TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> getAwsEndDate() {
         return (appUser, merchantInfo, startDate) -> {
             final var period = ofMillis(merchantInfo.getSyncPeriod());
@@ -41,23 +40,23 @@ public class PbSyncLambdaHolder {
         };
     }
 
-    public BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onAwsDbRegularSyncSuccess(final AwsStatementService awsStatementService) {
+    public BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onAwsDbRegularSyncSuccess(final StatementAsyncService statementAsyncService) {
 
-        return (pushedByNotCached, userId) -> awsStatementService.getAllStatementsByUser(userId)
+        return (pushedByNotCached, userId) -> statementAsyncService.getAllStatementsByUser(userId)
                 .thenCompose((AwsPbStatement dfStatements) -> {
                             final Set<String> pushedByNotCachedMapped = pushedByNotCached
                                     .stream()
                                     .flatMap(Collection::stream)
                                     .collect(toUnmodifiableSet())
                                     .stream()
-                                    .map(AwsStatementService::generateUniqString)
+                                    .map(PbStatementsToDynamoDbMapper::generateUniqString)
                                     .collect(toSet());
 
                             final Set<String> allNewStatements = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed()
                                     .stream())
-                                    .collect(Collectors.toSet());
+                                    .collect(toSet());
 
-                            return awsStatementService.save(dfStatements.setAlreadyPushed(allNewStatements));
+                            return statementAsyncService.saveAll(dfStatements.setAlreadyPushed(allNewStatements), userId);
                         }
                 );
     }

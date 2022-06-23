@@ -1,15 +1,16 @@
 package com.github.storytime.service.sync;
 
 import com.github.storytime.function.TrioFunction;
+import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
 import com.github.storytime.mapper.PbToZenMapper;
 import com.github.storytime.model.aws.AwsMerchant;
 import com.github.storytime.model.aws.AwsPbStatement;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.aws.AwsSqsPublisherService;
-import com.github.storytime.service.aws.AwsStatementService;
-import com.github.storytime.service.aws.AwsUserAsyncService;
 import com.github.storytime.service.PbStatementsService;
+import com.github.storytime.service.async.SqsAsyncPublisherService;
+import com.github.storytime.service.async.StatementAsyncService;
+import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.Logger;
@@ -23,8 +24,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
-import static com.github.storytime.service.utils.STUtils.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.*;
+import static com.github.storytime.service.utils.STUtils.*;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.function.Predicate.not;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -33,30 +34,27 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class PbSyncService {
 
     private static final Logger LOGGER = getLogger(PbSyncService.class);
-
-    // private final MerchantService merchantService;
     private final PbStatementsService pbStatementsService;
-    private final AwsUserAsyncService awsUserAsyncService;
+    private final UserAsyncService userAsyncService;
     private final PbToZenMapper pbToZenMapper;
     private final ZenAsyncService zenAsyncService;
-    private final AwsSqsPublisherService awsSqsPublisherService;
-    private final AwsStatementService awsStatementService;
-
+    private final SqsAsyncPublisherService sqsAsyncPublisherService;
+    private final StatementAsyncService statementAsyncService;
 
     @Autowired
     public PbSyncService(
             final PbStatementsService pbStatementsService,
             final ZenAsyncService zenAsyncService,
             final PbToZenMapper pbToZenMapper,
-            final AwsUserAsyncService awsUserAsyncService,
-            final AwsStatementService awsStatementService,
-            final AwsSqsPublisherService awsSqsPublisherService) {
+            final UserAsyncService userAsyncService,
+            final StatementAsyncService statementAsyncService,
+            final SqsAsyncPublisherService sqsAsyncPublisherService) {
         this.zenAsyncService = zenAsyncService;
         this.pbStatementsService = pbStatementsService;
         this.pbToZenMapper = pbToZenMapper;
-        this.awsSqsPublisherService = awsSqsPublisherService;
-        this.awsUserAsyncService = awsUserAsyncService;
-        this.awsStatementService = awsStatementService;
+        this.sqsAsyncPublisherService = sqsAsyncPublisherService;
+        this.userAsyncService = userAsyncService;
+        this.statementAsyncService = statementAsyncService;
     }
 
     @Async
@@ -66,7 +64,7 @@ public class PbSyncService {
 
         final var st = createSt();
         final CompletableFuture<List<CompletableFuture<String>>> allUsersSyncCf =
-                awsUserAsyncService.getAllUsers()
+                userAsyncService.getAllUsers()
                         .thenApply(awsUsers -> awsUsers.stream().map(user -> doSyncForAwsEachUser(onSuccessFk, startDateFk, endDateFk, user)).toList()); // //one for each user
 
         allUsersSyncCf.thenCompose(this::waitForAllCompleteAndPushToSqs)
@@ -77,7 +75,7 @@ public class PbSyncService {
     // cheap, join for all started sync, threads thenApply(newPbTrList -> handleAwsAll(newPbTrList, awsUser, selectedMerchants, onSuccessFk, st))
     private CompletableFuture<String> waitForAllCompleteAndPushToSqs(final List<CompletableFuture<String>> allCfList) {
         return allOf(allCfList.toArray(new CompletableFuture[allCfList.size()]))
-                .thenCompose(allDone -> awsSqsPublisherService.publishFinishMessage());
+                .thenCompose(allDone -> sqsAsyncPublisherService.publishFinishMessage());
     }
 
 
@@ -101,11 +99,11 @@ public class PbSyncService {
     }
 
     private CompletableFuture<List<List<Statement>>> filterUserLevelStatements(final AwsUser awsUser, final List<List<Statement>> userLevelStatements) {
-        return awsStatementService
+        return statementAsyncService
                 .getAllStatementsByUser(awsUser.getId())
                 .thenApply((AwsPbStatement dbData) -> userLevelStatements.stream().map(merchantLevel -> merchantLevel
                         .stream()
-                        .filter(ap -> !dbData.getAlreadyPushed().contains(AwsStatementService.generateUniqString(ap)))
+                        .filter(ap -> !dbData.getAlreadyPushed().contains(PbStatementsToDynamoDbMapper.generateUniqString(ap)))
                         .toList()).filter(not(List::isEmpty)).toList())
                 .whenComplete((r, e) -> logSyncStatements(awsUser.getId(), LOGGER, e));
     }
@@ -119,7 +117,7 @@ public class PbSyncService {
 
         var allTrList = newPbTrList.stream().flatMap(List::stream).toList();
         if (allTrList.isEmpty()) {
-            return awsUserAsyncService.updateUser(user)
+            return userAsyncService.updateUser(user)
                     .thenApply(Optional::get)
                     .thenApply(AwsUser::getId)
                     .whenComplete((r, e) -> logSyncPushByUserEmpty(user.getId(), st, selectedMerchants.size(), LOGGER, e));
@@ -134,7 +132,7 @@ public class PbSyncService {
                 .thenApply(Optional::get)
                 .thenCompose(tr -> zenAsyncService.pushToZen(user, tr))
                 .thenApply(Optional::get)
-                .thenCompose(zr -> awsUserAsyncService.updateUser(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
+                .thenCompose(zr -> userAsyncService.updateUser(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
                 .thenApply(AwsUser::getId)
                 .thenCompose(x -> onSuccessFk.apply(newPbTrList, user.getId()))

@@ -6,8 +6,6 @@ import com.github.storytime.mapper.response.PbResponseMapper;
 import com.github.storytime.model.aws.AwsMerchant;
 import com.github.storytime.model.internal.PbAccountBalance;
 import com.github.storytime.service.async.PbAsyncService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +16,6 @@ import static com.github.storytime.config.props.Constants.DEFAULT_ACC_BALANCE;
 
 @Service
 public class PbAccountService {
-
-    private static final Logger LOGGER = LogManager.getLogger(PbAccountService.class);
 
     private final PbRequestBuilder pbRequestBuilder;
     private final PbAccountBalanceResponseMapper pbAccountBalanceResponseMapper;

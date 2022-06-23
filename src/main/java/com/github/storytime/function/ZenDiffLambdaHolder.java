@@ -2,7 +2,6 @@ package com.github.storytime.function;
 
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.zen.ZenSyncRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +14,6 @@ import static java.util.Set.of;
 
 @Component
 public class ZenDiffLambdaHolder {
-
-    @Autowired
-    public ZenDiffLambdaHolder() {
-    }
 
     public Supplier<HttpEntity<ZenSyncRequest>> getInitialFunction(final AwsUser u) {
         return () -> {

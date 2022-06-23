@@ -4,8 +4,8 @@ import com.github.storytime.mapper.ReconcileCommonMapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
 import com.github.storytime.model.api.PbZenReconcileResponse;
 import com.github.storytime.model.aws.AwsUser;
-import com.github.storytime.service.aws.AwsUserAsyncService;
 import com.github.storytime.service.PbAccountService;
+import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import com.github.storytime.service.utils.DateService;
 import org.apache.logging.log4j.LogManager;
@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static com.github.storytime.error.AsyncErrorHandlerUtil.logReconcilePbJson;
 import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
-import static com.github.storytime.error.AsyncErrorHandlerUtil.logReconcilePbJson;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -29,7 +29,7 @@ public class ReconcileService {
 
     private static final Logger LOGGER = LogManager.getLogger(ReconcileService.class);
 
-    private final AwsUserAsyncService awsUserService;
+    private final UserAsyncService awsUserService;
     private final PbAccountService pbAccountService;
     private final ZenCommonMapper zenCommonMapper;
     private final DateService dateService;
@@ -38,7 +38,7 @@ public class ReconcileService {
 
     @Autowired
     public ReconcileService(
-            final AwsUserAsyncService awsUserService,
+            final UserAsyncService awsUserService,
             final ZenCommonMapper zenCommonMapper,
             final PbAccountService pbAccountService,
             final DateService dateService,

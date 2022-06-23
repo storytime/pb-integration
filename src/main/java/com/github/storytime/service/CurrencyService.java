@@ -18,11 +18,11 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.CacheNames.CURRENCY_CACHE;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.AwsCurrencySource.PB_CASH;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static java.lang.Math.abs;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;
@@ -101,7 +101,7 @@ public class CurrencyService {
                                                          final String currencyType) {
         return currencyAsyncService.getPbCashDayRates()
                 .thenApply(r -> r.orElse(emptyList()))
-                .thenApply(r -> r.stream().filter(cr -> isEq(cr.getBaseCcy(), UAH_STR) && isEq(cr.getCcy(), currencyType.toString())).findFirst())
+                .thenApply(r -> r.stream().filter(cr -> isEq(cr.getBaseCcy(), UAH_STR) && isEq(cr.getCcy(), currencyType)).findFirst())
                 .thenApply(r -> r.map(cr -> awsCurrencyResponseMapper.mapPbCashCurrencyRates(startDate, currencyType, cr)))
                 .thenApply(r -> r.map(dynamoDbCurrencyService::saveRate))
                 .join();

@@ -18,5 +18,6 @@ public class CacheNames {
     public static final String IN_DATA_BY_QUARTER = "get-in-data-by-quarter";
 
     private CacheNames() {
+        throw new IllegalStateException("Utility class");
     }
 }

@@ -84,7 +84,7 @@ public class ZenCommonMapper {
         return Optional.of(maybeZr).flatMap(zr -> ofNullable(zr.getTransaction())).orElse(emptyList());
     }
 
-    public TreeMap<String, BigDecimal> getZenTagsSummaryByCategory(long startDate,
+    public Map<String, BigDecimal> getZenTagsSummaryByCategory(long startDate,
                                                                    long endDate,
                                                                    final ZenResponse maybeZr) {
 

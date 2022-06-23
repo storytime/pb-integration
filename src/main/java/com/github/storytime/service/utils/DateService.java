@@ -44,42 +44,33 @@ public class DateService {
         this.zenDateTimeFormatter = zenDateTimeFormatter;
     }
 
-    public String toPbFormat(ZonedDateTime zonedDateTime) {
+    public String toPbFormat(final ZonedDateTime zonedDateTime) {
         return pbDateTimeFormatter.format(zonedDateTime);
     }
 
-    public String toMinfinFormat(ZonedDateTime zonedDateTime) {
+    public String toMinfinFormat(final ZonedDateTime zonedDateTime) {
         return minfinDateTimeFormatter.format(zonedDateTime);
     }
 
-    public ZonedDateTime millisUserDate(Long millis, AwsUser u) {
+    public ZonedDateTime millisAwsUserDate(final Long millis, final AwsUser u) {
         final Instant instant = ofEpochMilli(millis);
         return ofInstant(instant, of(u.getTimeZone()));
     }
 
-    public ZonedDateTime millisAwsUserDate(Long millis, AwsUser u) {
-        final Instant instant = ofEpochMilli(millis);
-        return ofInstant(instant, of(u.getTimeZone()));
-    }
-
-    public ZonedDateTime secToUserDate(Long secs, AwsUser u) {
+    public ZonedDateTime secToUserDate(final Long secs, final AwsUser u) {
         final Instant instant = ofEpochSecond(secs);
         return ofInstant(instant, of(u.getTimeZone()));
     }
 
-    public String toPbFormat(Long millis, AwsUser u) {
-        return pbDateTimeFormatter.format(millisUserDate(millis, u));
-    }
-
-    public String millisToIsoFormat(Long millis, AwsUser u) {
+    public String millisToIsoFormat(final Long millis, final AwsUser u) {
         return isoDateTimeFormatter.format(millisAwsUserDate(millis, u));
     }
 
-    public String secsToIsoFormat(Long secs, AwsUser u) {
+    public String secsToIsoFormat(final Long secs, final AwsUser u) {
         return isoDateTimeFormatter.format(secToUserDate(secs, u));
     }
 
-    public String millisToIsoFormat(ZonedDateTime zonedDateTime) {
+    public String millisToIsoFormat(final ZonedDateTime zonedDateTime) {
         return isoDateTimeFormatter.format(zonedDateTime);
     }
 

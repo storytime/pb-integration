@@ -19,6 +19,7 @@ import static java.lang.Boolean.TRUE;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingLong;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -65,9 +66,10 @@ public class PbToZenMapper {
                     .setLastServerTimestamp(zenDiff.getServerTimestamp())
                     .setAccount(isAccountsPushNeeded ? zenDiff.getAccount() : emptyList())
                     .setTransaction(allTransactionsToZen));
+
         } catch (Exception e) {
             LOGGER.debug("Error", e);
-            return Optional.empty();
+            return empty();
         }
     }
 }

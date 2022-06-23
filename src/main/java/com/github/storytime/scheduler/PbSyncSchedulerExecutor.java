@@ -6,7 +6,7 @@ import com.github.storytime.model.aws.AwsMerchant;
 import com.github.storytime.model.aws.AwsPbStatement;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.aws.AwsStatementService;
+import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.sync.PbSyncService;
 import com.github.storytime.service.utils.DateService;
 import org.apache.logging.log4j.Logger;
@@ -35,10 +35,10 @@ public class PbSyncSchedulerExecutor {
     @Autowired
     public PbSyncSchedulerExecutor(final PbSyncService pbSyncService,
                                    final DateService dateService,
-                                   final AwsStatementService awsStatementService,
+                                   final StatementAsyncService statementAsyncService,
                                    final PbSyncLambdaHolder pbSyncLambdaHolder) {
         this.pbSyncService = pbSyncService;
-        this.onSuccessFk = pbSyncLambdaHolder.onAwsDbRegularSyncSuccess(awsStatementService);
+        this.onSuccessFk = pbSyncLambdaHolder.onAwsDbRegularSyncSuccess(statementAsyncService);
         this.startDateFk = pbSyncLambdaHolder.getAwsStartDate(dateService);
         this.endDateFk = pbSyncLambdaHolder.getAwsEndDate();
     }

@@ -10,10 +10,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.Constants.DYNAMO_REQUEST_ID;
 import static com.github.storytime.config.props.Constants.SEARCH_LIMIT;
+import static com.github.storytime.model.aws.AwsPbStatement.builder;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Service
@@ -35,7 +40,7 @@ public class DynamoDbStatementService {
             return allStatement;
         } catch (Exception e) {
             LOGGER.debug("Error to fetch users from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
-            return Collections.emptyList();
+            return emptyList();
         }
     }
 
@@ -54,10 +59,10 @@ public class DynamoDbStatementService {
 
             final var allStatement = awsStatementRepository.getAllByUser(scanExpression);
             LOGGER.debug("Pulled user statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
-            return allStatement.isEmpty() ? AwsPbStatement.builder().userId(userId).alreadyPushed(Collections.<String>emptySet()).build() : allStatement.stream().findFirst().get();
+            return allStatement.isEmpty() ? builder().userId(userId).alreadyPushed(emptySet()).build() : allStatement.stream().findFirst().orElseThrow();
         } catch (Exception e) {
-            LOGGER.debug("Error to fetch users  statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
-            return AwsPbStatement.builder().userId(userId).alreadyPushed(Collections.<String>emptySet()).build();
+            LOGGER.debug("Error to fetch users statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
+            return builder().userId(userId).alreadyPushed(emptySet()).build();
         }
     }
 
@@ -69,7 +74,7 @@ public class DynamoDbStatementService {
             return statementList;
         } catch (Exception e) {
             LOGGER.debug("Saved statements db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
-            return Collections.emptyList();
+            return emptyList();
         }
     }
 
@@ -78,10 +83,10 @@ public class DynamoDbStatementService {
         try {
             awsStatementRepository.save(awsPbStatement);
             LOGGER.debug("Saved statement db time: [{}], user id: [{}] - finish", getTimeAndReset(st), awsPbStatement.getUserId());
-            return Optional.of(awsPbStatement);
+            return of(awsPbStatement);
         } catch (Exception e) {
             LOGGER.debug("Saved statements db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
-            return Optional.empty();
+            return empty();
         }
     }
 }

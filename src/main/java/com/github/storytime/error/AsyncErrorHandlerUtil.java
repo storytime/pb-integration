@@ -8,6 +8,8 @@ import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 
 public interface AsyncErrorHandlerUtil {
 
+      String ERROR_MSG = "Error! [{}]";
+
     static void logPbCf(final String userId,
                         final Logger logger,
                         final Throwable e) {
@@ -15,7 +17,7 @@ public interface AsyncErrorHandlerUtil {
             if (e != null)
                 logger.error("Async error, cannot continue with PB transactions for user: [{}], error: [{}]", userId, e.getCause());
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -29,7 +31,7 @@ public interface AsyncErrorHandlerUtil {
             else
                 logger.error("Cannot collect saving for user: [{}], time: [{}], error: [{}] - error endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -43,7 +45,7 @@ public interface AsyncErrorHandlerUtil {
             else
                 logger.error("Cannot not get export [{}], time: [{}], error: [{}] - error endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -56,7 +58,7 @@ public interface AsyncErrorHandlerUtil {
             else
                 logger.error("Refresh zend cache time:time: [{}], error: [{}]", getTimeAndReset(st), e.getCause(), e);
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -67,7 +69,7 @@ public interface AsyncErrorHandlerUtil {
             else
                 logger.error("Version time: [{}], error: [{}] - error endpoint ===", getTimeAndReset(st), e.getMessage(), e);
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -79,7 +81,7 @@ public interface AsyncErrorHandlerUtil {
                 logger.error("Cannot build pb/zen json for user: [{}], time: [{}], error [{}] - error endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
 
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -89,7 +91,7 @@ public interface AsyncErrorHandlerUtil {
             if (e != null)
                 logger.error("CF statement user: [{}] init error [{}]", userId, e.getCause(), e);
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -100,7 +102,7 @@ public interface AsyncErrorHandlerUtil {
             else
                 logger.error("Error! Sync for user: [{}], time: [{}], error [{}] - finished with error", userId, getTime(st), e.getCause(), e);
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -111,7 +113,7 @@ public interface AsyncErrorHandlerUtil {
             else
                 logger.error("Error! Sync for user: [{}], time: [{}], error [{}] - finished with error", userId, getTime(st), e.getCause(), e);
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -120,7 +122,7 @@ public interface AsyncErrorHandlerUtil {
             if (e != null)
                 logger.error("CF user: [{}] init error [{}], time: [{}]", userId, getTime(st), e.getCause());
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 
@@ -129,7 +131,7 @@ public interface AsyncErrorHandlerUtil {
             if (e != null)
                 logger.error("CF all users error [{}], time: [{}], sync finished with error", e.getCause(), getTime(st));
         } catch (final Exception localEx) {
-            logger.error("Error! [{}]", localEx.getCause(), e);
+            logger.error(ERROR_MSG, localEx.getCause(), e);
         }
     }
 }

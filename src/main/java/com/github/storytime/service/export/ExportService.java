@@ -4,7 +4,7 @@ import com.github.storytime.mapper.response.ExportMapper;
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.model.export.ExportTransaction;
 import com.github.storytime.model.zen.TransactionItem;
-import com.github.storytime.service.aws.AwsUserAsyncService;
+import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +15,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logExport;
 import static com.github.storytime.mapper.response.ExportMapper.*;
+import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static java.util.Collections.emptyList;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -30,14 +30,15 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class ExportService {
 
     private static final Logger LOGGER = getLogger(ExportService.class);
-    private final static Map<String, String> quarter = new TreeMap<>();
+    private static final Map<String, String> quarter = new TreeMap<>();
 
-    private final AwsUserAsyncService awsUserAsyncService;
+    private final UserAsyncService userAsyncService;
     private final ZenAsyncService zenAsyncService;
     private final ExportMapper exportMapper;
 
     private final Function<TransactionItem, ExportTransaction> outMonthlyDateMapperFk = t -> new ExportTransaction(t.getOutcome(), getCategory(t), getYear(t) + DATE_SEPARATOR + getMonth(t));
-    private final Function<TransactionItem, ExportTransaction> inMonthlyDateMapperFk = t -> new ExportTransaction(t.getIncome(), getCategory(t), getYear(t) + DATE_SEPARATOR + getMonth(t)); //TODO move getOutcome//getIncome to function
+    //TODO move getOutcome//getIncome to function
+    private final Function<TransactionItem, ExportTransaction> inMonthlyDateMapperFk = t -> new ExportTransaction(t.getIncome(), getCategory(t), getYear(t) + DATE_SEPARATOR + getMonth(t));
     private final Function<TransactionItem, ExportTransaction> outYearlyDateMapperFk = t -> new ExportTransaction(t.getOutcome(), getCategory(t), YEAR + getYear(t));
     private final Function<TransactionItem, ExportTransaction> inYearlyDateMapperFk = t -> new ExportTransaction(t.getIncome(), getCategory(t), YEAR + getYear(t));
     private final Function<TransactionItem, ExportTransaction> outQuarterlyDateMapperFk = t -> new ExportTransaction(t.getOutcome(), getCategory(t), QUARTER + getYear(t) + DATE_SEPARATOR + quarter.get(getMonth(t)));
@@ -46,10 +47,10 @@ public class ExportService {
     private final Predicate<TransactionItem> transactionInSelectPredicate = t -> t.getOutcome() == INITIAL_VALUE;
 
     @Autowired
-    public ExportService(final AwsUserAsyncService awsUserAsyncService,
+    public ExportService(final UserAsyncService userAsyncService,
                          final ExportMapper exportMapper,
                          final ZenAsyncService zenAsyncService) {
-        this.awsUserAsyncService = awsUserAsyncService;
+        this.userAsyncService = userAsyncService;
         this.zenAsyncService = zenAsyncService;
         this.exportMapper = exportMapper;
 
@@ -72,7 +73,7 @@ public class ExportService {
         try {
             LOGGER.debug("Calling get export out monthly user: [{}] - start", userId);
 
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outMonthlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -86,7 +87,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in monthly user: [{}] - start", userId);
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inMonthlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -100,7 +101,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export out yearly user: [{}] - start", userId);
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outYearlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -114,7 +115,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in yearly user: [{}] - start", userId);
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inYearlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -128,7 +129,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export in quarterly user: [{}] - start", userId);
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, inQuarterlyDateMapperFk, transactionInSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));
@@ -142,7 +143,7 @@ public class ExportService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get export out quarterly user: [{}] - start", userId);
-            return awsUserAsyncService.getById(userId)
+            return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenCompose(appUser -> getExportData(appUser, outQuarterlyDateMapperFk, transactionOutSelectPredicate))
                     .whenComplete((r, e) -> logExport(userId, st, LOGGER, e));

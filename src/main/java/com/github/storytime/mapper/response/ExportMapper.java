@@ -62,7 +62,7 @@ public class ExportMapper {
                 .reduce(INITIAL_VALUE, Double::sum);
     }
 
-    public List<Map<String, String>> mapExportData(final LinkedHashMap<String, List<ExportTransaction>> groupedByCat) {
+    public List<Map<String, String>> mapExportData(final Map<String, List<ExportTransaction>> groupedByCat) {
 
         final Set<String> dateRange = groupedByCat
                 .entrySet().stream().flatMap(e -> e.getValue().stream()).toList()

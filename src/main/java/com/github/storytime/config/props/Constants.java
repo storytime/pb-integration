@@ -109,6 +109,7 @@ public class Constants {
     public static final String SEC = " sec";
     public static final String MS = " ms";
     public static final String LOGS_TIME_FORMAT = "#####.#####";
+    public static final String TIMEOUT_HEADER = "timeout";
 
     private Constants() {
     }

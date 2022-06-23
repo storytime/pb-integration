@@ -1,6 +1,6 @@
 package com.github.storytime.scheduler;
 
-import com.github.storytime.service.aws.AwsUserAsyncService;
+import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.config.props.CacheNames.*;
 import static com.github.storytime.config.props.Constants.INITIAL_TIMESTAMP;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logCache;
+import static com.github.storytime.service.utils.STUtils.createSt;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
@@ -22,13 +22,13 @@ public class CacheResetScheduler {
 
     private static final Logger LOGGER = getLogger(CacheResetScheduler.class);
     private final ZenAsyncService zenAsyncService;
-    private final AwsUserAsyncService awsUserAsyncService;
+    private final UserAsyncService userAsyncService;
 
     @Autowired
     public CacheResetScheduler(final ZenAsyncService zenAsyncService,
-                               final AwsUserAsyncService awsUserAsyncService) {
+                               final UserAsyncService userAsyncService) {
         this.zenAsyncService = zenAsyncService;
-        this.awsUserAsyncService = awsUserAsyncService;
+        this.userAsyncService = userAsyncService;
     }
 
     @Scheduled(fixedRateString = "${cache.clean.currency.millis}")
@@ -43,7 +43,7 @@ public class CacheResetScheduler {
     })
     public void cleaningZenDiffTagsCache() {
         LOGGER.debug("Cleaning up tags cache ...");
-        awsUserAsyncService
+        userAsyncService
                 .getAllUsers()
                 .thenAccept(usersList -> {
                     final var st = createSt();

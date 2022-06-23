@@ -43,8 +43,8 @@ public class PrintAllConfigProperties {
             LOGGER.debug("==========[{}] PROPERTIES ==========", configName);
             final List<MapPropertySource> propertySources = new ArrayList<>();
             env.getPropertySources().forEach(it -> {
-                if (it instanceof MapPropertySource && it.getName().contains(configName)) {
-                    propertySources.add((MapPropertySource) it);
+                if (it instanceof MapPropertySource mappropertysource && it.getName().contains(configName)) {
+                    propertySources.add(mappropertysource);
                 }
             });
 

@@ -1,6 +1,5 @@
 package com.github.storytime.service.info;
 
-import com.github.storytime.api.VersionController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +10,10 @@ import java.io.InputStreamReader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.config.props.Constants.N_A;
 import static com.github.storytime.config.props.Constants.VERSION_PROPERTIES;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logVersionCf;
+import static com.github.storytime.service.utils.STUtils.createSt;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.LF;
@@ -22,7 +21,7 @@ import static org.apache.commons.lang3.StringUtils.LF;
 @Component
 public class VersionService {
 
-    private static final Logger LOGGER = LogManager.getLogger(VersionController.class);
+    private static final Logger LOGGER = LogManager.getLogger(VersionService.class);
     private final Executor cfThreadPool;
 
     @Autowired

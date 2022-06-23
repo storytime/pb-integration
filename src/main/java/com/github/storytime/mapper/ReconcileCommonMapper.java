@@ -33,5 +33,4 @@ public class ReconcileCommonMapper {
         final var diff = bankBal.subtract(zenBal).setScale(CURRENCY_SCALE, HALF_DOWN).toString();
         return new PbZenReconcile(accountName, bankBal.toString(), zenBal.toString(), diff);
     }
-
 }

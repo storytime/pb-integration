@@ -1,4 +1,4 @@
-package com.github.storytime.service.aws;
+package com.github.storytime.service.async;
 
 import com.github.storytime.model.aws.AwsUser;
 import com.github.storytime.service.http.DynamoDbUserService;
@@ -19,15 +19,18 @@ import static com.github.storytime.config.props.CacheNames.USER_PERMANENT_CACHE;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
-public class AwsUserAsyncService {
+public class UserAsyncService {
 
-    private static final Logger LOGGER = LogManager.getLogger(AwsUserAsyncService.class);
+    private static final Logger LOGGER = LogManager.getLogger(UserAsyncService.class);
+
+    private final DynamoDbUserService dynamoDbUserService;
+    private final Executor cfThreadPool;
 
     @Autowired
-    private DynamoDbUserService dynamoDbUserService;
-
-    @Autowired
-    private Executor cfThreadPool;
+    public UserAsyncService(final DynamoDbUserService dynamoDbUserService, final Executor cfThreadPool) {
+        this.dynamoDbUserService = dynamoDbUserService;
+        this.cfThreadPool = cfThreadPool;
+    }
 
     //    @Cacheable(USERS_PERMANENT_CACHE)
     public CompletableFuture<List<AwsUser>> getAllUsers() {
@@ -36,13 +39,14 @@ public class AwsUserAsyncService {
     }
 
     @Cacheable(USER_PERMANENT_CACHE)
-    public CompletableFuture<Optional<AwsUser>> getById(String id) {
-        LOGGER.debug("Fetching user from dynamo - start");
+    public CompletableFuture<Optional<AwsUser>> getById(final String id) {
+        LOGGER.debug("Fetching user: [{}] from dynamo - start", id);
         return supplyAsync(() -> dynamoDbUserService.getById(id), cfThreadPool);
     }
 
     @CacheEvict(value = USERS_CACHE, allEntries = true)
     public CompletableFuture<Optional<AwsUser>> updateUser(final AwsUser appUser) {
+        LOGGER.debug("Fetching user: [{}] from dynamo - start", appUser.getId());
         return supplyAsync(() -> dynamoDbUserService.saveUser(appUser), cfThreadPool);
     }
 
