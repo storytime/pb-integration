@@ -1,9 +1,9 @@
 package com.github.storytime.service;
 
 import com.github.storytime.function.CurrencyCommentFunction;
-import com.github.storytime.model.AWSCurrencyType;
-import com.github.storytime.model.AwsAdditionalComment;
-import com.github.storytime.model.aws.AwsMerchant;
+import com.github.storytime.model.AdditionalComment;
+import com.github.storytime.model.CurrencyType;
+import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.utils.DateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,17 +39,17 @@ public class AdditionalCommentService {
 
 
     public List<Statement> addAdditionalAwsComments(final List<Statement> statementList,
-                                                    final AwsMerchant merchantInfo,
+                                                    final PbMerchant merchantInfo,
                                                     final String timeZone) {
         return statementList.stream().peek(statement -> mapAwsCommentForAStatement(merchantInfo, timeZone, statement)).toList();
     }
 
-    private void mapAwsCommentForAStatement(AwsMerchant merchantInfo, String timeZone, Statement s) {
+    private void mapAwsCommentForAStatement(PbMerchant merchantInfo, String timeZone, Statement s) {
         final var additionalCommentList = merchantInfo.getAwsAdditionalComment()
                 .stream()
                 .map(ac -> switch (ac) {
-                    case AwsAdditionalComment.PB_CURRENT_BUSINESS_DAY -> mapPbCurrentBusinessDayComment(s, timeZone);
-                    case AwsAdditionalComment.NBU_PREV_MOUTH_LAST_BUSINESS_DAY -> EMPTY;
+                    case AdditionalComment.PB_CURRENT_BUSINESS_DAY -> mapPbCurrentBusinessDayComment(s, timeZone);
+                    case AdditionalComment.NBU_PREV_MOUTH_LAST_BUSINESS_DAY -> EMPTY;
                     default -> EMPTY;
                 }).toList();
         s.setCustomComment(String.join(SPACE, additionalCommentList) + SPACE);
@@ -57,7 +57,7 @@ public class AdditionalCommentService {
 
     private String mapPbCurrentBusinessDayComment(final Statement s, final String timeZone) {
         final ZonedDateTime startDate = dateService.getPbStatementZonedDateTime(timeZone, s.getTrandate());
-        return currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.USD)
+        return currencyService.pbUsdCashDayRates(startDate, CurrencyType.USD)
                 .map(rate -> currencyCommentFunction.generate(rate, s, BANK_RATE, USD_COMMENT))
                 .orElse(EMPTY);
     }

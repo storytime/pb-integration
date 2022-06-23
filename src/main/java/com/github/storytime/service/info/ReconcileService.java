@@ -3,7 +3,7 @@ package com.github.storytime.service.info;
 import com.github.storytime.mapper.ReconcileCommonMapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
 import com.github.storytime.model.api.PbZenReconcileResponse;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.service.PbAccountService;
 import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
@@ -58,7 +58,7 @@ public class ReconcileService {
             LOGGER.debug("Building pb/zen reconcile json, for user: [{}] - stared", userId);
             return getUserAsync(userId)
                     .thenCompose(appUser -> {
-                        final var merchantInfos = appUser.getAwsMerchant();
+                        final var merchantInfos = appUser.getPbMerchant();
                         final var startDate = dateService.getUserStarDateInMillis(appUser);
                         final var pbAccsFuture = pbAccountService.getPbAsyncAccounts(merchantInfos);
                         final var zenAccsFuture = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate)
@@ -75,7 +75,7 @@ public class ReconcileService {
     }
 
 
-    private CompletableFuture<AwsUser> getUserAsync(String userId) {
+    private CompletableFuture<AppUser> getUserAsync(String userId) {
         return awsUserService.getById(userId).thenApply(Optional::get);
     }
 }

@@ -2,13 +2,16 @@ package com.github.storytime.service.http;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.github.storytime.model.aws.AwsPbStatement;
-import com.github.storytime.repository.AwsStatementRepository;
+import com.github.storytime.model.aws.PbStatement;
+import com.github.storytime.repository.StatementRepository;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.github.storytime.config.props.Constants.DYNAMO_REQUEST_ID;
 import static com.github.storytime.config.props.Constants.SEARCH_LIMIT;
@@ -24,17 +27,17 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class DynamoDbStatementService {
 
     private static final Logger LOGGER = getLogger(DynamoDbStatementService.class);
-    private final AwsStatementRepository awsStatementRepository;
+    private final StatementRepository statementRepository;
 
     @Autowired
-    public DynamoDbStatementService(final AwsStatementRepository awsStatementRepository) {
-        this.awsStatementRepository = awsStatementRepository;
+    public DynamoDbStatementService(final StatementRepository statementRepository) {
+        this.statementRepository = statementRepository;
     }
 
-    public List<AwsPbStatement> getAllStatements() {
+    public List<PbStatement> getAllStatements() {
         final var st = createSt();
         try {
-            final var allStatement = awsStatementRepository.getAllStatement();
+            final var allStatement = statementRepository.getAllStatement();
             LOGGER.debug("Pulled statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
             return allStatement;
         } catch (Exception e) {
@@ -44,7 +47,7 @@ public class DynamoDbStatementService {
     }
 
 
-    public AwsPbStatement getAllStatementsForUser(final String userId) {
+    public PbStatement getAllStatementsForUser(final String userId) {
         final var st = createSt();
         try {
 
@@ -56,19 +59,19 @@ public class DynamoDbStatementService {
                     .withExpressionAttributeValues(eav)
                     .withLimit(SEARCH_LIMIT);
 
-            final var allStatement = awsStatementRepository.getAllByUser(scanExpression);
+            final var allStatement = statementRepository.getAllByUser(scanExpression);
             LOGGER.debug("Pulled user statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
-            return allStatement.isEmpty() ? AwsPbStatement.builder().userId(userId).alreadyPushed(emptySet()).build() : allStatement.stream().findFirst().orElseThrow();
+            return allStatement.isEmpty() ? PbStatement.builder().userId(userId).alreadyPushed(emptySet()).build() : allStatement.stream().findFirst().orElseThrow();
         } catch (Exception e) {
             LOGGER.debug("Error to fetch users statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
-            return AwsPbStatement.builder().userId(userId).alreadyPushed(emptySet()).build();
+            return PbStatement.builder().userId(userId).alreadyPushed(emptySet()).build();
         }
     }
 
-    public List<AwsPbStatement> saveAllStatements(final List<AwsPbStatement> statementList) {
+    public List<PbStatement> saveAllStatements(final List<PbStatement> statementList) {
         final var st = createSt();
         try {
-            awsStatementRepository.saveAll(statementList);
+            statementRepository.saveAll(statementList);
             LOGGER.debug("Saved statements db time: [{}], id: [{}] - finish", getTimeAndReset(st), statementList.size());
             return statementList;
         } catch (Exception e) {
@@ -77,12 +80,12 @@ public class DynamoDbStatementService {
         }
     }
 
-    public Optional<AwsPbStatement> save(final AwsPbStatement awsPbStatement) {
+    public Optional<PbStatement> save(final PbStatement pbStatement) {
         final var st = createSt();
         try {
-            awsStatementRepository.save(awsPbStatement);
-            LOGGER.debug("Saved statement db time: [{}], user id: [{}] - finish", getTimeAndReset(st), awsPbStatement.getUserId());
-            return of(awsPbStatement);
+            statementRepository.save(pbStatement);
+            LOGGER.debug("Saved statement db time: [{}], user id: [{}] - finish", getTimeAndReset(st), pbStatement.getUserId());
+            return of(pbStatement);
         } catch (Exception e) {
             LOGGER.debug("Saved statements db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
             return empty();

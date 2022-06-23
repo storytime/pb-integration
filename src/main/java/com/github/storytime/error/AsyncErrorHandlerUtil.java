@@ -8,7 +8,7 @@ import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 
 public interface AsyncErrorHandlerUtil {
 
-      String ERROR_MSG = "Error! [{}]";
+    String ERROR_MSG = "Error! [{}]";
 
     static void logPbCf(final String userId,
                         final Logger logger,

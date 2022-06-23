@@ -2,8 +2,8 @@ package com.github.storytime.service.http;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.github.storytime.model.aws.AwsCurrencyRates;
-import com.github.storytime.repository.AwsCurrencyRepository;
+import com.github.storytime.model.aws.CurrencyRates;
+import com.github.storytime.repository.CurrencyRepository;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,15 +19,15 @@ import static org.apache.logging.log4j.LogManager.getLogger;
 public class DynamoDbCurrencyService {
 
     private static final Logger LOGGER = getLogger(DynamoDbCurrencyService.class);
-    private final AwsCurrencyRepository awsCurrencyRepository;
+    private final CurrencyRepository currencyRepository;
 
     @Autowired
-    public DynamoDbCurrencyService(final AwsCurrencyRepository awsCurrencyRepository) {
-        this.awsCurrencyRepository = awsCurrencyRepository;
+    public DynamoDbCurrencyService(final CurrencyRepository currencyRepository) {
+        this.currencyRepository = currencyRepository;
     }
 
-    public Optional<AwsCurrencyRates> getRateFromDynamo(final Map<String, AttributeValue> eav,
-                                                        final long startDate) {
+    public Optional<CurrencyRates> getRateFromDynamo(final Map<String, AttributeValue> eav,
+                                                     final long startDate) {
         final var st = createSt();
 
         try {
@@ -35,7 +35,7 @@ public class DynamoDbCurrencyService {
                     .withFilterExpression("currencyType = :type and currencySource =:source")
                     .withExpressionAttributeValues(eav);
 
-            final Optional<AwsCurrencyRates> maybeRate = awsCurrencyRepository.findByTypeSourceAndDate(scanExpression)
+            final Optional<CurrencyRates> maybeRate = currencyRepository.findByTypeSourceAndDate(scanExpression)
                     .stream()
                     .filter(x -> x.getDateTime() == startDate)
                     .findFirst();
@@ -48,10 +48,10 @@ public class DynamoDbCurrencyService {
         }
     }
 
-    public AwsCurrencyRates saveRate(final AwsCurrencyRates rate) {
+    public CurrencyRates saveRate(final CurrencyRates rate) {
         final var st = createSt();
         try {
-            AwsCurrencyRates savedRate = awsCurrencyRepository.saveRate(rate);
+            CurrencyRates savedRate = currencyRepository.saveRate(rate);
             LOGGER.debug("Saved user dynamo db time: [{}], id: [{}] - finish", getTimeAndReset(st), savedRate.getId());
             return savedRate;
         } catch (Exception e) {

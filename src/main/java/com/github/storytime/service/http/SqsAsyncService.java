@@ -1,6 +1,6 @@
 package com.github.storytime.service.http;
 
-import com.github.storytime.config.AwsSqsConfig;
+import com.github.storytime.config.SqsConfig;
 import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -15,19 +15,19 @@ public class SqsAsyncService {
 
     private static final Logger LOGGER = getLogger(SqsAsyncService.class);
     private final QueueMessagingTemplate queueMessagingTemplate;
-    private final AwsSqsConfig awsSqsConfig;
+    private final SqsConfig sqsConfig;
 
     public SqsAsyncService(final QueueMessagingTemplate queueMessagingTemplate,
-                           final AwsSqsConfig awsSqsConfig) {
+                           final SqsConfig sqsConfig) {
         this.queueMessagingTemplate = queueMessagingTemplate;
-        this.awsSqsConfig = awsSqsConfig;
+        this.sqsConfig = sqsConfig;
     }
 
     public String publishFinishMessage() {
         var uuid = randomUUID().toString();
         final var st = createSt();
         try {
-            queueMessagingTemplate.convertAndSend(awsSqsConfig.getShutdownQueue(), uuid);
+            queueMessagingTemplate.convertAndSend(sqsConfig.getShutdownQueue(), uuid);
             LOGGER.info("Pushed to SQS done: [{}], time: [{}] - done", uuid, getTimeAndReset(st));
             return uuid;
         } catch (Exception e) {

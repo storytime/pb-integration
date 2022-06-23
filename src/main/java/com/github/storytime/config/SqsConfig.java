@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-public class AwsSqsConfig {
+public class SqsConfig {
 
     @Value("${cloud.aws.credentials.access-key}")
     private String accessKey;

@@ -4,8 +4,8 @@ import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
 import com.github.storytime.error.exception.PbSignatureException;
 import com.github.storytime.mapper.response.PbResponseMapper;
-import com.github.storytime.model.aws.AwsMerchant;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
+import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.async.PbAsyncService;
 import com.github.storytime.service.utils.DateService;
@@ -59,8 +59,8 @@ public class PbStatementsService {
         this.pbAsyncService = pbAsyncService;
     }
 
-    public CompletableFuture<List<Statement>> getAwsPbTransactions(final AwsUser appUser,
-                                                                   final AwsMerchant merchantInfo,
+    public CompletableFuture<List<Statement>> getAwsPbTransactions(final AppUser appUser,
+                                                                   final PbMerchant merchantInfo,
                                                                    final ZonedDateTime startDate,
                                                                    final ZonedDateTime endDate) {
 
@@ -83,8 +83,8 @@ public class PbStatementsService {
     }
 
 
-    private List<Statement> handleResponse(final AwsUser u,
-                                           final AwsMerchant m,
+    private List<Statement> handleResponse(final AppUser u,
+                                           final PbMerchant m,
                                            final ZonedDateTime startDate,
                                            final ZonedDateTime endDate,
                                            final ResponseEntity<String> body) {
@@ -118,7 +118,7 @@ public class PbStatementsService {
     public List<Statement> filterNewPbTransactions(final ZonedDateTime start,
                                                    final ZonedDateTime end,
                                                    final List<Statement> pbStatements,
-                                                   final AwsUser appUser) {
+                                                   final AppUser appUser) {
         final Comparator<ZonedDateTime> comparator = comparing(zdt -> zdt.truncatedTo(MILLIS));
         // sometimes new transactions can be available with delay, so we need to change start time of filtering
         final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
@@ -128,7 +128,7 @@ public class PbStatementsService {
     }
 
     public Predicate<Statement> getStatementComparatorPredicate(final ZonedDateTime end,
-                                                                final AwsUser appUser,
+                                                                final AppUser appUser,
                                                                 final Comparator<ZonedDateTime> comparator,
                                                                 final ZonedDateTime searchStartTime) {
         return t -> {

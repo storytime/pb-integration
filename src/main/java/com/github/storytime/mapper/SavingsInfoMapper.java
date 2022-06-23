@@ -2,7 +2,7 @@ package com.github.storytime.mapper;
 
 import com.github.storytime.config.props.Constants;
 import com.github.storytime.mapper.response.ZenResponseMapper;
-import com.github.storytime.model.AWSCurrencyType;
+import com.github.storytime.model.CurrencyType;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
@@ -80,9 +80,9 @@ public class SavingsInfoMapper {
         final var startDate = now(systemDefault()).with(MIN);
         final var bal = valueOf(balance);
         final var inUah =
-                instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
-                instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, AWSCurrencyType.EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
-                bal;
+                instrument == USD_ID ? currencyService.pbUsdCashDayRates(startDate, CurrencyType.USD).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
+                        instrument == EUR_ID ? currencyService.pbUsdCashDayRates(startDate, CurrencyType.EUR).map(cr -> bal.multiply(cr.getSellRate())).orElse(bal) :
+                                bal;
 
         return SavingsInfo
                 .builder()

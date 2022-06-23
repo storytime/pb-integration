@@ -1,7 +1,7 @@
 package com.github.storytime.service.utils;
 
-import com.github.storytime.model.aws.AwsCustomPayee;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
+import com.github.storytime.model.aws.CustomPayee;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +21,9 @@ public class CustomPayeeService {
     private static final Logger LOGGER = getLogger(CustomPayeeService.class);
 
 
-    public String getNicePayee(final String maybePayee, AwsUser u) {
+    public String getNicePayee(final String maybePayee, AppUser u) {
         var originalPayee = ofNullable(maybePayee).orElse(EMPTY);
-        var userPayeeList = Optional.ofNullable(u.getAwsCustomPayee())
+        var userPayeeList = Optional.ofNullable(u.getCustomPayee())
                 .orElse(Collections.emptyList())
                 .stream()
                 .filter(not(p -> isEmpty(p.getPayee())))
@@ -34,7 +34,7 @@ public class CustomPayeeService {
                 .stream()
                 .filter(cp -> originalPayee.contains(cp.getContainsValue()))
                 .findAny()
-                .map(AwsCustomPayee::getPayee)
+                .map(CustomPayee::getPayee)
                 .orElse(originalPayee).trim();
 
         LOGGER.debug("Nice payee is: [{}] for original: [{}]", nicePayee, originalPayee);

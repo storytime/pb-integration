@@ -1,9 +1,9 @@
 package com.github.storytime.function;
 
 import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
-import com.github.storytime.model.aws.AwsMerchant;
-import com.github.storytime.model.aws.AwsPbStatement;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
+import com.github.storytime.model.aws.PbMerchant;
+import com.github.storytime.model.aws.PbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.utils.DateService;
@@ -28,11 +28,11 @@ import static java.util.stream.Stream.concat;
 @Component
 public class PbSyncLambdaHolder {
 
-    public BiFunction<AwsUser, AwsMerchant, ZonedDateTime> getAwsStartDate(final DateService dateService) {
+    public BiFunction<AppUser, PbMerchant, ZonedDateTime> getAwsStartDate(final DateService dateService) {
         return (user, merchant) -> dateService.millisAwsUserDate(merchant.getSyncStartDate(), user);
     }
 
-    public TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> getAwsEndDate() {
+    public TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> getAwsEndDate() {
         return (appUser, merchantInfo, startDate) -> {
             final var period = ofMillis(merchantInfo.getSyncPeriod());
             final var now = now().withZoneSameInstant(of(appUser.getTimeZone()));
@@ -40,10 +40,10 @@ public class PbSyncLambdaHolder {
         };
     }
 
-    public BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onAwsDbRegularSyncSuccess(final StatementAsyncService statementAsyncService) {
+    public BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onAwsDbRegularSyncSuccess(final StatementAsyncService statementAsyncService) {
 
         return (pushedByNotCached, userId) -> statementAsyncService.getAllStatementsByUser(userId)
-                .thenCompose((AwsPbStatement dfStatements) -> {
+                .thenCompose((PbStatement dfStatements) -> {
                             final Set<String> pushedByNotCachedMapped = pushedByNotCached
                                     .stream()
                                     .flatMap(Collection::stream)

@@ -12,6 +12,10 @@ public class STUtils {
 
     private static final DecimalFormat df = new DecimalFormat(LOGS_TIME_FORMAT);
 
+    private STUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static StopWatch createSt() {
         final var st = new StopWatch();
         st.start();
@@ -28,9 +32,5 @@ public class STUtils {
 
     public static String getTime(final StopWatch st) {
         return st.getTime() > MILLIS_IN_SEC ? df.format(st.getTime(SECONDS)).concat(SEC) : valueOf(st.getTime()).concat(MS);
-    }
-
-    private STUtils() {
-        throw new IllegalStateException("Utility class");
     }
 }

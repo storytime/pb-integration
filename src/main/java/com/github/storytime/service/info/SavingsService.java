@@ -4,7 +4,7 @@ import com.github.storytime.mapper.SavingsInfoMapper;
 import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.api.SavingsInfoResponse;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.service.DigitsFormatter;
 import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
@@ -94,7 +94,7 @@ public class SavingsService {
         }
     }
 
-    private CompletableFuture<List<SavingsInfo>> getUserSavings(final AwsUser appUser) {
+    private CompletableFuture<List<SavingsInfo>> getUserSavings(final AppUser appUser) {
         return zenAsyncService
                 .zenDiffByUserForSavings(appUser)
                 .thenApply(Optional::get)

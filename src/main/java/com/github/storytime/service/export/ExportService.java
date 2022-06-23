@@ -1,7 +1,7 @@
 package com.github.storytime.service.export;
 
 import com.github.storytime.mapper.response.ExportMapper;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.export.ExportTransaction;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.service.async.UserAsyncService;
@@ -153,7 +153,7 @@ public class ExportService {
         }
     }
 
-    private CompletableFuture<List<Map<String, String>>> getExportData(final AwsUser appUser,
+    private CompletableFuture<List<Map<String, String>>> getExportData(final AppUser appUser,
                                                                        final Function<TransactionItem, ExportTransaction> transactionMapper,
                                                                        final Predicate<TransactionItem> transactionFilter) {
         return zenAsyncService

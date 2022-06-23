@@ -2,27 +2,27 @@ package com.github.storytime.repository;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.github.storytime.model.aws.AwsCurrencyRates;
+import com.github.storytime.model.aws.CurrencyRates;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class AwsCurrencyRepository {
+public class CurrencyRepository {
 
     private final DynamoDBMapper dynamoDBMapper;
 
     @Autowired
-    public AwsCurrencyRepository(DynamoDBMapper dynamoDBMapper) {
+    public CurrencyRepository(DynamoDBMapper dynamoDBMapper) {
         this.dynamoDBMapper = dynamoDBMapper;
     }
 
-    public List<AwsCurrencyRates> findByTypeSourceAndDate(DynamoDBScanExpression scanExpression) {
-        return dynamoDBMapper.scan(AwsCurrencyRates.class, scanExpression);
+    public List<CurrencyRates> findByTypeSourceAndDate(DynamoDBScanExpression scanExpression) {
+        return dynamoDBMapper.scan(CurrencyRates.class, scanExpression);
     }
 
-    public AwsCurrencyRates saveRate(AwsCurrencyRates rate) {
+    public CurrencyRates saveRate(CurrencyRates rate) {
         dynamoDBMapper.save(rate);
         return rate;
     }

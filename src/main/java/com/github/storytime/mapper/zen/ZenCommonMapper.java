@@ -85,8 +85,8 @@ public class ZenCommonMapper {
     }
 
     public Map<String, BigDecimal> getZenTagsSummaryByCategory(long startDate,
-                                                                   long endDate,
-                                                                   final ZenResponse maybeZr) {
+                                                               long endDate,
+                                                               final ZenResponse maybeZr) {
 
         final List<TransactionItem> transactionItems = this.getZenTransactions(maybeZr);
         final List<TagItem> zenTags = this.getTags(maybeZr)

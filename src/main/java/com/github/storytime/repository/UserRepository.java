@@ -2,31 +2,31 @@ package com.github.storytime.repository;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class AwsUserRepository {
+public class UserRepository {
 
     private final DynamoDBMapper dynamoDBMapper;
 
     @Autowired
-    public AwsUserRepository(DynamoDBMapper dynamoDBMapper) {
+    public UserRepository(DynamoDBMapper dynamoDBMapper) {
         this.dynamoDBMapper = dynamoDBMapper;
     }
 
-    public List<AwsUser> getAllUsers() {
-        return dynamoDBMapper.scan(AwsUser.class, new DynamoDBScanExpression());
+    public List<AppUser> getAllUsers() {
+        return dynamoDBMapper.scan(AppUser.class, new DynamoDBScanExpression());
     }
 
-    public AwsUser findById(String id) {
-        return dynamoDBMapper.load(AwsUser.class, id);
+    public AppUser findById(String id) {
+        return dynamoDBMapper.load(AppUser.class, id);
     }
 
-    public AwsUser save(AwsUser updatedUser) {
+    public AppUser save(AppUser updatedUser) {
         dynamoDBMapper.save(updatedUser);
         return updatedUser;
     }

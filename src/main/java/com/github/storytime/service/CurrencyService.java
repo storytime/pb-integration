@@ -1,8 +1,8 @@
 package com.github.storytime.service;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.github.storytime.mapper.response.AwsCurrencyResponseMapper;
-import com.github.storytime.model.aws.AwsCurrencyRates;
+import com.github.storytime.mapper.response.CurrencyResponseMapper;
+import com.github.storytime.model.aws.CurrencyRates;
 import com.github.storytime.service.async.CurrencyAsyncService;
 import com.github.storytime.service.http.DynamoDbCurrencyService;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +20,7 @@ import java.util.concurrent.Executor;
 
 import static com.github.storytime.config.props.CacheNames.CURRENCY_CACHE;
 import static com.github.storytime.config.props.Constants.*;
-import static com.github.storytime.model.AwsCurrencySource.PB_CASH;
+import static com.github.storytime.model.CurrencySource.PB_CASH;
 import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static java.lang.Math.abs;
@@ -40,18 +40,18 @@ public class CurrencyService {
     private static final Logger LOGGER = getLogger(CurrencyService.class);
 
     private final CurrencyAsyncService currencyAsyncService;
-    private final AwsCurrencyResponseMapper awsCurrencyResponseMapper;
+    private final CurrencyResponseMapper currencyResponseMapper;
     private final DynamoDbCurrencyService dynamoDbCurrencyService;
     private final Executor cfThreadPool;
 
     @Autowired
     public CurrencyService(final CurrencyAsyncService currencyAsyncService,
-                           final AwsCurrencyResponseMapper awsCurrencyResponseMapper,
+                           final CurrencyResponseMapper currencyResponseMapper,
                            final DynamoDbCurrencyService dynamoDbCurrencyService,
                            final Executor cfThreadPool) {
 
         this.currencyAsyncService = currencyAsyncService;
-        this.awsCurrencyResponseMapper = awsCurrencyResponseMapper;
+        this.currencyResponseMapper = currencyResponseMapper;
         this.dynamoDbCurrencyService = dynamoDbCurrencyService;
         this.cfThreadPool = cfThreadPool;
     }
@@ -68,8 +68,8 @@ public class CurrencyService {
     }
 
     @Cacheable(CURRENCY_CACHE)
-    public Optional<AwsCurrencyRates> pbUsdCashDayRates(final ZonedDateTime startDate,
-                                                        final String currencyType) {
+    public Optional<CurrencyRates> pbUsdCashDayRates(final ZonedDateTime startDate,
+                                                     final String currencyType) {
         final var st = createSt();
         try {
             LOGGER.debug("Getting PB rate: [{}] - started", currencyType);
@@ -85,9 +85,9 @@ public class CurrencyService {
         }
     }
 
-    private CompletableFuture<Optional<AwsCurrencyRates>> fetchCurrencyRate(final long startDate,
-                                                                            final String source,
-                                                                            final String type) {
+    private CompletableFuture<Optional<CurrencyRates>> fetchCurrencyRate(final long startDate,
+                                                                         final String source,
+                                                                         final String type) {
 
         LOGGER.debug("Fetching rate from dynamo db - start");
         final Map<String, AttributeValue> eav = new HashMap<>();
@@ -97,12 +97,12 @@ public class CurrencyService {
         return supplyAsync(() -> dynamoDbCurrencyService.getRateFromDynamo(eav, startDate), cfThreadPool);
     }
 
-    private Optional<AwsCurrencyRates> fetchCurrencyRate(final ZonedDateTime startDate,
-                                                         final String currencyType) {
+    private Optional<CurrencyRates> fetchCurrencyRate(final ZonedDateTime startDate,
+                                                      final String currencyType) {
         return currencyAsyncService.getPbCashDayRates()
                 .thenApply(r -> r.orElse(emptyList()))
                 .thenApply(r -> r.stream().filter(cr -> isEq(cr.getBaseCcy(), UAH_STR) && isEq(cr.getCcy(), currencyType)).findFirst())
-                .thenApply(r -> r.map(cr -> awsCurrencyResponseMapper.mapPbCashCurrencyRates(startDate, currencyType, cr)))
+                .thenApply(r -> r.map(cr -> currencyResponseMapper.mapPbCashCurrencyRates(startDate, currencyType, cr)))
                 .thenApply(r -> r.map(dynamoDbCurrencyService::saveRate))
                 .join();
     }

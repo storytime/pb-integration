@@ -1,7 +1,7 @@
 package com.github.storytime.service.http;
 
 import com.github.storytime.config.CustomConfig;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.zen.ZenDiffRequest;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.model.zen.ZenSyncRequest;
@@ -36,7 +36,7 @@ public class ZenDiffHttpService {
         this.customConfig = customConfig;
     }
 
-    public Optional<ZenResponse> pushToZen(final AwsUser u, final ZenDiffRequest request) {
+    public Optional<ZenResponse> pushToZen(final AppUser u, final ZenDiffRequest request) {
         final var st = createSt();
         try {
             final var diffObject = new HttpEntity<>(request, createHeader(u.getZenAuthToken()));

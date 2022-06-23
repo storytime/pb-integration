@@ -2,7 +2,7 @@ package com.github.storytime.mapper;
 
 import com.github.storytime.mapper.pb.PbToZenAccountMapper;
 import com.github.storytime.mapper.pb.PbToZenTransactionMapper;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenDiffRequest;
@@ -42,7 +42,7 @@ public class PbToZenMapper {
 
     public Optional<ZenDiffRequest> buildZenReqFromPbData(final List<List<Statement>> newPbTransaction,
                                                           final ZenResponse zenDiff,
-                                                          final AwsUser appUser) {
+                                                          final AppUser appUser) {
 
         try {
             LOGGER.debug("Starting build data for zen, for user: [{}] ", appUser.getId());

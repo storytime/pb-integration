@@ -1,8 +1,8 @@
 package com.github.storytime.mapper.pb;
 
 import com.github.storytime.mapper.response.ZenResponseMapper;
-import com.github.storytime.model.aws.AwsCustomPayee;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
+import com.github.storytime.model.aws.CustomPayee;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
@@ -51,7 +51,7 @@ public class PbToZenTransactionMapper {
 
     public List<TransactionItem> mapPbTransactionToZen(final List<Statement> statementList,
                                                        final ZenResponse zenDiff,
-                                                       final AwsUser u) {
+                                                       final AppUser u) {
 
         return statementList
                 .stream()
@@ -85,7 +85,7 @@ public class PbToZenTransactionMapper {
         return UUID.nameUUIDFromBytes(idBytes).toString();
     }
 
-    public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AwsUser u, final Statement pbTr) {
+    public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser u, final Statement pbTr) {
         final var newZenTr = new TransactionItem();
         final var transactionDesc = regExpService.normalizeDescription(pbTr.getDescription());
         final var opAmount = valueOf(substringBefore(pbTr.getAmount(), SPACE));
@@ -124,13 +124,13 @@ public class PbToZenTransactionMapper {
         newZenTr.setMerchant(merchantId);
 
         //add payeer to users list TODO
-        final Optional<AwsCustomPayee> first = u.getAwsCustomPayee()
+        final Optional<CustomPayee> first = u.getCustomPayee()
                 .stream()
                 .filter(t -> t.getContainsValue().equals(transactionDesc))
                 .findFirst();
 
         if (first.isEmpty())
-            u.getAwsCustomPayee().add(new AwsCustomPayee(UNDERSCORE, transactionDesc));
+            u.getCustomPayee().add(new CustomPayee(UNDERSCORE, transactionDesc));
 
         // transaction in different currency
         final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);

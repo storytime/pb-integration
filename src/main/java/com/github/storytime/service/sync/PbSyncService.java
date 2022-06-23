@@ -3,9 +3,9 @@ package com.github.storytime.service.sync;
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
 import com.github.storytime.mapper.PbToZenMapper;
-import com.github.storytime.model.aws.AwsMerchant;
-import com.github.storytime.model.aws.AwsPbStatement;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
+import com.github.storytime.model.aws.PbMerchant;
+import com.github.storytime.model.aws.PbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.PbStatementsService;
 import com.github.storytime.service.async.SqsAsyncPublisherService;
@@ -58,9 +58,9 @@ public class PbSyncService {
     }
 
     @Async
-    public void sync(final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
-                     final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk,
-                     final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk) {
+    public void sync(final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onSuccessFk,
+                     final BiFunction<AppUser, PbMerchant, ZonedDateTime> startDateFk,
+                     final TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> endDateFk) {
 
         final var st = createSt();
         final CompletableFuture<List<CompletableFuture<String>>> allUsersSyncCf =
@@ -79,47 +79,47 @@ public class PbSyncService {
     }
 
 
-    private CompletableFuture<String> doSyncForAwsEachUser(final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
-                                                           final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk,
-                                                           final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk,
-                                                           final AwsUser awsUser) {
+    private CompletableFuture<String> doSyncForAwsEachUser(final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onSuccessFk,
+                                                           final BiFunction<AppUser, PbMerchant, ZonedDateTime> startDateFk,
+                                                           final TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> endDateFk,
+                                                           final AppUser appUser) {
 
         final var st = createSt();
-        final var selectedMerchants = awsUser.getAwsMerchant();
+        final var selectedMerchants = appUser.getPbMerchant();
         final var pbCfList = selectedMerchants
                 .stream()
-                .map(m -> getAwsListOfPbCf(startDateFk, endDateFk, awsUser, m)).toList();
+                .map(m -> getAwsListOfPbCf(startDateFk, endDateFk, appUser, m)).toList();
 
         //* Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere */
         return allOf(pbCfList.toArray(new CompletableFuture[selectedMerchants.size()]))
                 .thenApply(v -> pbCfList.stream().map(CompletableFuture::join).toList())
-                .thenCompose(userLevelStatementsUnFiltered -> filterUserLevelStatements(awsUser, userLevelStatementsUnFiltered))
-                .thenCompose(userLevelStatementsFiltered -> handleAllForUser(userLevelStatementsFiltered, awsUser, selectedMerchants, onSuccessFk, st))
-                .whenComplete((r, e) -> logSyncInitPerUser(awsUser.getId(), st, LOGGER, e));
+                .thenCompose(userLevelStatementsUnFiltered -> filterUserLevelStatements(appUser, userLevelStatementsUnFiltered))
+                .thenCompose(userLevelStatementsFiltered -> handleAllForUser(userLevelStatementsFiltered, appUser, selectedMerchants, onSuccessFk, st))
+                .whenComplete((r, e) -> logSyncInitPerUser(appUser.getId(), st, LOGGER, e));
     }
 
-    private CompletableFuture<List<List<Statement>>> filterUserLevelStatements(final AwsUser awsUser, final List<List<Statement>> userLevelStatements) {
+    private CompletableFuture<List<List<Statement>>> filterUserLevelStatements(final AppUser appUser, final List<List<Statement>> userLevelStatements) {
         return statementAsyncService
-                .getAllStatementsByUser(awsUser.getId())
-                .thenApply((AwsPbStatement dbData) -> userLevelStatements.stream().map(merchantLevel -> merchantLevel
+                .getAllStatementsByUser(appUser.getId())
+                .thenApply((PbStatement dbData) -> userLevelStatements.stream().map(merchantLevel -> merchantLevel
                         .stream()
                         .filter(ap -> !dbData.getAlreadyPushed().contains(PbStatementsToDynamoDbMapper.generateUniqString(ap)))
                         .toList()).filter(not(List::isEmpty)).toList())
-                .whenComplete((r, e) -> logSyncStatements(awsUser.getId(), LOGGER, e));
+                .whenComplete((r, e) -> logSyncStatements(appUser.getId(), LOGGER, e));
     }
 
 
     public CompletableFuture<String> handleAllForUser(final List<List<Statement>> newPbTrList,
-                                                      final AwsUser user,
-                                                      final List<AwsMerchant> selectedMerchants,
-                                                      final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk,
+                                                      final AppUser user,
+                                                      final List<PbMerchant> selectedMerchants,
+                                                      final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onSuccessFk,
                                                       final StopWatch st) {
 
         var allTrList = newPbTrList.stream().flatMap(List::stream).toList();
         if (allTrList.isEmpty()) {
             return userAsyncService.updateUser(user)
                     .thenApply(Optional::get)
-                    .thenApply(AwsUser::getId)
+                    .thenApply(AppUser::getId)
                     .whenComplete((r, e) -> logSyncPushByUserEmpty(user.getId(), st, selectedMerchants.size(), LOGGER, e));
         }
 
@@ -134,18 +134,18 @@ public class PbSyncService {
                 .thenApply(Optional::get)
                 .thenCompose(zr -> userAsyncService.updateUser(user.setZenLastSyncTimestamp(zr.getServerTimestamp())))
                 .thenApply(Optional::get)
-                .thenApply(AwsUser::getId)
+                .thenApply(AppUser::getId)
                 .thenCompose(x -> onSuccessFk.apply(newPbTrList, user.getId()))
                 .thenApply(Optional::get)
-                .thenApply(AwsPbStatement::getId)
+                .thenApply(PbStatement::getId)
                 .whenComplete((r, e) -> logSyncPushByUserNotEmpty(user.getId(), st, LOGGER, e));
     }
 
 
-    private CompletableFuture<List<Statement>> getAwsListOfPbCf(final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFunction,
-                                                                final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFunction,
-                                                                final AwsUser user,
-                                                                final AwsMerchant merch) {
+    private CompletableFuture<List<Statement>> getAwsListOfPbCf(final BiFunction<AppUser, PbMerchant, ZonedDateTime> startDateFunction,
+                                                                final TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> endDateFunction,
+                                                                final AppUser user,
+                                                                final PbMerchant merch) {
         final var startDate = startDateFunction.apply(user, merch);
         final var endDate = endDateFunction.calculate(user, merch, startDate);
         return pbStatementsService.getAwsPbTransactions(user, merch, startDate, endDate);

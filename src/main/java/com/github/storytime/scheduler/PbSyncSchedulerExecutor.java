@@ -2,9 +2,9 @@ package com.github.storytime.scheduler;
 
 import com.github.storytime.function.PbSyncLambdaHolder;
 import com.github.storytime.function.TrioFunction;
-import com.github.storytime.model.aws.AwsMerchant;
-import com.github.storytime.model.aws.AwsPbStatement;
-import com.github.storytime.model.aws.AwsUser;
+import com.github.storytime.model.aws.AppUser;
+import com.github.storytime.model.aws.PbMerchant;
+import com.github.storytime.model.aws.PbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.sync.PbSyncService;
@@ -28,9 +28,9 @@ public class PbSyncSchedulerExecutor {
     private static final Logger LOGGER = getLogger(PbSyncSchedulerExecutor.class);
 
     private final PbSyncService pbSyncService;
-    private final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<AwsPbStatement>>> onSuccessFk;
-    private final BiFunction<AwsUser, AwsMerchant, ZonedDateTime> startDateFk;
-    private final TrioFunction<AwsUser, AwsMerchant, ZonedDateTime, ZonedDateTime> endDateFk;
+    private final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onSuccessFk;
+    private final BiFunction<AppUser, PbMerchant, ZonedDateTime> startDateFk;
+    private final TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> endDateFk;
 
     @Autowired
     public PbSyncSchedulerExecutor(final PbSyncService pbSyncService,

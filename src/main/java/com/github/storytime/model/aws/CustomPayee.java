@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamoDBDocument
-public class AwsCustomPayee {
+public class CustomPayee {
 
     @DynamoDBAttribute
     private String payee;
