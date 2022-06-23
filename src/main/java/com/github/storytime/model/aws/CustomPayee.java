@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @DynamoDBDocument
 public class CustomPayee {
 
-    @DynamoDBAttribute
+    @DynamoDBAttribute(attributeName = "payee")
     private String payee;
 
-    @DynamoDBAttribute
+    @DynamoDBAttribute(attributeName = "containsValue")
     private String containsValue;
 }
