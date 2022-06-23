@@ -12,7 +12,6 @@ import java.util.*;
 
 import static com.github.storytime.config.props.Constants.DYNAMO_REQUEST_ID;
 import static com.github.storytime.config.props.Constants.SEARCH_LIMIT;
-import static com.github.storytime.model.aws.AwsPbStatement.builder;
 import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static java.util.Collections.emptyList;
@@ -59,10 +58,10 @@ public class DynamoDbStatementService {
 
             final var allStatement = awsStatementRepository.getAllByUser(scanExpression);
             LOGGER.debug("Pulled user statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
-            return allStatement.isEmpty() ? builder().userId(userId).alreadyPushed(emptySet()).build() : allStatement.stream().findFirst().orElseThrow();
+            return allStatement.isEmpty() ? AwsPbStatement.builder().userId(userId).alreadyPushed(emptySet()).build() : allStatement.stream().findFirst().orElseThrow();
         } catch (Exception e) {
             LOGGER.debug("Error to fetch users statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
-            return builder().userId(userId).alreadyPushed(emptySet()).build();
+            return AwsPbStatement.builder().userId(userId).alreadyPushed(emptySet()).build();
         }
     }
 
