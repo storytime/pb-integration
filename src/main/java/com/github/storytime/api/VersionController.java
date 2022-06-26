@@ -22,8 +22,8 @@ public class VersionController {
         this.versionService = versionService;
     }
 
-    @Cacheable(VERSION_CACHE)
     @GetMapping(value = API_PREFIX + "/version", produces = TEXT_PLAIN_VALUE)
+    @Cacheable(VERSION_CACHE)
     public CompletableFuture<String> getVersion() {
         return versionService.readVersion();
     }

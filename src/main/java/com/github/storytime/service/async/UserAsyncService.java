@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,16 +38,19 @@ public class UserAsyncService {
         return supplyAsync(dynamoDbUserService::getAwsAllUsers, cfThreadPool);
     }
 
-    @Cacheable(USER_PERMANENT_CACHE)
+    @Cacheable(cacheNames = USER_PERMANENT_CACHE, key = "#id")
     public CompletableFuture<Optional<AppUser>> getById(final String id) {
         LOGGER.debug("Fetching user: [{}] from dynamo - start", id);
         return supplyAsync(() -> dynamoDbUserService.getById(id), cfThreadPool);
     }
 
-    @CacheEvict(value = USERS_CACHE, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = USERS_CACHE, allEntries = true),
+            @CacheEvict(value = USER_PERMANENT_CACHE, key = "#appUser.id"),
+            @CacheEvict(value = CUSTOM_PAYEE_CACHE, key = "#appUser.id")
+    })
     public CompletableFuture<Optional<AppUser>> updateUser(final AppUser appUser) {
         LOGGER.debug("Fetching user: [{}] from dynamo - start", appUser.getId());
         return supplyAsync(() -> dynamoDbUserService.saveUser(appUser), cfThreadPool);
     }
-
 }
