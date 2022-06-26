@@ -1,6 +1,6 @@
 package com.github.storytime.service.info;
 
-import com.github.storytime.mapper.SavingsInfoMapper;
+import com.github.storytime.mapper.response.SavingsInfoMapper;
 import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.api.SavingsInfoResponse;

@@ -1,6 +1,6 @@
 package com.github.storytime.service.info;
 
-import com.github.storytime.mapper.ReconcileCommonMapper;
+import com.github.storytime.mapper.response.ReconcileCommonMapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
 import com.github.storytime.model.api.PbZenReconcileResponse;
 import com.github.storytime.model.aws.AppUser;

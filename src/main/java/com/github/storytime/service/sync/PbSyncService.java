@@ -2,7 +2,7 @@ package com.github.storytime.service.sync;
 
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
-import com.github.storytime.mapper.PbToZenMapper;
+import com.github.storytime.mapper.pb.PbToZenDataMapper;
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.aws.PbStatement;
@@ -36,7 +36,7 @@ public class PbSyncService {
     private static final Logger LOGGER = getLogger(PbSyncService.class);
     private final PbStatementsService pbStatementsService;
     private final UserAsyncService userAsyncService;
-    private final PbToZenMapper pbToZenMapper;
+    private final PbToZenDataMapper pbToZenDataMapper;
     private final ZenAsyncService zenAsyncService;
     private final SqsAsyncPublisherService sqsAsyncPublisherService;
     private final StatementAsyncService statementAsyncService;
@@ -45,13 +45,13 @@ public class PbSyncService {
     public PbSyncService(
             final PbStatementsService pbStatementsService,
             final ZenAsyncService zenAsyncService,
-            final PbToZenMapper pbToZenMapper,
+            final PbToZenDataMapper pbToZenDataMapper,
             final UserAsyncService userAsyncService,
             final StatementAsyncService statementAsyncService,
             final SqsAsyncPublisherService sqsAsyncPublisherService) {
         this.zenAsyncService = zenAsyncService;
         this.pbStatementsService = pbStatementsService;
-        this.pbToZenMapper = pbToZenMapper;
+        this.pbToZenDataMapper = pbToZenDataMapper;
         this.sqsAsyncPublisherService = sqsAsyncPublisherService;
         this.userAsyncService = userAsyncService;
         this.statementAsyncService = statementAsyncService;
@@ -128,7 +128,7 @@ public class PbSyncService {
         // step by step in one thread
         return zenAsyncService.zenDiffByUserForPb(user)
                 .thenApply(Optional::get)
-                .thenApply(zenDiff -> pbToZenMapper.buildZenReqFromPbData(newPbTrList, zenDiff, user))
+                .thenApply(zenDiff -> pbToZenDataMapper.buildZenReqFromPbData(newPbTrList, zenDiff, user))
                 .thenApply(Optional::get)
                 .thenCompose(tr -> zenAsyncService.pushToZen(user, tr))
                 .thenApply(Optional::get)

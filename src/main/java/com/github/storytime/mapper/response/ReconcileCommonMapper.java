@@ -1,4 +1,4 @@
-package com.github.storytime.mapper;
+package com.github.storytime.mapper.response;
 
 import com.github.storytime.model.api.PbZenReconcile;
 import com.github.storytime.model.internal.PbAccountBalance;

@@ -1,7 +1,5 @@
-package com.github.storytime.mapper;
+package com.github.storytime.mapper.pb;
 
-import com.github.storytime.mapper.pb.PbToZenAccountMapper;
-import com.github.storytime.mapper.pb.PbToZenTransactionMapper;
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.TransactionItem;
@@ -25,16 +23,15 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
-public class PbToZenMapper {
+public class PbToZenDataMapper {
 
-    private static final Logger LOGGER = getLogger(PbToZenMapper.class);
-
+    private static final Logger LOGGER = getLogger(PbToZenDataMapper.class);
     private final PbToZenAccountMapper pbToZenAccountMapper;
     private final PbToZenTransactionMapper pbToZenTransactionMapper;
 
     @Autowired
-    public PbToZenMapper(final PbToZenAccountMapper pbToZenAccountMapper,
-                         final PbToZenTransactionMapper pbToZenTransactionMapper) {
+    public PbToZenDataMapper(final PbToZenAccountMapper pbToZenAccountMapper,
+                             final PbToZenTransactionMapper pbToZenTransactionMapper) {
 
         this.pbToZenAccountMapper = pbToZenAccountMapper;
         this.pbToZenTransactionMapper = pbToZenTransactionMapper;

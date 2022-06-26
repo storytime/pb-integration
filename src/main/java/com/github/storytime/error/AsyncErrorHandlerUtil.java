@@ -73,6 +73,17 @@ public interface AsyncErrorHandlerUtil {
         }
     }
 
+    static void logGetPayee(final StopWatch st, final Logger logger, final Throwable e) {
+        try {
+            if (e == null)
+                logger.debug("Get payee time: [{}] - finish endpoint ===", getTimeAndReset(st));
+            else
+                logger.error("Get payee: [{}], error: [{}] - error endpoint ===", getTimeAndReset(st), e.getMessage(), e);
+        } catch (final Exception localEx) {
+            logger.error(ERROR_MSG, localEx.getCause(), e);
+        }
+    }
+
     static void logReconcilePbJson(final String userId, final StopWatch st, final Logger logger, final Throwable e) {
         try {
             if (e == null)

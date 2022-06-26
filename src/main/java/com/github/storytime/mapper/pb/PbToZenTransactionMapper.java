@@ -1,5 +1,6 @@
 package com.github.storytime.mapper.pb;
 
+import com.github.storytime.mapper.CustomPayeeMapper;
 import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.CustomPayee;
@@ -8,7 +9,6 @@ import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.AdditionalCommentService;
-import com.github.storytime.service.utils.CustomPayeeService;
 import com.github.storytime.service.utils.DateService;
 import com.github.storytime.service.utils.RegExpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,19 +32,19 @@ public class PbToZenTransactionMapper {
 
     private final DateService dateService;
     private final RegExpService regExpService;
-    private final CustomPayeeService customPayeeService;
+    private final CustomPayeeMapper customPayeeMapper;
     private final AdditionalCommentService additionalCommentService;
     private final ZenResponseMapper zenResponseMapper;
 
     @Autowired
     public PbToZenTransactionMapper(final DateService dateService,
                                     final RegExpService regExpService,
-                                    final CustomPayeeService customPayeeService,
+                                    final CustomPayeeMapper customPayeeMapper,
                                     final AdditionalCommentService additionalCommentService,
                                     final ZenResponseMapper zenResponseMapper) {
         this.dateService = dateService;
         this.regExpService = regExpService;
-        this.customPayeeService = customPayeeService;
+        this.customPayeeMapper = customPayeeMapper;
         this.additionalCommentService = additionalCommentService;
         this.zenResponseMapper = zenResponseMapper;
     }
@@ -100,7 +100,7 @@ public class PbToZenTransactionMapper {
         final var createdTime = dateService.xmlDateTimeToZoned(pbTr.getTrandate(), pbTr.getTrantime(), u.getTimeZone()).toInstant().getEpochSecond();
         final var idTr = createIdForZen(u.getId(), opAmount, trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode(), pbTr.getTerminal());
         final var userId = zenResponseMapper.findUserId(zenDiff);
-        final var nicePayee = customPayeeService.getNicePayee(transactionDesc, u);
+        final var nicePayee = customPayeeMapper.getNicePayee(transactionDesc, u);
         final var merchantId = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);
 
         newZenTr.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
@@ -123,7 +123,7 @@ public class PbToZenTransactionMapper {
         newZenTr.setViewed(false);
         newZenTr.setMerchant(merchantId);
 
-        //add payeer to users list TODO
+        //add payees to users list TODO
         final Optional<CustomPayee> first = u.getCustomPayee()
                 .stream()
                 .filter(t -> t.getContainsValue().equals(transactionDesc))

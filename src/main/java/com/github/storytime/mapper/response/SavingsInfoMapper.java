@@ -1,7 +1,6 @@
-package com.github.storytime.mapper;
+package com.github.storytime.mapper.response;
 
 import com.github.storytime.config.props.Constants;
-import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.CurrencyType;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.zen.AccountItem;
