@@ -35,7 +35,7 @@ public class VersionService {
         return supplyAsync(this::getString, cfThreadPool).whenComplete((r, e) -> logVersionCf(st, LOGGER, e));
     }
 
-    private String getString() {
+    public String getString() {
         try (final var is = getClass().getClassLoader().getResourceAsStream(VERSION_PROPERTIES)) {
             final var reader = new BufferedReader(new InputStreamReader(is));
             return reader.lines().collect(joining(LF)).concat(LF).trim();

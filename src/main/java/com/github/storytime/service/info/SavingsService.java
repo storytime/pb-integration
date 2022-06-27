@@ -86,7 +86,7 @@ public class SavingsService {
                     .thenApply(updatedSavings -> new SavingsInfoResponse()
                             .setSavings(updatedSavings)
                             .setTotal(digitsFormatter.formatAmount(savingsInfoMapper.getTotalInUah(updatedSavings))))
-                    .thenApply(r -> new ResponseEntity<>(r, OK))
+                    .thenApply((SavingsInfoResponse r) -> new ResponseEntity<>(r, OK))
                     .whenComplete((t, e) -> logSavingCf(userId, st, LOGGER, e));
         } catch (final Exception e) {
             LOGGER.error("Cannot get savings info as JSON for user: [{}], time: [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);

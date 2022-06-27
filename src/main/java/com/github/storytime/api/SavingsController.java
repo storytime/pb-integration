@@ -25,7 +25,7 @@ public class SavingsController {
     }
 
     @GetMapping(value = API_PREFIX + "/savings/{userId}/info", produces = TEXT_PLAIN_VALUE)
-    public CompletableFuture<String> getAllSavingsAsTable(@PathVariable("userId") String userId) {
+    public CompletableFuture<String> getAllSavingsAsTable(@PathVariable("userId") final String userId) {
         return savingsService.getAllSavingsAsTable(userId);
     }
 

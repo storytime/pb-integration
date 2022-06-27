@@ -41,7 +41,7 @@ public class DynamoDbStatementService {
             LOGGER.debug("Pulled statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
             return allStatement;
         } catch (Exception e) {
-            LOGGER.debug("Error to fetch users from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
+            LOGGER.debug("Error to fetch statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
             return emptyList();
         }
     }
