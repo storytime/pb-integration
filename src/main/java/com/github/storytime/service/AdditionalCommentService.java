@@ -41,7 +41,8 @@ public class AdditionalCommentService {
     public List<Statement> addAdditionalAwsComments(final List<Statement> statementList,
                                                     final PbMerchant merchantInfo,
                                                     final String timeZone) {
-        return statementList.stream().peek(statement -> mapAwsCommentForAStatement(merchantInfo, timeZone, statement)).toList();
+        statementList.forEach(statement -> mapAwsCommentForAStatement(merchantInfo, timeZone, statement));
+        return statementList;
     }
 
     private void mapAwsCommentForAStatement(PbMerchant merchantInfo, String timeZone, Statement s) {

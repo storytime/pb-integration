@@ -64,16 +64,7 @@ public class PbStatementsService {
                                                                    final ZonedDateTime startDate,
                                                                    final ZonedDateTime endDate) {
 
-        LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync: [{}], card: [{}]",
-                appUser.getId(),
-                ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY),
-                merchantInfo.getMerchantId(),
-                merchantInfo.getMerchantId(),
-                dateService.millisToIsoFormat(startDate),
-                dateService.millisToIsoFormat(endDate),
-                right(merchantInfo.getCardNumber(), CARD_LAST_DIGITS)
-        );
-
+        logValues(appUser, merchantInfo, startDate, endDate);
         final var requestToBank = pbRequestBuilder.buildStatementRequest(merchantInfo, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
         return pbAsyncService.pullPbTransactions(requestToBank)
                 .thenApply(Optional::get)
@@ -81,7 +72,6 @@ public class PbStatementsService {
                 .thenApply(stList -> additionalCommentService.addAdditionalAwsComments(stList, merchantInfo, appUser.getTimeZone()))
                 .whenComplete((r, e) -> logPbCf(appUser.getId(), LOGGER, e));
     }
-
 
     private List<Statement> handleResponse(final AppUser u,
                                            final PbMerchant m,
@@ -109,7 +99,6 @@ public class PbStatementsService {
             } else {
                 LOGGER.error("Desc: [{}] mId: [{}] invalid signature, failed to rollback from: [{}] to: [{}] date is too big", mDesc, mId, sDate, rollBackTime);
             }
-
             return emptyList();
         }
     }
@@ -124,7 +113,8 @@ public class PbStatementsService {
         final ZonedDateTime searchStartTime = start.minus(customConfig.getFilterTimeMillis(), MILLIS);
         return pbStatements
                 .stream()
-                .filter(getStatementComparatorPredicate(end, appUser, comparator, searchStartTime)).toList();
+                .filter(getStatementComparatorPredicate(end, appUser, comparator, searchStartTime))
+                .toList();
     }
 
     public Predicate<Statement> getStatementComparatorPredicate(final ZonedDateTime end,
@@ -135,5 +125,16 @@ public class PbStatementsService {
             final ZonedDateTime tTime = dateService.xmlDateTimeToZoned(t.getTrandate(), t.getTrantime(), appUser.getTimeZone());
             return comparator.compare(searchStartTime, tTime) <= 0 && comparator.compare(end, tTime) > 0;
         };
+    }
+
+    private void logValues(final AppUser appUser, final PbMerchant merchantInfo, final ZonedDateTime startDate, final ZonedDateTime endDate) {
+        final var sd = dateService.millisToIsoFormat(startDate);
+        final var userId = appUser.getId();
+        final var desc = ofNullable(merchantInfo.getShortDesc()).orElse(EMPTY);
+        final var id = merchantInfo.getId();
+        final var merchantId = merchantInfo.getMerchantId();
+        final var ed = dateService.millisToIsoFormat(endDate);
+        final var lastDigits = right(merchantInfo.getCardNumber(), CARD_LAST_DIGITS);
+        LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync: [{}], card: [{}]", userId, desc, id, merchantId, sd, ed, lastDigits);
     }
 }

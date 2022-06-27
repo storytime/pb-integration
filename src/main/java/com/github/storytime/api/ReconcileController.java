@@ -25,7 +25,7 @@ public class ReconcileController {
 
 
     @GetMapping(value = API_PREFIX + "/reconcile/{userId}/pb", produces = APPLICATION_JSON_VALUE)
-    public CompletableFuture<ResponseEntity<PbZenReconcileResponse>> reconcilePbZen(@PathVariable("userId") String userId) {
+    public CompletableFuture<ResponseEntity<PbZenReconcileResponse>> reconcilePbZen(@PathVariable("userId") final String userId) {
         return reconcileService.reconcilePbJson(userId);
     }
 }

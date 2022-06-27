@@ -30,7 +30,7 @@ public class SavingsController {
     }
 
     @GetMapping(value = API_PREFIX + "/savings/{userId}/json", produces = APPLICATION_JSON_VALUE)
-    public CompletableFuture<ResponseEntity<SavingsInfoResponse>> getAllSavingsAsJson(@PathVariable("userId") String userId) {
+    public CompletableFuture<ResponseEntity<SavingsInfoResponse>> getAllSavingsAsJson(@PathVariable("userId") final String userId) {
         return savingsService.getAllSavingsJson(userId);
     }
 }

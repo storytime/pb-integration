@@ -9,6 +9,7 @@ import static com.github.storytime.service.utils.STUtils.createSt;
 import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
 import static java.util.UUID.randomUUID;
 import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.apache.logging.log4j.util.Strings.EMPTY;
 
 @Service
 public class SqsAsyncService {
@@ -32,7 +33,7 @@ public class SqsAsyncService {
             return uuid;
         } catch (Exception e) {
             LOGGER.error("Cannot push to SQL: [{}], time: [{}] - error", uuid, getTimeAndReset(st), e);
-            return uuid;
+            return EMPTY;
         }
     }
 }
