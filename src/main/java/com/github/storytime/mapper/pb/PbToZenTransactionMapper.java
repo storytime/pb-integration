@@ -124,22 +124,10 @@ public class PbToZenTransactionMapper {
         newZenTr.setMerchant(merchantId);
 
         //add payees to users list TODO
-        final Optional<CustomPayee> first = u.getCustomPayee()
-                .stream()
-                .filter(t -> t.getContainsValue().equals(transactionDesc))
-                .findFirst();
-
-        if (first.isEmpty())
-            u.getCustomPayee().add(new CustomPayee(UNDERSCORE, transactionDesc));
+        updatePayeeIfNeeded(u, transactionDesc);
 
         // transaction in different currency
-        final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
-        final var currencyIdByShortLetter = zenResponseMapper.findCurrencyIdByShortLetter(zenDiff, opCurrency);
-        if (isAnotherCurrency) {
-            mapDifferentCurrency(newZenTr, opAmount, currencyIdByShortLetter);
-            final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + newZenTr.getComment();
-            newZenTr.setComment(newComment);
-        }
+        final Integer currencyIdByShortLetter = mapAnotherCurrency(zenDiff, newZenTr, opAmount, opCurrency, cardAmount, cardCurrency);
 
         // cash withdrawal
         if (regExpService.isCashWithdrawal(transactionDesc)) {
@@ -149,6 +137,23 @@ public class PbToZenTransactionMapper {
         }
 
         // parse transfer between own cards
+        checkIfOwnTransfer(zenDiff, newZenTr, transactionDesc, opAmount, pbCard);
+
+        return newZenTr;
+    }
+
+    private Integer mapAnotherCurrency(ZenResponse zenDiff, TransactionItem newZenTr, Double opAmount, String opCurrency, double cardAmount, String cardCurrency) {
+        final var isAnotherCurrency = opAmount != EMPTY_AMOUNT && !opCurrency.equalsIgnoreCase(cardCurrency);
+        final var currencyIdByShortLetter = zenResponseMapper.findCurrencyIdByShortLetter(zenDiff, opCurrency);
+        if (isAnotherCurrency) {
+            mapDifferentCurrency(newZenTr, opAmount, currencyIdByShortLetter);
+            final var newComment = additionalCommentService.exchangeInfoComment(opAmount, opCurrency, cardAmount) + newZenTr.getComment();
+            newZenTr.setComment(newComment);
+        }
+        return currencyIdByShortLetter;
+    }
+
+    private void checkIfOwnTransfer(final ZenResponse zenDiff, final TransactionItem newZenTr, final String transactionDesc, final Double opAmount, final Long pbCard) {
         if (regExpService.isInternalTransfer(transactionDesc)) {
             newZenTr.setPayee(EMPTY);
             newZenTr.setOriginalPayee(EMPTY);
@@ -170,8 +175,16 @@ public class PbToZenTransactionMapper {
                 newZenTr.setIncomeAccount(maybeAcc.get());
             }
         }
+    }
 
-        return newZenTr;
+    private void updatePayeeIfNeeded(final AppUser appUser, final String transactionDesc) {
+        final Optional<CustomPayee> first = appUser.getCustomPayee()
+                .stream()
+                .filter(t -> t.getContainsValue().equals(transactionDesc))
+                .findFirst();
+
+        if (first.isEmpty())
+            appUser.getCustomPayee().add(new CustomPayee(UNDERSCORE, transactionDesc));
     }
 
     private void mapDifferentCurrency(final TransactionItem t,

@@ -1,6 +1,7 @@
 package com.github.storytime.model.pb.jaxb.request;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -9,6 +10,7 @@ import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Data
 @Accessors(chain = true)
 @AllArgsConstructor
@@ -30,6 +32,7 @@ public class Request {
     @XmlAttribute(name = "version")
     protected Integer version;
 
+    @Builder
     @lombok.Data
     @Accessors(chain = true)
     @AllArgsConstructor
@@ -54,6 +57,7 @@ public class Request {
         protected Request.Data.Payment payment;
 
 
+        @Builder
         @lombok.Data
         @Accessors(chain = true)
         @AllArgsConstructor
@@ -77,6 +81,7 @@ public class Request {
                 return this.prop;
             }
 
+            @Builder
             @lombok.Data
             @Accessors(chain = true)
             @AllArgsConstructor
@@ -94,6 +99,7 @@ public class Request {
         }
     }
 
+    @Builder
     @lombok.Data
     @Accessors(chain = true)
     @AllArgsConstructor

@@ -44,9 +44,9 @@ public class PbAccountService {
         //Since we’re calling future.join() when all the futures are complete, we’re not blocking anywhere
     }
 
-    public CompletableFuture<PbAccountBalance> getPbAsyncAccounts(final PbMerchant m) {
-        return pbAsyncService.pullPbAccounts(pbRequestBuilder.buildAccountRequest(m))
+    public CompletableFuture<PbAccountBalance> getPbAsyncAccounts(final PbMerchant pbMerchant) {
+        return pbAsyncService.pullPbAccounts(pbRequestBuilder.buildAccountRequest(pbMerchant))
                 .thenApply(r -> r.map(pbResponseMapper::mapAccountRequestBody).orElse(DEFAULT_ACC_BALANCE))
-                .thenApply(r -> pbAccountBalanceResponseMapper.buildSimpleObject(r, m));
+                .thenApply(r -> pbAccountBalanceResponseMapper.buildSimpleObject(r, pbMerchant));
     }
 }

@@ -119,9 +119,8 @@ public class TransactionItem {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TransactionItem)) return false;
-        TransactionItem that = (TransactionItem) o;
-        return getOpOutcome() == that.getOpOutcome() &&
+        if (!(o instanceof TransactionItem that)) return false;
+        return getOpOutcome().equals(that.getOpOutcome()) &&
                 getUser() == that.getUser() &&
                 Objects.equals(getDate(), that.getDate()) &&
                 Objects.equals(getIncome(), that.getIncome()) &&
