@@ -3,8 +3,8 @@ package com.github.storytime.error;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.Logger;
 
-import static com.github.storytime.service.utils.STUtils.getTime;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static com.github.storytime.service.util.STUtils.getTime;
+import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 
 public interface AsyncErrorHandlerUtil {
 

@@ -15,8 +15,8 @@ import java.util.Optional;
 
 import static com.github.storytime.config.props.Constants.DYNAMO_REQUEST_ID;
 import static com.github.storytime.config.props.Constants.SEARCH_LIMIT;
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static com.github.storytime.service.util.STUtils.createSt;
+import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
@@ -45,7 +45,6 @@ public class DynamoDbStatementService {
             return emptyList();
         }
     }
-
 
     public PbStatement getAllStatementsForUser(final String userId) {
         final var st = createSt();

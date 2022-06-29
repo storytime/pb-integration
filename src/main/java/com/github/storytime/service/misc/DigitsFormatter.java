@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.misc;
 
 import com.github.storytime.config.props.Constants;
 import com.github.storytime.model.api.SavingsInfo;

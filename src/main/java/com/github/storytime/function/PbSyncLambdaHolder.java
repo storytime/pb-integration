@@ -6,7 +6,7 @@ import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.aws.PbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.async.StatementAsyncService;
-import com.github.storytime.service.utils.DateService;
+import com.github.storytime.service.misc.DateService;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;

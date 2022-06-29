@@ -4,7 +4,7 @@ import com.github.storytime.mapper.zen.ZenCommonMapper;
 import com.github.storytime.model.export.ExportTransaction;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
-import com.github.storytime.service.DigitsFormatter;
+import com.github.storytime.service.misc.DigitsFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

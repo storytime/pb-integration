@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import static com.github.storytime.config.props.CacheNames.*;
 import static com.github.storytime.config.props.Constants.INITIAL_TIMESTAMP;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logCache;
-import static com.github.storytime.service.utils.STUtils.createSt;
+import static com.github.storytime.service.util.STUtils.createSt;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static org.apache.logging.log4j.LogManager.getLogger;
 

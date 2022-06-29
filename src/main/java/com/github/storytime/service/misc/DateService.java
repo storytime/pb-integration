@@ -1,4 +1,4 @@
-package com.github.storytime.service.utils;
+package com.github.storytime.service.misc;
 
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
@@ -48,10 +48,6 @@ public class DateService {
         return pbDateTimeFormatter.format(zonedDateTime);
     }
 
-    public String toMinfinFormat(final ZonedDateTime zonedDateTime) {
-        return minfinDateTimeFormatter.format(zonedDateTime);
-    }
-
     public ZonedDateTime millisAwsUserDate(final Long millis, final AppUser u) {
         final Instant instant = ofEpochMilli(millis);
         return ofInstant(instant, of(u.getTimeZone()));
@@ -66,24 +62,12 @@ public class DateService {
         return isoDateTimeFormatter.format(millisAwsUserDate(millis, u));
     }
 
-    public String secsToIsoFormat(final Long secs, final AppUser u) {
-        return isoDateTimeFormatter.format(secToUserDate(secs, u));
-    }
-
     public String millisToIsoFormat(final ZonedDateTime zonedDateTime) {
         return isoDateTimeFormatter.format(zonedDateTime);
     }
 
     public ZonedDateTime xmlDateTimeToZoned(final XMLGregorianCalendar d, final XMLGregorianCalendar t, final String timeZone) {
         return of(d.getYear(), d.getMonth(), d.getDay(), t.getHour(), t.getMinute(), t.getSecond()).atZone(of(timeZone));
-    }
-
-    public Long zenStringToZonedSeconds(final String dateString, final String timeZone) {
-        return LocalDate
-                .parse(dateString, minfinDateTimeFormatter)
-                .atStartOfDay(of(timeZone))
-                .toInstant()
-                .getEpochSecond();
     }
 
     public String toZenFormat(final XMLGregorianCalendar d,

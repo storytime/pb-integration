@@ -5,8 +5,8 @@ import com.github.storytime.model.CurrencyType;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.ZenResponse;
-import com.github.storytime.service.CurrencyService;
-import com.github.storytime.service.DigitsFormatter;
+import com.github.storytime.service.misc.CurrencyService;
+import com.github.storytime.service.misc.DigitsFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

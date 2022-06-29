@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.pb;
 
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.mapper.response.PbAccountBalanceResponseMapper;

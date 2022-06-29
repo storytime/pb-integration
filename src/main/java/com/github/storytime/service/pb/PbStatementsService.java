@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.pb;
 
 import com.github.storytime.builder.PbRequestBuilder;
 import com.github.storytime.config.CustomConfig;
@@ -8,7 +8,8 @@ import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.async.PbAsyncService;
-import com.github.storytime.service.utils.DateService;
+import com.github.storytime.service.misc.AdditionalCommentService;
+import com.github.storytime.service.misc.DateService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -8,9 +8,9 @@ import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.In
 import com.github.storytime.model.zen.AccountItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
-import com.github.storytime.service.AdditionalCommentService;
-import com.github.storytime.service.utils.DateService;
-import com.github.storytime.service.utils.RegExpService;
+import com.github.storytime.service.misc.AdditionalCommentService;
+import com.github.storytime.service.misc.DateService;
+import com.github.storytime.service.misc.RegExpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

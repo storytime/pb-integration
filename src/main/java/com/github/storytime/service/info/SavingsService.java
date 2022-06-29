@@ -5,7 +5,7 @@ import com.github.storytime.mapper.response.ZenResponseMapper;
 import com.github.storytime.model.api.SavingsInfo;
 import com.github.storytime.model.api.SavingsInfoResponse;
 import com.github.storytime.model.aws.AppUser;
-import com.github.storytime.service.DigitsFormatter;
+import com.github.storytime.service.misc.DigitsFormatter;
 import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
@@ -20,8 +20,8 @@ import java.util.concurrent.CompletableFuture;
 import static com.github.storytime.config.props.Constants.TOTAL;
 import static com.github.storytime.config.props.Constants.UAH;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logSavingCf;
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static com.github.storytime.service.util.STUtils.createSt;
+import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
@@ -62,12 +62,7 @@ public class SavingsService {
                     .thenApply(Optional::get)
                     .thenCompose(this::getUserSavings)
                     .thenApply(savings -> savingsInfoMapper.calculatePercents(savingsInfoMapper.getTotalInUah(savings), savings))
-                    .thenApply(savingsInfo -> savingsInfoMapper.getNiceSavings(savingsInfo)
-                            .append(TOTAL)
-                            .append(digitsFormatter.formatAmount(savingsInfoMapper.getTotalInUah(savingsInfo)))
-                            .append(SPACE)
-                            .append(UAH)
-                            .toString())
+                    .thenApply(this::mapSavings)
                     .whenComplete((r, e) -> logSavingCf(userId, st, LOGGER, e));
         } catch (Exception e) {
             LOGGER.error("Cannot collect saving info as table for user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
@@ -100,4 +95,14 @@ public class SavingsService {
                 .thenApply(Optional::get)
                 .thenApply(zenDiff -> savingsInfoMapper.getUserSavings(zenResponseMapper.getSavingsAccounts(zenDiff), zenDiff));
     }
+
+    private String mapSavings(final List<SavingsInfo> savingsInfo) {
+        return savingsInfoMapper.getNiceSavings(savingsInfo)
+                .append(TOTAL)
+                .append(digitsFormatter.formatAmount(savingsInfoMapper.getTotalInUah(savingsInfo)))
+                .append(SPACE)
+                .append(UAH)
+                .toString();
+    }
+
 }

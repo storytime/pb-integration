@@ -1,4 +1,4 @@
-package com.github.storytime.service.utils;
+package com.github.storytime.service.misc;
 
 import com.github.storytime.config.props.Constants;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,8 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static com.github.storytime.service.util.STUtils.createSt;
+import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.UUID.randomUUID;
 import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.apache.logging.log4j.util.Strings.EMPTY;

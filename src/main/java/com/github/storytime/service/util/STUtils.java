@@ -1,4 +1,4 @@
-package com.github.storytime.service.utils;
+package com.github.storytime.service.util;
 
 import org.apache.commons.lang3.time.StopWatch;
 

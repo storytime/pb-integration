@@ -1,4 +1,4 @@
-package com.github.storytime.service;
+package com.github.storytime.service.misc;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.github.storytime.mapper.response.CurrencyResponseMapper;
@@ -21,8 +21,8 @@ import java.util.concurrent.Executor;
 import static com.github.storytime.config.props.CacheNames.CURRENCY_CACHE;
 import static com.github.storytime.config.props.Constants.*;
 import static com.github.storytime.model.CurrencySource.PB_CASH;
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static com.github.storytime.service.util.STUtils.createSt;
+import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.lang.Math.abs;
 import static java.math.BigDecimal.valueOf;
 import static java.math.RoundingMode.HALF_DOWN;

@@ -2,24 +2,26 @@ package com.github.storytime.service.info;
 
 import com.github.storytime.mapper.response.ReconcileCommonMapper;
 import com.github.storytime.mapper.zen.ZenCommonMapper;
+import com.github.storytime.model.api.PbZenReconcile;
 import com.github.storytime.model.api.PbZenReconcileResponse;
 import com.github.storytime.model.aws.AppUser;
-import com.github.storytime.service.PbAccountService;
+import com.github.storytime.service.pb.PbAccountService;
 import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
-import com.github.storytime.service.utils.DateService;
+import com.github.storytime.service.misc.DateService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logReconcilePbJson;
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static com.github.storytime.service.util.STUtils.createSt;
+import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -57,15 +59,7 @@ public class ReconcileService {
         try {
             LOGGER.debug("Building pb/zen reconcile json, for user: [{}] - stared", userId);
             return getUserAsync(userId)
-                    .thenCompose(appUser -> {
-                        final var merchantInfos = appUser.getPbMerchant();
-                        final var startDate = dateService.getUserStarDateInMillis(appUser);
-                        final var pbAccsFuture = pbAccountService.getPbAsyncAccounts(merchantInfos);
-                        final var zenAccsFuture = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate)
-                                .thenApply(Optional::get)
-                                .thenApply(zenCommonMapper::getZenAccounts);
-                        return zenAccsFuture.thenCombine(pbAccsFuture, reconcileCommonMapper::mapInfoForAccountJson);
-                    })
+                    .thenCompose(this::calculatedDiff)
                     .thenApply(r -> new ResponseEntity<>(new PbZenReconcileResponse(r), OK))
                     .whenComplete((r, e) -> logReconcilePbJson(userId, st, LOGGER, e));
         } catch (Exception e) {
@@ -74,8 +68,17 @@ public class ReconcileService {
         }
     }
 
+    private CompletableFuture<List<PbZenReconcile>> calculatedDiff(final AppUser appUser) {
+        final var merchantInfos = appUser.getPbMerchant();
+        final var startDate = dateService.getUserStarDateInMillis(appUser);
+        final var pbAccsFuture = pbAccountService.getPbAsyncAccounts(merchantInfos);
+        final var zenAccsFuture = zenAsyncService.zenDiffByUserForPbAccReconcile(appUser, startDate)
+                .thenApply(Optional::get)
+                .thenApply(zenCommonMapper::getZenAccounts);
+        return zenAccsFuture.thenCombine(pbAccsFuture, reconcileCommonMapper::mapInfoForAccountJson);
+    }
 
-    private CompletableFuture<AppUser> getUserAsync(String userId) {
+    private CompletableFuture<AppUser> getUserAsync(final String userId) {
         return awsUserService.getById(userId).thenApply(Optional::get);
     }
 }

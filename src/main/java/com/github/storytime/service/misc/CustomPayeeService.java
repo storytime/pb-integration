@@ -1,4 +1,4 @@
-package com.github.storytime.service.utils;
+package com.github.storytime.service.misc;
 
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.CustomPayee;
@@ -13,8 +13,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logGetPayee;
-import static com.github.storytime.service.utils.STUtils.createSt;
-import static com.github.storytime.service.utils.STUtils.getTimeAndReset;
+import static com.github.storytime.service.util.STUtils.createSt;
+import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
@@ -33,6 +33,21 @@ public class CustomPayeeService {
         final var st = createSt();
         try {
             LOGGER.debug("Calling get payee for user: [{}] - start", userId);
+            return userAsyncService.getById(userId)
+                    .thenApply(Optional::get)
+                    .thenApply(AppUser::getCustomPayee)
+                    .whenComplete((r, e) -> logGetPayee(st, LOGGER, e));
+        } catch (Exception e) {
+            LOGGER.error("Cannot get payee for user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
+            return completedFuture(emptyList());
+        }
+    }
+
+
+    public CompletableFuture<List<CustomPayee>> updatePayeeByUserId(final String userId) {
+        final var st = createSt();
+        try {
+            LOGGER.debug("Calling update payee for user: [{}] - start", userId);
             return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenApply(AppUser::getCustomPayee)

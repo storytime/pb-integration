@@ -6,7 +6,7 @@ import com.github.storytime.model.pb.jaxb.request.Request.Data;
 import com.github.storytime.model.pb.jaxb.request.Request.Data.Payment;
 import com.github.storytime.model.pb.jaxb.request.Request.Data.Payment.Prop;
 import com.github.storytime.model.pb.jaxb.request.Request.Merchant;
-import com.github.storytime.service.utils.PbSignatureGeneratorService;
+import com.github.storytime.service.pb.PbSignatureGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

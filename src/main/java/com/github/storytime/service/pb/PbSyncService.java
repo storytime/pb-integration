@@ -1,4 +1,4 @@
-package com.github.storytime.service.sync;
+package com.github.storytime.service.pb;
 
 import com.github.storytime.function.TrioFunction;
 import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
@@ -7,7 +7,6 @@ import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.aws.PbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.PbStatementsService;
 import com.github.storytime.service.async.SqsAsyncPublisherService;
 import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.async.UserAsyncService;
@@ -25,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
 import static com.github.storytime.error.AsyncErrorHandlerUtil.*;
-import static com.github.storytime.service.utils.STUtils.*;
+import static com.github.storytime.service.util.STUtils.*;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.function.Predicate.not;
 import static org.apache.logging.log4j.LogManager.getLogger;
