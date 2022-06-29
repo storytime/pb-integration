@@ -64,7 +64,7 @@ public class PbSyncService {
         final var st = createSt();
         final CompletableFuture<List<CompletableFuture<String>>> allUsersSyncCf =
                 userAsyncService.getAllUsers()
-                        .thenApply(awsUsers -> awsUsers.stream().map(user -> doSyncForAwsEachUser(onSuccessFk, startDateFk, endDateFk, user)).toList()); // //one for each user
+                        .thenApply(awsUsers -> awsUsers.stream().filter(AppUser::isEnabled).map(user -> doSyncForAwsEachUser(onSuccessFk, startDateFk, endDateFk, user)).toList()); // //one for each user
 
         allUsersSyncCf.thenCompose(this::waitForAllCompleteAndPushToSqs)
                 .thenAccept(x -> LOGGER.info("#################### All sync done time: [{}] ####################", getTimeAndReset(st)))
@@ -84,7 +84,7 @@ public class PbSyncService {
                                                            final AppUser appUser) {
 
         final var st = createSt();
-        final var selectedMerchants = appUser.getPbMerchant();
+        final var selectedMerchants = appUser.getPbMerchant().stream().filter(PbMerchant::getEnabled).toList();
         final var pbCfList = selectedMerchants
                 .stream()
                 .map(m -> getAwsListOfPbCf(startDateFk, endDateFk, appUser, m)).toList();
