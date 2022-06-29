@@ -184,7 +184,7 @@ public class PbToZenTransactionMapper {
                 .findFirst();
 
         if (first.isEmpty())
-            appUser.getCustomPayee().add(new CustomPayee(UNDERSCORE, transactionDesc));
+            appUser.getCustomPayee().add(new CustomPayee(UNDERSCORE, transactionDesc, dateService.getUserStarDateInMillis(appUser)));
     }
 
     private void mapDifferentCurrency(final TransactionItem t,

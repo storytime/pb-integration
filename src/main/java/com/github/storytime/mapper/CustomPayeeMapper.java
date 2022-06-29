@@ -38,8 +38,8 @@ public class CustomPayeeMapper {
         return ofNullable(u.getCustomPayee())
                 .orElse(emptyList())
                 .stream()
-                .filter(not(p -> isEmpty(p.getPayee())))
                 .filter(not(p -> p.getPayee().equals(UNDERSCORE)))
+                .filter(not(p -> isEmpty(p.getPayee())))
                 .toList();
     }
 }

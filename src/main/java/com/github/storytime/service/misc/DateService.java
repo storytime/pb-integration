@@ -28,6 +28,13 @@ import static java.util.Set.of;
 public class DateService {
 
     private static final Set<DayOfWeek> WEEKEND = of(SATURDAY, SUNDAY);
+    public static final int ONE_DAY_IN_HRS = 24;
+    public static final int ONE_DAY = 1;
+    public static final int START_HOUR = 0;
+    public static final int START_MIN = 0;
+    public static final int START_SEC = 0;
+    public static final int FIRST_DAT_OF_MO = 1;
+
     private final DateTimeFormatter minfinDateTimeFormatter;
     private final DateTimeFormatter isoDateTimeFormatter;
     private final DateTimeFormatter pbDateTimeFormatter;
@@ -90,20 +97,20 @@ public class DateService {
             if (!WEEKEND.contains(start.getDayOfWeek())) {
                 businessDays.add(start);
             }
-            start = start.plusDays(1);
+            start = start.plusDays(ONE_DAY);
         }
 
-        return businessDays.get(businessDays.size() - 1);
+        return businessDays.get(businessDays.size() - ONE_DAY);
     }
 
     public ZonedDateTime getPbStatementZonedDateTime(final String timeZone, final XMLGregorianCalendar trandate) {
-        return of(trandate.getYear(), trandate.getMonth(), trandate.getDay(), 0, 0, 0)
+        return of(trandate.getYear(), trandate.getMonth(), trandate.getDay(), START_HOUR, START_MIN, START_SEC)
                 .atZone(of(timeZone));
     }
 
     public long getStartOfMouthInSeconds(int year, int mouth, final AppUser u) {
         return YearMonth.of(year, mouth)
-                .atDay(1)
+                .atDay(FIRST_DAT_OF_MO)
                 .atStartOfDay(of(u.getTimeZone()))
                 .toInstant()
                 .getEpochSecond();
@@ -113,7 +120,7 @@ public class DateService {
         return YearMonth.of(year, mouth)
                 .atEndOfMonth()
                 .atStartOfDay(of(u.getTimeZone()))
-                .plusHours(24)
+                .plusHours(ONE_DAY_IN_HRS)
                 .toInstant()
                 .getEpochSecond();
     }
