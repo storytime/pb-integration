@@ -8,7 +8,9 @@ import com.github.storytime.service.http.ZenDiffHttpService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import static com.github.storytime.config.props.CacheNames.TR_TAGS_DIFF;
+import static com.github.storytime.config.props.CacheNames.ZM_SAVING_CACHE;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
@@ -41,6 +44,7 @@ public class ZenAsyncService {
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getInitialFunction(appUser)), pool);
     }
 
+    @Cacheable(cacheNames = ZM_SAVING_CACHE, key = "#appUser.id")
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForSavings(final AppUser appUser) {
         LOGGER.debug("Fetching ZEN accounts/instruments for savings for user: [{}] - start", appUser.getId());
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser)), pool);
@@ -57,6 +61,10 @@ public class ZenAsyncService {
         return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate)), pool);
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = ZM_SAVING_CACHE, key = "#appUser.id"),
+            @CacheEvict(cacheNames = TR_TAGS_DIFF, key = "#appUser.id")
+    })
     public CompletableFuture<Optional<ZenResponse>> pushToZen(final AppUser appUser,
                                                               final ZenDiffRequest request) {
         LOGGER.debug("Pushing zen diff for user: [{}] - stared", appUser.getId());

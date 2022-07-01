@@ -1,5 +1,6 @@
 package com.github.storytime.scheduler;
 
+import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +40,7 @@ public class CacheResetScheduler {
 
     @Scheduled(fixedRateString = "${cache.clean.zentags.millis}")
     @CacheEvict(allEntries = true, beforeInvocation = true, value = {TR_TAGS_DIFF, OUT_DATA_BY_MONTH, IN_DATA_BY_MONTH,
-            OUT_DATA_BY_YEAR, IN_DATA_BY_YEAR, OUT_DATA_BY_QUARTER, IN_DATA_BY_QUARTER
+            OUT_DATA_BY_YEAR, IN_DATA_BY_YEAR, OUT_DATA_BY_QUARTER, IN_DATA_BY_QUARTER, ZM_SAVING_CACHE
     })
     public void cleaningZenDiffTagsCache() {
         LOGGER.debug("Cleaning up tags cache ...");
@@ -47,7 +48,10 @@ public class CacheResetScheduler {
                 .getAllUsers()
                 .thenAccept(usersList -> {
                     final var st = createSt();
-                    final var completableFutures = usersList.stream().map(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, INITIAL_TIMESTAMP)).toList();
+                    final var completableFutures = usersList.stream()
+                            .filter(AppUser::isEnabled)
+                            .map(user -> zenAsyncService.zenDiffByUserTagsAndTransaction(user, INITIAL_TIMESTAMP))
+                            .toList();
                     allOf(completableFutures.toArray(new CompletableFuture[0]))
                             .whenComplete((r, e) -> logCache(st, LOGGER, e));
                 });

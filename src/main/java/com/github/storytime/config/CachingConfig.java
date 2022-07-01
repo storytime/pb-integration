@@ -28,6 +28,7 @@ public class CachingConfig {
         caches.add(new ConcurrentMapCache(USER_PERMANENT_CACHE));
         caches.add(new ConcurrentMapCache(CURRENCY_CACHE));
         caches.add(new ConcurrentMapCache(TR_TAGS_DIFF));
+        caches.add(new ConcurrentMapCache(ZM_SAVING_CACHE));
         caches.add(new ConcurrentMapCache(VERSION_CACHE));
         caches.add(new ConcurrentMapCache(CUSTOM_PAYEE_CACHE));
         caches.add(new ConcurrentMapCache(OUT_DATA_BY_MONTH));

@@ -25,6 +25,7 @@ import static com.github.storytime.config.props.Constants.EMPTY;
 import static com.github.storytime.config.props.Constants.*;
 import static java.lang.Double.valueOf;
 import static java.lang.Math.abs;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @Component
@@ -183,8 +184,16 @@ public class PbToZenTransactionMapper {
                 .filter(t -> t.getContainsValue().equals(transactionDesc))
                 .findFirst();
 
-        if (first.isEmpty())
-            appUser.getCustomPayee().add(new CustomPayee(UNDERSCORE, transactionDesc, dateService.getUserStarDateInMillis(appUser)));
+        if (first.isEmpty()) {
+            final var customPayee = CustomPayee
+                    .builder()
+                    .payee(UNDERSCORE)
+                    .containsValue(transactionDesc)
+                    .createDate(dateService.getUserStarDateInMillis(appUser))
+                    .id(randomUUID().toString())
+                    .build();
+            appUser.getCustomPayee().add(customPayee);
+        }
     }
 
     private void mapDifferentCurrency(final TransactionItem t,
