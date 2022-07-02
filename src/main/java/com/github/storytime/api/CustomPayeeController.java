@@ -1,13 +1,11 @@
 package com.github.storytime.api;
 
-import com.github.storytime.model.aws.CustomPayee;
+import com.github.storytime.model.api.CustomPayee;
 import com.github.storytime.service.misc.CustomPayeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -32,10 +30,10 @@ public class CustomPayeeController {
         return customPayeeService.getPayeeByUserId(userId);
     }
 
-
-    @PutMapping(value = API_PREFIX + "/payee/{userId}", produces = APPLICATION_JSON_VALUE)
-    public CompletableFuture<List<CustomPayee>> updateCustomerPayee(@PathVariable("userId") final String userId) {
-        return customPayeeService.updatePayeeByUserId(userId);
+    @PutMapping(value = API_PREFIX + "/payee/{userId}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    public CompletableFuture<ResponseEntity<Void>> updateCustomerPayee(@RequestBody final List<CustomPayee> toUpdateList,
+                                                                       @PathVariable("userId") final String userId) {
+        return customPayeeService.updatePayeeByUserId(userId, toUpdateList);
     }
 
 }

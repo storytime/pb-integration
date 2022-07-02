@@ -1,7 +1,7 @@
 package com.github.storytime.mapper;
 
 import com.github.storytime.model.aws.AppUser;
-import com.github.storytime.model.aws.CustomPayee;
+import com.github.storytime.model.api.CustomPayee;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 

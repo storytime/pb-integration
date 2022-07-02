@@ -1,21 +1,20 @@
-package com.github.storytime.model.aws;
+package com.github.storytime.model.api;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
+@Getter
+@Setter
 @Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamoDBDocument
 public class CustomPayee {
 
+    @NotNull
     @DynamoDBAttribute(attributeName = "id")
     private String id;
 
@@ -29,4 +28,10 @@ public class CustomPayee {
 
     @DynamoDBAttribute(attributeName = "createDate")
     private Long createDate;
+
+    @Override
+    public boolean equals(final Object obj) {
+        final CustomPayee that = (CustomPayee) obj;
+        return that.getId().equals(this.getId());
+    }
 }
