@@ -38,13 +38,11 @@ public class ZenResponseMapper {
                 .orElse(EMPTY);
     }
 
-    public String findMerchantByNicePayee(final ZenResponse zenDiff, final String nicePayee) {
+    public Optional<MerchantItem> findMerchantByNicePayee(final ZenResponse zenDiff, final String nicePayee) {
         return ofNullable(zenDiff.getMerchant()).orElse(emptyList())
                 .stream()
                 .filter(a -> ofNullable(a.getTitle()).orElse(EMPTY).trim().equals(nicePayee))
-                .findFirst()
-                .map(MerchantItem::getId)
-                .orElse(null);
+                .findFirst();
     }
 
     public Integer findCurrencyIdByShortLetter(final ZenResponse zenDiff, final String shortLetter) {

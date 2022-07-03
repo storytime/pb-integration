@@ -15,6 +15,7 @@ import static java.util.Set.of;
 @Component
 public class ZenDiffLambdaHolder {
 
+
     public Supplier<HttpEntity<ZenSyncRequest>> getInitialFunction(final AppUser u) {
         return () -> {
             final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(now().getEpochSecond());
@@ -25,7 +26,7 @@ public class ZenDiffLambdaHolder {
                 zenSyncRequest.setForceFetch(null);
                 zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
             } else {
-                zenSyncRequest.setForceFetch(of(USER, INSTRUMENT, ACCOUNT));
+                zenSyncRequest.setForceFetch(of(USER, INSTRUMENT, ACCOUNT, MERCHANT));
                 zenSyncRequest.setServerTimestamp(zenLastSyncTimestamp);
             }
 

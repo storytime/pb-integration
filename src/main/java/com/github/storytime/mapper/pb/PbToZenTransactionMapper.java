@@ -2,10 +2,11 @@ package com.github.storytime.mapper.pb;
 
 import com.github.storytime.mapper.CustomPayeeMapper;
 import com.github.storytime.mapper.response.ZenResponseMapper;
-import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.api.CustomPayee;
+import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.model.zen.AccountItem;
+import com.github.storytime.model.zen.MerchantItem;
 import com.github.storytime.model.zen.TransactionItem;
 import com.github.storytime.model.zen.ZenResponse;
 import com.github.storytime.service.misc.AdditionalCommentService;
@@ -102,7 +103,7 @@ public class PbToZenTransactionMapper {
         final var idTr = createIdForZen(u.getId(), opAmount, trDate.getBytes(), pbTr.getCard(), pbTr.getAppcode(), pbTr.getTerminal());
         final var userId = zenResponseMapper.findUserId(zenDiff);
         final var nicePayee = customPayeeMapper.getNicePayee(transactionDesc, u);
-        final var merchantId = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);
+        final var merchant = zenResponseMapper.findMerchantByNicePayee(zenDiff, nicePayee);
 
         newZenTr.setIncomeBankID(cardAmount > EMPTY_AMOUNT ? appCode : EMPTY);
         newZenTr.setOutcomeBankID(cardAmount < EMPTY_AMOUNT ? appCode : EMPTY);
@@ -111,7 +112,6 @@ public class PbToZenTransactionMapper {
         newZenTr.setCreated(createdTime);
         newZenTr.setUser(userId);
         newZenTr.setDeleted(false);
-        newZenTr.setPayee(nicePayee);
         newZenTr.setOriginalPayee(transactionDesc);
         newZenTr.setComment(pbTr.getCustomComment());
         newZenTr.setDate(trDate);
@@ -122,7 +122,9 @@ public class PbToZenTransactionMapper {
         newZenTr.setIncomeInstrument(currency);
         newZenTr.setOutcomeInstrument(currency);
         newZenTr.setViewed(false);
-        newZenTr.setMerchant(merchantId);
+
+        newZenTr.setMerchant(merchant.map(MerchantItem::getId).orElse(null));
+        newZenTr.setPayee(merchant.map(MerchantItem::getTitle).orElse(nicePayee));
 
         //add payees to users list TODO
         updatePayeeIfNeeded(u, transactionDesc);
