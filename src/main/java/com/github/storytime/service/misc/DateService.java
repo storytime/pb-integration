@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +30,13 @@ import static java.util.Set.of;
 @Component
 public class DateService {
 
-    private static final Set<DayOfWeek> WEEKEND = of(SATURDAY, SUNDAY);
     public static final int ONE_DAY_IN_HRS = 24;
     public static final int ONE_DAY = 1;
     public static final int START_HOUR = 0;
     public static final int START_MIN = 0;
     public static final int START_SEC = 0;
     public static final int FIRST_DAT_OF_MO = 1;
-
+    private static final Set<DayOfWeek> WEEKEND = of(SATURDAY, SUNDAY);
     private final DateTimeFormatter minfinDateTimeFormatter;
     private final DateTimeFormatter isoDateTimeFormatter;
     private final DateTimeFormatter pbDateTimeFormatter;

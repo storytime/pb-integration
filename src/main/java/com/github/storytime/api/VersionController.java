@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.github.storytime.config.props.CacheNames.VERSION_CACHE;
 import static com.github.storytime.config.props.Constants.API_PREFIX;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @RestController

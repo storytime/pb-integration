@@ -46,7 +46,6 @@ public class UserAsyncService {
 
     @Caching(evict = {
             @CacheEvict(value = USERS_CACHE, allEntries = true),
-            @CacheEvict(value = USER_PERMANENT_CACHE, key = "#appUser.id"),
             @CacheEvict(value = CUSTOM_PAYEE_CACHE, key = "#appUser.id")
     })
     public CompletableFuture<Optional<AppUser>> updateUser(final AppUser appUser) {

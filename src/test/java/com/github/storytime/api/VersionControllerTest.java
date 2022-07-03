@@ -25,13 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(VersionController.class)
 class VersionControllerTest {
 
+    private final TextProducer textProducer;
     @MockBean
     private VersionService versionService;
-
     @Autowired
     private MockMvc mockMvc;
-
-    private final TextProducer textProducer;
 
     public VersionControllerTest() {
         this.textProducer = Fairy.create().textProducer();

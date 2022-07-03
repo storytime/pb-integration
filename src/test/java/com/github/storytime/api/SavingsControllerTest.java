@@ -33,16 +33,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SavingsControllerTest {
 
     private static final int COUNT = 1;
-
+    private final ObjectMapper objectMapper;
+    private final TextProducer textProducer;
     @MockBean
     private SavingsController savingsController;
-
     @Autowired
     private MockMvc mockMvc;
-
-    private final ObjectMapper objectMapper;
-
-    private final TextProducer textProducer;
 
     public SavingsControllerTest() {
         this.textProducer = create().textProducer();

@@ -5,8 +5,6 @@ import com.github.storytime.model.AdditionalComment;
 import com.github.storytime.model.CurrencyType;
 import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
-import com.github.storytime.service.misc.CurrencyService;
-import com.github.storytime.service.misc.DateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
