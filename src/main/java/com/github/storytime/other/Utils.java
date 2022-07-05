@@ -12,7 +12,7 @@ public class Utils {
     private Utils() {
     }
 
-    public static HttpHeaders createHeader(String token) {
+    public static HttpHeaders createHeader(final String token) {
         final HttpHeaders headers = new HttpHeaders();
         headers.set(AUTHORIZATION_HEADER_NAME, "Bearer " + token);
         headers.setContentType(APPLICATION_JSON);

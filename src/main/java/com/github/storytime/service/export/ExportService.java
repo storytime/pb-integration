@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.storytime.config.props.Constants.*;
+import static com.github.storytime.config.props.ZenDataConstants.INITIAL_TIMESTAMP;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logExport;
 import static com.github.storytime.mapper.response.ExportMapper.*;
 import static com.github.storytime.service.util.STUtils.createSt;

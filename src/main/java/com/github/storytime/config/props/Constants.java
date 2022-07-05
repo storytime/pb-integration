@@ -48,12 +48,6 @@ public class Constants {
     public static final String CARDNUM = "cardnum";
     public static final String COUNTRY = "country";
     public static final String UA = "UA";
-    public static final long INITIAL_TIMESTAMP = 0L;
-    public static final String ACCOUNT = "account";
-    public static final String INSTRUMENT = "instrument";
-    public static final String MERCHANT = "merchant";
-    public static final String TAG = "tag";
-    public static final String USER = "user";
     public static final BigDecimal DEFAULT_ACC_BALANCE = BigDecimal.valueOf(0);
     public static final String SPLITTER_EMPTY = "(?<=.)";
     public static final int START_INCLUSIVE = 0;

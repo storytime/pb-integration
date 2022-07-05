@@ -41,24 +41,24 @@ public class ZenAsyncService {
 
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForPb(final AppUser appUser) {
         LOGGER.debug("Fetching all ZEN data for user: [{}] - start", appUser.getId());
-        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getInitialFunction(appUser)), pool);
+        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getInitialData(appUser)), pool);
     }
 
     @Cacheable(cacheNames = ZM_SAVING_CACHE, key = "#appUser.id")
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForSavings(final AppUser appUser) {
         LOGGER.debug("Fetching ZEN accounts/instruments for savings for user: [{}] - start", appUser.getId());
-        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getSavingsFunction(appUser)), pool);
+        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getDataForSavings(appUser)), pool);
     }
 
     @Cacheable(cacheNames = TR_TAGS_DIFF, key = "#appUser.getId")
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserTagsAndTransaction(final AppUser appUser, long startDate) {
         LOGGER.debug("Fetching ZEN accounts/tags for user: [{}] - start", appUser.getId());
-        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccountAndTags(appUser, startDate)), pool);
+        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getDataForAccountAndTags(appUser, startDate)), pool);
     }
 
     public CompletableFuture<Optional<ZenResponse>> zenDiffByUserForPbAccReconcile(final AppUser appUser, long startDate) {
         LOGGER.debug("Fetching ZEN accounts for user: [{}] - start", appUser.getId());
-        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getAccount(appUser, startDate)), pool);
+        return supplyAsync(() -> zenDiffHttpService.getZenDiffByUser(zenDiffLambdaHolder.getDataForAccount(appUser, startDate)), pool);
     }
 
     @Caching(evict = {

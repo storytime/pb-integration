@@ -5,9 +5,10 @@ import com.github.storytime.model.zen.ZenSyncRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.github.storytime.config.props.Constants.*;
+import static com.github.storytime.config.props.ZenDataConstants.*;
 import static com.github.storytime.other.Utils.createHeader;
 import static java.time.Instant.now;
 import static java.util.Set.of;
@@ -16,51 +17,36 @@ import static java.util.Set.of;
 public class ZenDiffLambdaHolder {
 
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getInitialFunction(final AppUser u) {
-        return () -> {
-            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest().setCurrentClientTimestamp(now().getEpochSecond());
-            final Long zenLastSyncTimestamp = u.getZenLastSyncTimestamp();
-
-            if (zenLastSyncTimestamp == null || zenLastSyncTimestamp == INITIAL_TIMESTAMP) {
-                //fetch all data
-                zenSyncRequest.setForceFetch(null);
-                zenSyncRequest.setServerTimestamp(INITIAL_TIMESTAMP);
-            } else {
-                zenSyncRequest.setForceFetch(of(USER, INSTRUMENT, ACCOUNT, MERCHANT));
-                zenSyncRequest.setServerTimestamp(zenLastSyncTimestamp);
-            }
-
-            return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
-        };
+    public Supplier<HttpEntity<ZenSyncRequest>> getInitialData(final AppUser user) {
+        final long zenLastSyncTimestamp = user.getZenLastSyncTimestamp();
+        if (zenLastSyncTimestamp == INITIAL_TIMESTAMP) {
+            return this.requestToZenFunction(user, now().getEpochSecond(), INITIAL_TIMESTAMP, null);
+        } else {
+            return this.requestToZenFunction(user, now().getEpochSecond(), zenLastSyncTimestamp, of(USER, INSTRUMENT, ACCOUNT, MERCHANT));
+        }
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getSavingsFunction(final AppUser u) {
-        return () -> {
-            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
-                    .setCurrentClientTimestamp(now().getEpochSecond())
-                    .setServerTimestamp(now().getEpochSecond())
-                    .setForceFetch(of(ACCOUNT, INSTRUMENT));
-            return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
-        };
+    public Supplier<HttpEntity<ZenSyncRequest>> getDataForSavings(final AppUser user) {
+        return this.requestToZenFunction(user, now().getEpochSecond(), now().getEpochSecond(), of(ACCOUNT, INSTRUMENT));
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getAccountAndTags(final AppUser u, long startDate) {
-        return () -> {
-            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
-                    .setCurrentClientTimestamp(now().getEpochSecond())
-                    .setServerTimestamp(startDate)
-                    .setForceFetch(of(TAG, ACCOUNT));
-            return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
-        };
+    public Supplier<HttpEntity<ZenSyncRequest>> getDataForAccountAndTags(final AppUser user, long startDate) {
+        return this.requestToZenFunction(user, now().getEpochSecond(), startDate, of(TAG, ACCOUNT));
     }
 
-    public Supplier<HttpEntity<ZenSyncRequest>> getAccount(final AppUser u, long startDate) {
+    public Supplier<HttpEntity<ZenSyncRequest>> getDataForAccount(final AppUser user, long startDate) {
+        return this.requestToZenFunction(user, now().getEpochSecond(), startDate, of(ACCOUNT));
+    }
+
+    public Supplier<HttpEntity<ZenSyncRequest>> requestToZenFunction(final AppUser user, long client,
+                                                                     long startDate, final Set<String> forceFetch) {
         return () -> {
-            final ZenSyncRequest zenSyncRequest = new ZenSyncRequest()
-                    .setCurrentClientTimestamp(now().getEpochSecond())
-                    .setServerTimestamp(startDate)
-                    .setForceFetch(of(ACCOUNT));
-            return new HttpEntity<>(zenSyncRequest, createHeader(u.getZenAuthToken()));
+            final ZenSyncRequest zenSyncRequest = ZenSyncRequest.builder()
+                    .currentClientTimestamp(client)
+                    .serverTimestamp(startDate)
+                    .forceFetch(forceFetch)
+                    .build();
+            return new HttpEntity<>(zenSyncRequest, createHeader(user.getZenAuthToken()));
         };
     }
 }
