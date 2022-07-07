@@ -45,7 +45,35 @@ public class VerbalExpressionConfig {
         return VerbalExpression.regex()
                 .startOfLine()
                 .anything()
-                .oneOf(customConfig.getPbInternalTransferTo(), customConfig.getPbInternalTransferFrom())
+                .oneOf(
+                        customConfig.getPbInternalTransferTo(),
+                        customConfig.getPbInternalTransferFrom(),
+                        customConfig.getPbInternalTransferFromNew(),
+                        customConfig.getPbInternalTransferNew(),
+                        customConfig.getPbInternalTransferFromSpecial()
+                )
+                .anything()
+                .endOfLine()
+                .build();
+    }
+
+    @Bean
+    public VerbalExpression internalTransferAdditionalCheck() {
+        return VerbalExpression.regex()
+                .startOfLine()
+                .anything()
+                .oneOf(customConfig.getTransferCheckByTerminal())
+                .anything()
+                .endOfLine()
+                .build();
+    }
+
+    @Bean
+    public VerbalExpression moneyBackCheck() {
+        return VerbalExpression.regex()
+                .startOfLine()
+                .anything()
+                .oneOf(customConfig.getMoneyBack())
                 .anything()
                 .endOfLine()
                 .build();
@@ -67,7 +95,11 @@ public class VerbalExpressionConfig {
         return VerbalExpression.regex()
                 .startOfLine()
                 .anything()
-                .then(customConfig.getPbInternalTransferFrom())
+                .oneOf(
+                        customConfig.getPbInternalTransferFrom(),
+                        customConfig.getPbInternalTransferFromNew(),
+                        customConfig.getPbInternalTransferFromSpecial()
+                )
                 .anything()
                 .endOfLine()
                 .build();

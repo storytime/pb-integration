@@ -2,6 +2,7 @@ package com.github.storytime.model.zen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+@Builder
 @Data
 @Accessors(chain = true)
 @AllArgsConstructor

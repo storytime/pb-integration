@@ -14,10 +14,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static com.github.storytime.config.props.Constants.UNDERSCORE;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.logGetPayee;
 import static com.github.storytime.service.util.STUtils.createSt;
 import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.Collections.emptyList;
+import static java.util.UUID.randomUUID;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Stream.of;
@@ -27,10 +29,13 @@ public class CustomPayeeService {
 
     private static final Logger LOGGER = LogManager.getLogger(CustomPayeeService.class);
     private final UserAsyncService userAsyncService;
+    private final DateService dateService;
 
     @Autowired
-    public CustomPayeeService(final UserAsyncService userAsyncService) {
+    public CustomPayeeService(final UserAsyncService userAsyncService,
+                              final DateService dateService) {
         this.userAsyncService = userAsyncService;
+        this.dateService = dateService;
     }
 
     public CompletableFuture<List<CustomPayee>> getPayeeByUserId(final String userId) {
@@ -77,5 +82,24 @@ public class CustomPayeeService {
 
         appUser.setCustomPayee(mergedList);
         return appUser;
+    }
+
+    public void updatePayeeForUser(final AppUser appUser, final String transactionDesc) {
+        Optional<CustomPayee> maybeCustomPayee = appUser.getCustomPayee()
+                .stream()
+                .filter(t -> t.getContainsValue().equals(transactionDesc))
+                .findFirst();
+
+        if (maybeCustomPayee.isEmpty()) {
+            final CustomPayee newCustomPayee = CustomPayee
+                    .builder()
+                    .payee(UNDERSCORE)
+                    .containsValue(transactionDesc)
+                    .createDate(dateService.getUserStarDateInMillis(appUser))
+                    .id(randomUUID().toString())
+                    .build();
+
+            appUser.getCustomPayee().add(newCustomPayee);
+        }
     }
 }

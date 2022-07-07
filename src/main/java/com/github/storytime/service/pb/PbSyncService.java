@@ -1,7 +1,6 @@
 package com.github.storytime.service.pb;
 
 import com.github.storytime.function.TrioFunction;
-import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
 import com.github.storytime.mapper.pb.PbToZenDataMapper;
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.PbMerchant;
@@ -24,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
 import static com.github.storytime.error.AsyncErrorHandlerUtil.*;
+import static com.github.storytime.mapper.PbStatementsToDynamoDbMapper.generateUniqString;
 import static com.github.storytime.service.util.STUtils.*;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.function.Predicate.not;
@@ -102,7 +102,7 @@ public class PbSyncService {
                 .getAllStatementsByUser(appUser.getId())
                 .thenApply((PbStatement dbData) -> userLevelStatements.stream().map(merchantLevel -> merchantLevel
                         .stream()
-                        .filter(ap -> !dbData.getAlreadyPushed().contains(PbStatementsToDynamoDbMapper.generateUniqString(ap)))
+                        .filter(ap -> !dbData.getAlreadyPushed().contains(generateUniqString(ap)))
                         .toList()).filter(not(List::isEmpty)).toList())
                 .whenComplete((r, e) -> logSyncStatements(appUser.getId(), LOGGER, e));
     }

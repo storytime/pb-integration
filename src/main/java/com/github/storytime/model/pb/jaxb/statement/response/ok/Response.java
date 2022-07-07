@@ -76,10 +76,10 @@ public class Response {
                 protected String status;
 
                 @XmlAttribute(name = "credit")
-                protected Float credit;
+                protected String credit;
 
                 @XmlAttribute(name = "debet")
-                protected Float debet;
+                protected String debet;
 
                 public List<Response.Data.Info.Statements.Statement> getStatement() {
                     if (statement == null) {
@@ -102,7 +102,7 @@ public class Response {
                     protected String value;
 
                     @XmlAttribute(name = "card")
-                    protected Long card;
+                    protected String card;
 
                     @XmlAttribute(name = "appcode")
                     protected String appcode;

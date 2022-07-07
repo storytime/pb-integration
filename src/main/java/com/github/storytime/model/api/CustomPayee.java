@@ -4,7 +4,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import lombok.*;
 
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -14,15 +13,12 @@ import javax.validation.constraints.NotNull;
 @DynamoDBDocument
 public class CustomPayee {
 
-    @NotNull
     @DynamoDBAttribute(attributeName = "id")
     private String id;
 
-    @NotNull
     @DynamoDBAttribute(attributeName = "payee")
     private String payee;
 
-    @NotNull
     @DynamoDBAttribute(attributeName = "containsValue")
     private String containsValue;
 

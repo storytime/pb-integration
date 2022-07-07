@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,22 +25,22 @@ public class AppUser {
     @DynamoDBAttribute(attributeName = "id")
     private String id;
 
-    @NotNull
+
     @DynamoDBAttribute(attributeName = "enabled")
     private boolean enabled;
 
     @DynamoDBAttribute(attributeName = "zenAuthToken")
     private String zenAuthToken;
 
-    @NotNull
+
     @DynamoDBAttribute(attributeName = "timeZone")
     private String timeZone;
 
-    @NotNull
+
     @DynamoDBAttribute(attributeName = "zenLastSyncTimestamp")
     private long zenLastSyncTimestamp;
 
-    @NotNull
+
     @DynamoDBAttribute(attributeName = "zenSyncEnabled")
     private boolean zenSyncEnabled;
 

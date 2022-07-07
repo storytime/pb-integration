@@ -28,8 +28,8 @@ public class ZenResponseMapper {
                 .orElseThrow().getId();
     }
 
-    public String findAccountIdByPbCard(final ZenResponse zenDiff, final Long card) {
-        final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
+    public String findAccountIdByPbCard(final ZenResponse zenDiff, final String card) {
+        final String carLastDigits = right(card, CARD_LAST_DIGITS);
         return ofNullable(zenDiff.getAccount()).orElse(emptyList())
                 .stream()
                 .filter(a -> ofNullable(a.getSyncID()).orElse(emptyList()).contains(carLastDigits))
@@ -63,8 +63,8 @@ public class ZenResponseMapper {
 
     public Optional<String> findAccountIdByTwoCardDigits(final ZenResponse zenDiff,
                                                          final String lastTwoDigits,
-                                                         final Long card) {
-        final String carLastDigits = right(valueOf(card), CARD_LAST_DIGITS);
+                                                         final String card) {
+        final String carLastDigits = right(card, CARD_LAST_DIGITS);
         return ofNullable(zenDiff.getAccount()).orElse(emptyList())
                 .stream()
                 .filter(not(a -> ofNullable(a.getSyncID())

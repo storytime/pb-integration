@@ -1,10 +1,14 @@
 package com.github.storytime.config;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+@Setter
+@Getter
 @Configuration
 @PropertySource(value = "classpath:custom.properties", encoding = "UTF-8")
 public class CustomConfig {
@@ -60,8 +64,23 @@ public class CustomConfig {
     @Value("${verbal.regexp.pb.transfer.internal.to}")
     private String pbInternalTransferTo;
 
+    @Value("${verbal.regexp.pb.transfer.internal.to.new}")
+    private String pbInternalTransferNew;
+
     @Value("${verbal.regexp.pb.transfer.internal.from}")
     private String pbInternalTransferFrom;
+
+    @Value("${verbal.regexp.pb.transfer.internal.from.new}")
+    private String pbInternalTransferFromNew;
+
+    @Value("${verbal.regexp.pb.transfer.internal.from.special}")
+    private String pbInternalTransferFromSpecial;
+
+    @Value("${verbal.regexp.pb.transfer.terminal}")
+    private String transferCheckByTerminal;
+
+    @Value("${verbal.regexp.pb.money.back}")
+    private String moneyBack;
 
     @Value("${verbal.regexp.pb.transfer.digit.separator}")
     private String pbInternalTransferSeparator;
@@ -86,104 +105,4 @@ public class CustomConfig {
 
     @Value("${pb.invalid.signature.max.rollback.period.ms}")
     private Long maxRollbackPeriod;
-
-    public String getPbExchangeUrl() {
-        return pbExchangeUrl;
-    }
-
-    public String getMinExchangeUrl() {
-        return minExchangeUrl + minfinToken + "/";
-    }
-
-    public String getPbTransactionsUrl() {
-        return pbTransactionsUrl;
-    }
-
-    public String getZenDiffUrl() {
-        return zenDiffUrl;
-    }
-
-    public Integer getFilterTimeMillis() {
-        return filterTimeMillis;
-    }
-
-    public String getPbBankSignature() {
-        return pbBankSignature;
-    }
-
-    public Integer getAsyncCorePoolSize() {
-        return asyncCorePoolSize;
-    }
-
-    public Integer getAsyncMaxPoolSize() {
-        return asyncMaxPoolSize;
-    }
-
-    public String getAsyncThreadPrefix() {
-        return asyncThreadPrefix;
-    }
-
-    public String getPbCommentSeparator() {
-        return pbCommentSeparator.trim();
-    }
-
-    public String getPbCashWithdrawal() {
-        return pbCashWithdrawal.trim();
-    }
-
-    public String getPbInternalTransferTo() {
-        return pbInternalTransferTo.trim();
-    }
-
-    public String getPbInternalTransferFrom() {
-        return pbInternalTransferFrom.trim();
-    }
-
-    public String getPbInternalTransferSeparator() {
-        return pbInternalTransferSeparator.trim();
-    }
-
-    public String getPbCashUrl() {
-        return pbCashUrl;
-    }
-
-    public Integer getPushedPbZenTransactionStorageCleanOlderMillis() {
-        return pushedPbZenTransactionStorageCleanOlderMillis;
-    }
-
-    public Integer getPbRollBackPeriod() {
-        return pbRollBackPeriod;
-    }
-
-    public Integer getSchedulerCorePoolSize() {
-        return schedulerCorePoolSize;
-    }
-
-    public String getSchedulerThreadPrefix() {
-        return schedulerThreadPrefix;
-    }
-
-    public Integer getCfCorePoolSize() {
-        return cfCorePoolSize;
-    }
-
-    public Integer getCfMaxPoolSize() {
-        return cfMaxPoolSize;
-    }
-
-    public String getCfThreadPrefix() {
-        return cfThreadPrefix;
-    }
-
-    public String getYnabUrl() {
-        return ynabUrl;
-    }
-
-    public String getPbAccountsUrl() {
-        return pbAccountsUrl;
-    }
-
-    public Long getMaxRollbackPeriod() {
-        return maxRollbackPeriod;
-    }
 }

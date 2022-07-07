@@ -22,13 +22,17 @@ public class RegExpService {
     private final VerbalExpression internalFrom;
     private final VerbalExpression internalTo;
     private final VerbalExpression internalTransferComment;
+    private final VerbalExpression internalTransferAdditionalCheck;
+    private final VerbalExpression moneyBackCheck;
 
     @Autowired
     public RegExpService(final VerbalExpression internalTransfer,
                          final VerbalExpression internalTransferCard,
                          final VerbalExpression internalFrom,
                          final VerbalExpression internalTo,
+                         final VerbalExpression internalTransferAdditionalCheck,
                          final VerbalExpression internalTransferComment,
+                         final VerbalExpression moneyBackCheck,
                          final VerbalExpression cashWithdrawal) {
         this.cashWithdrawal = cashWithdrawal;
         this.internalTransferCard = internalTransferCard;
@@ -36,33 +40,53 @@ public class RegExpService {
         this.internalTo = internalTo;
         this.internalTransferComment = internalTransferComment;
         this.internalTransfer = internalTransfer;
+        this.moneyBackCheck = moneyBackCheck;
+        this.internalTransferAdditionalCheck = internalTransferAdditionalCheck;
     }
 
-    public boolean isCashWithdrawal(String comment) {
+    public boolean isCashWithdrawal(final String comment) {
         return cashWithdrawal.test(comment);
     }
 
-    public boolean isInternalTransfer(String comment) {
+    /**
+     *
+     *[Statement[appcode='895500', trandate=2022-07-05, trantime=15:12:00, amount='10.00 UAH', cardamount='-10.00 UAH', terminal='PrivatBank, CS980400', description='На свою карту']],
+     *
+     */
+
+    public boolean isInternalTransfer(final String comment) {
         return internalTransfer.test(comment);
     }
 
-    public boolean isInternalFrom(String comment) {
+    /**
+     *[Statement[value='' appcode='208227', trandate=2022-07-05, trantime=10:24:00, amount='428.00 UAH', cardamount='-433.00 UAH', terminal='Prom ua, 31001422', description='Cо своей карты']]
+     */
+
+    public boolean isInternalTransferAdditionalCheck(final String terminal) {
+        return internalTransferAdditionalCheck.test(terminal);
+    }
+
+    public boolean isMoneyBack(final String str) {
+        return moneyBackCheck.test(str);
+    }
+
+    public boolean isInternalFrom(final String comment) {
         return internalFrom.test(comment);
     }
 
-    public boolean isInternalTo(String comment) {
+    public boolean isInternalTo(final String comment) {
         return internalTo.test(comment);
     }
 
-    public String getCardFirstDigits(String comment) {
+    public String getCardFirstDigits(final String comment) {
         return internalTransferCard.getText(comment, GROUP_1);
     }
 
-    public String getCardLastDigits(String comment) {
+    public String getCardLastDigits(final String comment) {
         return internalTransferCard.getText(comment, GROUP_2);
     }
 
-    public String getCardDigits(String comment) {
+    public String getCardDigits(final String comment) {
         return internalTransferComment.getText(comment, GROUP_1);
     }
 

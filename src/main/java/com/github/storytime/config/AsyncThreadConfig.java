@@ -12,7 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import javax.validation.constraints.NotNull;
+
 import java.util.concurrent.Executor;
 
 @Configuration
@@ -63,7 +63,7 @@ public class AsyncThreadConfig implements AsyncConfigurer, SchedulingConfigurer 
     }
 
     @Override
-    public void configureTasks(@NotNull final ScheduledTaskRegistrar taskRegistrar) {
+    public void configureTasks(final ScheduledTaskRegistrar taskRegistrar) {
         taskRegistrar.setScheduler(scheduledTaskExecutor());
     }
 }

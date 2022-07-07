@@ -52,10 +52,10 @@ public class DynamoDbCurrencyService {
         final var st = createSt();
         try {
             CurrencyRates savedRate = currencyRepository.saveRate(rate);
-            LOGGER.debug("Saved user dynamo db time: [{}], id: [{}] - finish", getTimeAndReset(st), savedRate.getId());
+            LOGGER.debug("Saved rate dynamo db time: [{}], id: [{}] - finish", getTimeAndReset(st), savedRate.getId());
             return savedRate;
         } catch (Exception e) {
-            LOGGER.debug("Error saving db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
+            LOGGER.debug("Error saving rate to db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
             return rate;
         }
     }

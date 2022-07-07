@@ -10,12 +10,10 @@ import com.github.storytime.service.misc.DateService;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
@@ -50,13 +48,13 @@ public class PbSyncLambdaHolder {
                                     .collect(toUnmodifiableSet())
                                     .stream()
                                     .map(PbStatementsToDynamoDbMapper::generateUniqString)
-                                    .collect(toSet());
+                                    .collect(toUnmodifiableSet());
 
                             final Set<String> allNewStatements = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed()
                                     .stream())
-                                    .collect(toSet());
+                                    .collect(toUnmodifiableSet());
 
-                            return statementAsyncService.saveAll(dfStatements.setAlreadyPushed(allNewStatements), userId);
+                            return statementAsyncService.saveAll(dfStatements.setAlreadyPushed(new TreeSet<>(allNewStatements)), userId);
                         }
                 );
     }

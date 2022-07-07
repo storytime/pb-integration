@@ -8,17 +8,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.github.storytime.config.props.Constants.DYNAMO_REQUEST_ID;
 import static com.github.storytime.config.props.Constants.SEARCH_LIMIT;
 import static com.github.storytime.service.util.STUtils.createSt;
 import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -60,10 +56,10 @@ public class DynamoDbStatementService {
 
             final var allStatement = statementRepository.getAllByUser(scanExpression);
             LOGGER.debug("Pulled user statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
-            return allStatement.isEmpty() ? PbStatement.builder().userId(userId).alreadyPushed(emptySet()).build() : allStatement.stream().findFirst().orElseThrow();
+            return allStatement.isEmpty() ? PbStatement.builder().userId(userId).alreadyPushed(new TreeSet<>()).build() : allStatement.stream().findFirst().orElseThrow();
         } catch (Exception e) {
             LOGGER.debug("Error to fetch users statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
-            return PbStatement.builder().userId(userId).alreadyPushed(emptySet()).build();
+            return PbStatement.builder().userId(userId).alreadyPushed(new TreeSet<>()).build();
         }
     }
 

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 @Builder
@@ -29,6 +30,6 @@ public class PbStatement {
     private String userId;
 
     @DynamoDBAttribute(attributeName = "alreadyPushed")
-    private Set<String> alreadyPushed;
+    private TreeSet<String> alreadyPushed;
 
 }
