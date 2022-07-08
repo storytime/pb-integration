@@ -30,6 +30,6 @@ public class PbStatement {
     private String userId;
 
     @DynamoDBAttribute(attributeName = "alreadyPushed")
-    private TreeSet<String> alreadyPushed;
+    private Set<String> alreadyPushed;
 
 }

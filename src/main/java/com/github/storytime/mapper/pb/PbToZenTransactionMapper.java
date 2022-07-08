@@ -93,6 +93,28 @@ public class PbToZenTransactionMapper {
         return UUID.nameUUIDFromBytes(idBytes).toString();
     }
 
+    private String createIdForZenForOwnTransfer(final String userId,
+                                                final long createdTimeArg,
+                                                final String appcode,
+                                                final String terminal) {
+        final var userIdBytes = userId.getBytes();
+        final var appCodeBytes = appcode.getBytes();
+        final var descBytes = terminal.getBytes();
+        final var crTimeBytes = String.valueOf(createdTimeArg).getBytes();
+
+        final var capacity = userIdBytes.length + crTimeBytes.length +
+                appCodeBytes.length + descBytes.length;
+
+        final var idBytes = ByteBuffer.allocate(capacity)
+                .put(userIdBytes)
+                .put(crTimeBytes)
+                .put(appCodeBytes)
+                .put(descBytes)
+                .array();
+
+        return UUID.nameUUIDFromBytes(idBytes).toString();
+    }
+
     public TransactionItem parseTransactionItem(final ZenResponse zenDiff, final AppUser user, final Statement pbTr) {
         final var userId = user.getId();
 
@@ -154,6 +176,7 @@ public class PbToZenTransactionMapper {
         final var isOwnTransferForSureFlag = isOwnTransferFlag && isPrivateTerminal;
         final var isMoneyBackFlag = regExpService.isMoneyBack(transactionDesc);
 
+        //is in another currency
         if (inAnotherCurrencyPositiveFlag) {
             newZenBuilder.opIncome(abs(cardAmount));
             newZenBuilder.opIncomeInstrument(currencyIdByShortLetterArg);
@@ -175,6 +198,7 @@ public class PbToZenTransactionMapper {
 
         // parse transfer between own cards
         if (isOwnTransferForSureFlag) {
+            newZenBuilder.id(createIdForZenForOwnTransfer(userId, createdTimeArg, appCode, terminal));
             final var cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
             final var maybeAcc = zenResponseMapper.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, pbCard);
             final var isAccountExists = maybeAcc.isPresent();
@@ -193,9 +217,9 @@ public class PbToZenTransactionMapper {
             }
         }
 
-        //skip payee
-        if (!cashFlag && !isOwnTransferForSureFlag) {
-            final var originalDesc = isPrivateTerminal ? transactionDesc : isMoneyBackFlag ? transactionDesc : terminal;
+        //add payee
+        if (!cashFlag && !isOwnTransferForSureFlag && !isMoneyBackFlag) {
+            final var originalDesc = getTransactionItem(transactionDesc, terminal, isPrivateTerminal, isOwnTransferFlag);
             final var maybeNicePayee = customPayeeMapper.getNicePayee(originalDesc, user);
             final var merchant = zenResponseMapper.findMerchantByNicePayee(zenDiff, maybeNicePayee);
             addMerchant(originalDesc, maybeNicePayee, newZenBuilder, merchant);
@@ -204,6 +228,16 @@ public class PbToZenTransactionMapper {
         }
 
         return newZenBuilder.build();
+    }
+
+    private String getTransactionItem(final String transactionDesc, final String terminal, boolean isPrivateTerminal, boolean isOwnTransferFlag) {
+        if (isPrivateTerminal) {
+            return transactionDesc;
+        } else if (isOwnTransferFlag) {
+            return terminal;
+        } else {
+            return transactionDesc;
+        }
     }
 
     private void addMerchant(final String transactionDesc,

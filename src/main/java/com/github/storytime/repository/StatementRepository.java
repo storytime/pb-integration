@@ -14,7 +14,7 @@ public class StatementRepository {
     private final DynamoDBMapper dynamoDBMapper;
 
     @Autowired
-    public StatementRepository(DynamoDBMapper dynamoDBMapper) {
+    public StatementRepository(final DynamoDBMapper dynamoDBMapper) {
         this.dynamoDBMapper = dynamoDBMapper;
     }
 
@@ -22,16 +22,16 @@ public class StatementRepository {
         return dynamoDBMapper.scan(PbStatement.class, new DynamoDBScanExpression());
     }
 
-    public List<PbStatement> getAllByUser(DynamoDBScanExpression scanExpression) {
+    public List<PbStatement> getAllByUser(final DynamoDBScanExpression scanExpression) {
         return dynamoDBMapper.scan(PbStatement.class, scanExpression);
     }
 
-    public List<PbStatement> saveAll(List<PbStatement> statementList) {
+    public List<PbStatement> saveAll(final List<PbStatement> statementList) {
         dynamoDBMapper.save(statementList);
         return statementList;
     }
 
-    public PbStatement save(PbStatement pbStatements) {
+    public PbStatement save(final PbStatement pbStatements) {
         dynamoDBMapper.save(pbStatements);
         return pbStatements;
     }
