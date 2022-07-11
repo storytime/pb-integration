@@ -49,9 +49,7 @@ public class RegExpService {
     }
 
     /**
-     *
-     *[Statement[appcode='895500', trandate=2022-07-05, trantime=15:12:00, amount='10.00 UAH', cardamount='-10.00 UAH', terminal='PrivatBank, CS980400', description='На свою карту']],
-     *
+     * [Statement[appcode='895500', trandate=2022-07-05, trantime=15:12:00, amount='10.00 UAH', cardamount='-10.00 UAH', terminal='PrivatBank, CS980400', description='На свою карту']],
      */
 
     public boolean isInternalTransfer(final String comment) {
@@ -59,7 +57,7 @@ public class RegExpService {
     }
 
     /**
-     *[Statement[value='' appcode='208227', trandate=2022-07-05, trantime=10:24:00, amount='428.00 UAH', cardamount='-433.00 UAH', terminal='Prom ua, 31001422', description='Cо своей карты']]
+     * [Statement[value='' appcode='208227', trandate=2022-07-05, trantime=10:24:00, amount='428.00 UAH', cardamount='-433.00 UAH', terminal='Prom ua, 31001422', description='Cо своей карты']]
      */
 
     public boolean isInternalTransferAdditionalCheck(final String terminal) {

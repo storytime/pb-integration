@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -70,22 +69,58 @@ public class CustomPayeeService {
         }
     }
 
-    private AppUser mergeUserPayees(final List<CustomPayee> toUpdateList, final AppUser appUser) {
+    public AppUser mergeUserPayees(final List<CustomPayee> toUpdateList, final AppUser appUser) {
         final List<CustomPayee> userCustomPayee = appUser.getCustomPayee();
-        final List<CustomPayee> newPayees = toUpdateList.stream().filter(not(userCustomPayee::contains)).toList();
-        final List<CustomPayee> updatedPayees = toUpdateList.stream().filter(not(newPayees::contains)).toList();
-        final List<CustomPayee> oldPayees = userCustomPayee.stream().filter(not(updatedPayees::contains)).toList();
 
-        final List<CustomPayee> mergedList = of(newPayees, updatedPayees, oldPayees)
-                .flatMap(Collection::stream)
+        final List<CustomPayee> newPayees = toUpdateList.stream()
+                .filter(e -> ifNotContainsById(e, userCustomPayee))
+                .toList();
+
+        final List<CustomPayee> updatedPayees = userCustomPayee.stream()
+                .map(x -> ifNotContainsByPayeeButContainsById(x, toUpdateList))
+                .toList()
+                .stream()
+                .flatMap(List::stream)
+                .toList();
+
+        final List<String> updatedIds = updatedPayees.stream().map(CustomPayee::getId).toList();
+        final List<CustomPayee> oldPayees = userCustomPayee.stream().sequential()
+                .filter(not(e -> updatedIds.contains(e.getId())))
+                .toList();
+
+        if (newPayees.isEmpty() && updatedPayees.isEmpty()) {
+            LOGGER.debug("No payee's to update, for user: [{}]", appUser.getId());
+            return appUser;
+        } else {
+            LOGGER.debug("Create new payees for user: [{}] payees: [{}]", appUser.getId(), newPayees);
+            LOGGER.debug("Updated existing payees for user: [{}] payees: [{}]", appUser.getId(), updatedPayees);
+        }
+
+        final List<CustomPayee> mergedList = of(oldPayees, newPayees, updatedPayees)
+                .flatMap(list -> list.stream().sequential())
                 .toList();
 
         appUser.setCustomPayee(mergedList);
         return appUser;
     }
 
+    private boolean ifNotContainsById(final CustomPayee elm, final List<CustomPayee> userCustomPayee) {
+        return userCustomPayee.stream().noneMatch(existing -> existing.getId().equals(elm.getId()));
+    }
+
+    private List<CustomPayee> ifNotContainsByPayeeButContainsById(final CustomPayee elm, final List<CustomPayee> userCustomPayee) {
+        final List<CustomPayee> eqById = userCustomPayee.stream()
+                .filter(not(existing -> existing.getPayee().equals(UNDERSCORE)))
+                .filter(existing -> existing.getId().equals(elm.getId()))
+                .toList();
+
+        return eqById.stream()
+                .filter(not(existing -> existing.getPayee().equals(elm.getPayee())))
+                .toList();
+    }
+
     public void updatePayeeForUser(final AppUser appUser, final String transactionDesc) {
-        Optional<CustomPayee> maybeCustomPayee = appUser.getCustomPayee()
+        final Optional<CustomPayee> maybeCustomPayee = appUser.getCustomPayee()
                 .stream()
                 .filter(t -> t.getContainsValue().equals(transactionDesc))
                 .findFirst();

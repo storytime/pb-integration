@@ -108,13 +108,13 @@ public class TransactionItem {
     @Override
     public String toString() {
         return new StringJoiner(" ")
-                .add("id:[" + id +"]")
-                .add("date:[" + date +"]")
-                .add("income:[" + income +"]")
-                .add("outcome:[" + outcome +"]")
-                .add("opayee:[" + originalPayee +"]")
-                .add("payee:[" + payee +"]")
-                .add("merchant:[" + merchant +"]")
+                .add("id:[" + id + "]")
+                .add("date:[" + date + "]")
+                .add("income:[" + income + "]")
+                .add("outcome:[" + outcome + "]")
+                .add("opayee:[" + originalPayee + "]")
+                .add("payee:[" + payee + "]")
+                .add("merchant:[" + merchant + "]")
                 .add("\n")
                 .toString();
     }

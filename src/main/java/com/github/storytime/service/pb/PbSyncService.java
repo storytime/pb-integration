@@ -10,6 +10,7 @@ import com.github.storytime.service.async.SqsAsyncPublisherService;
 import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.async.UserAsyncService;
 import com.github.storytime.service.async.ZenAsyncService;
+import com.github.storytime.service.misc.CustomPayeeService;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ public class PbSyncService {
     private final ZenAsyncService zenAsyncService;
     private final SqsAsyncPublisherService sqsAsyncPublisherService;
     private final StatementAsyncService statementAsyncService;
+    private final CustomPayeeService customPayeeService;
 
     @Autowired
     public PbSyncService(
@@ -47,6 +49,7 @@ public class PbSyncService {
             final PbToZenDataMapper pbToZenDataMapper,
             final UserAsyncService userAsyncService,
             final StatementAsyncService statementAsyncService,
+            final CustomPayeeService customPayeeService,
             final SqsAsyncPublisherService sqsAsyncPublisherService) {
         this.zenAsyncService = zenAsyncService;
         this.pbStatementsService = pbStatementsService;
@@ -54,6 +57,7 @@ public class PbSyncService {
         this.sqsAsyncPublisherService = sqsAsyncPublisherService;
         this.userAsyncService = userAsyncService;
         this.statementAsyncService = statementAsyncService;
+        this.customPayeeService = customPayeeService;
     }
 
     @Async
@@ -116,7 +120,9 @@ public class PbSyncService {
 
         var allTrList = newPbTrList.stream().flatMap(List::stream).toList();
         if (allTrList.isEmpty()) {
-            return userAsyncService.updateUser(user)
+            customPayeeService.getPayeeByUserId(user.getId())
+                    .thenApply(newCustomerPayee -> customPayeeService.mergeUserPayees(newCustomerPayee, user))
+                    .thenCompose(userAsyncService::updateUser)
                     .thenApply(Optional::get)
                     .thenApply(AppUser::getId)
                     .whenComplete((r, e) -> logSyncPushByUserEmpty(user.getId(), st, selectedMerchants.size(), LOGGER, e));
@@ -125,7 +131,10 @@ public class PbSyncService {
         LOGGER.info("User: [{}] has: [{}] transactions to push, time: [{}]", user.getId(), allTrList.size(), getTime(st));
 
         // step by step in one thread
-        return zenAsyncService.zenDiffByUserForPb(user)
+        return customPayeeService
+                .getPayeeByUserId(user.getId())
+                .thenApply(newCustomerPayee -> customPayeeService.mergeUserPayees(newCustomerPayee, user))
+                .thenCompose(zenAsyncService::zenDiffByUserForPb)
                 .thenApply(Optional::get)
                 .thenApply(zenDiff -> pbToZenDataMapper.buildZenReqFromPbData(newPbTrList, zenDiff, user))
                 .thenApply(Optional::get)

@@ -28,6 +28,11 @@ public class CustomPayee {
     @Override
     public boolean equals(final Object obj) {
         final CustomPayee that = (CustomPayee) obj;
-        return that.getId().equals(this.getId());
+        return that.id.equals(this.id) && that.payee.equals(this.payee);
+    }
+
+    @Override
+    public String toString() {
+        return "id: " + id + ", payee: " + payee + ", contains value: " + containsValue;
     }
 }
