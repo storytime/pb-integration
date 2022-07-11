@@ -61,6 +61,9 @@ public class CustomConfig {
     @Value("${verbal.regexp.pb.cash.withdrawal}")
     private String pbCashWithdrawal;
 
+    @Value("${verbal.regexp.pb.cash.withdrawal.new}")
+    private String pbCashWithdrawalNew;
+
     @Value("${verbal.regexp.pb.transfer.internal.to}")
     private String pbInternalTransferTo;
 
