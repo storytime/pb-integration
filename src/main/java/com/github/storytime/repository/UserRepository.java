@@ -14,7 +14,7 @@ public class UserRepository {
     private final DynamoDBMapper dynamoDBMapper;
 
     @Autowired
-    public UserRepository(DynamoDBMapper dynamoDBMapper) {
+    public UserRepository(final DynamoDBMapper dynamoDBMapper) {
         this.dynamoDBMapper = dynamoDBMapper;
     }
 
@@ -22,11 +22,11 @@ public class UserRepository {
         return dynamoDBMapper.scan(AppUser.class, new DynamoDBScanExpression());
     }
 
-    public AppUser findById(String id) {
+    public AppUser findById(final String id) {
         return dynamoDBMapper.load(AppUser.class, id);
     }
 
-    public AppUser save(AppUser updatedUser) {
+    public AppUser save(final AppUser updatedUser) {
         dynamoDBMapper.save(updatedUser);
         return updatedUser;
     }

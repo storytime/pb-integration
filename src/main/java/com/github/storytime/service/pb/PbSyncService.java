@@ -104,10 +104,12 @@ public class PbSyncService {
     private CompletableFuture<List<List<Statement>>> filterUserLevelStatements(final AppUser appUser, final List<List<Statement>> userLevelStatements) {
         return statementAsyncService
                 .getAllStatementsByUser(appUser.getId())
-                .thenApply((PbStatement dbData) -> userLevelStatements.stream().map(merchantLevel -> merchantLevel
-                        .stream()
-                        .filter(ap -> !dbData.getAlreadyPushed().contains(generateUniqString(ap)))
-                        .toList()).filter(not(List::isEmpty)).toList())
+                .thenApply(dbPbStatement -> userLevelStatements.stream()
+                        .map(merchantLevel -> merchantLevel
+                                .stream()
+                                .filter(not(ap -> dbPbStatement.getAlreadyPushed().contains(generateUniqString(ap))))
+                                .toList())
+                        .filter(not(List::isEmpty)).toList())
                 .whenComplete((r, e) -> logSyncStatements(appUser.getId(), LOGGER, e));
     }
 

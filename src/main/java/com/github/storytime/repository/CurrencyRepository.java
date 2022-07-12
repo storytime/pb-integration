@@ -18,11 +18,11 @@ public class CurrencyRepository {
         this.dynamoDBMapper = dynamoDBMapper;
     }
 
-    public List<CurrencyRates> findByTypeSourceAndDate(DynamoDBScanExpression scanExpression) {
+    public List<CurrencyRates> findByTypeSourceAndDate(final DynamoDBScanExpression scanExpression) {
         return dynamoDBMapper.scan(CurrencyRates.class, scanExpression);
     }
 
-    public CurrencyRates saveRate(CurrencyRates rate) {
+    public CurrencyRates saveRate(final CurrencyRates rate) {
         dynamoDBMapper.save(rate);
         return rate;
     }

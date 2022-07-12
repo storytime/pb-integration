@@ -42,7 +42,7 @@ public class PbSyncLambdaHolder {
     public BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onAwsDbRegularSyncSuccess(final StatementAsyncService statementAsyncService) {
 
         return (pushedByNotCached, userId) -> statementAsyncService.getAllStatementsByUser(userId)
-                .thenCompose((PbStatement dfStatements) -> {
+                .thenCompose(dfStatements -> {
                             final Set<String> pushedByNotCachedMapped = pushedByNotCached
                                     .stream()
                                     .flatMap(Collection::stream)
