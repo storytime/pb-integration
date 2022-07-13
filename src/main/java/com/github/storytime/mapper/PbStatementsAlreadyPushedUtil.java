@@ -2,13 +2,16 @@ package com.github.storytime.mapper;
 
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 
-public class PbStatementsToDynamoDbMapper {
+public class PbStatementsAlreadyPushedUtil {
 
-    private PbStatementsToDynamoDbMapper() {
+    private PbStatementsAlreadyPushedUtil() {
         throw new IllegalStateException("Utility class");
     }
 
     public static String generateUniqString(final Statement pbSt) {
-        return pbSt.getAppcode() + pbSt.getTerminal() + pbSt.getCardamount() + pbSt.getAmount();
+        final var terminal = pbSt.getTerminal();
+        final var cardAmount = pbSt.getAmount();
+        final var amount = pbSt.getAmount();
+        return terminal + cardAmount + amount;
     }
 }

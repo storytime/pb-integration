@@ -95,21 +95,18 @@ public class PbToZenTransactionMapper {
 
     private String createIdForZenForOwnTransfer(final String userId,
                                                 final long createdTimeArg,
-                                                final String appcode,
                                                 final String terminal) {
         final var userIdBytes = userId.getBytes();
-        final var appCodeBytes = appcode.getBytes();
-        final var descBytes = terminal.getBytes();
+        final var terminalBytes = terminal.getBytes();
         final var crTimeBytes = String.valueOf(createdTimeArg).getBytes();
+        final var capacity = userIdBytes.length + crTimeBytes.length + terminalBytes.length;
 
-        final var capacity = userIdBytes.length + crTimeBytes.length +
-                appCodeBytes.length + descBytes.length;
+        //  LOGGER.debug("PBM transfer id generation, user id: [{}], terminal: [{}], createdTimeArg: [{}]", userId, terminal, createdTimeArg);
 
         final var idBytes = ByteBuffer.allocate(capacity)
                 .put(userIdBytes)
                 .put(crTimeBytes)
-                .put(appCodeBytes)
-                .put(descBytes)
+                .put(terminalBytes)
                 .array();
 
         return UUID.nameUUIDFromBytes(idBytes).toString();
@@ -193,12 +190,14 @@ public class PbToZenTransactionMapper {
         if (isCashAndAccountFlag) {
             newZenBuilder.income(opAmount);
             newZenBuilder.incomeAccount(maybeCashAccountInCurrency.get().getId());
+            // LOGGER.debug("PBM cash withdrawal tr: [{}], user: [{}]", pbTr, userId);
             return newZenBuilder.build();
         }
 
         // parse transfer between own cards
         if (isOwnTransferForSureFlag) {
-            newZenBuilder.id(createIdForZenForOwnTransfer(userId, createdTimeArg, appCode, terminal));
+            final var idForZenForOwnTransfer = createIdForZenForOwnTransfer(userId, createdTimeArg, terminal);
+            newZenBuilder.id(idForZenForOwnTransfer);
             final var cardLastDigits = regExpService.getCardLastDigits(transactionDesc);
             final var maybeAcc = zenResponseMapper.findAccountIdByTwoCardDigits(zenDiff, cardLastDigits, pbCard);
             final var isAccountExists = maybeAcc.isPresent();
@@ -213,8 +212,9 @@ public class PbToZenTransactionMapper {
                 newZenBuilder.outcomeBankID(null);
                 newZenBuilder.incomeAccount(maybeAcc.get());
             } else {
-                LOGGER.warn("Not able to parse internal transfer cannot get to/from account tr: [{}], user: [{}]", pbTr, userId);
+                LOGGER.warn("PBM not able to parse internal transfer cannot get to/from account tr id: [{}], user: [{}], id tr: [{}]", idForZenForOwnTransfer, userId, pbTr);
             }
+            // LOGGER.debug("PBM local transfer tr id: [{}], user: [{}], tr: [{}]", idForZenForOwnTransfer, userId, pbTr);
         }
 
         //add payee

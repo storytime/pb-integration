@@ -140,4 +140,8 @@ public class TransactionItem {
         return Objects.hash(getDate(), getIncome(), getOpIncome(), getOriginalPayee(), getOpOutcome(),
                 getOutcomeBankID(), getOutcome(), getOutcomeAccount(), getIncomeBankID(), getUser());
     }
+
+    public boolean isAmountNotZero() {
+        return this.outcome != 0 && this.income != 0;
+    }
 }

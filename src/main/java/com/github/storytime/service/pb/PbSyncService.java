@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
 import static com.github.storytime.error.AsyncErrorHandlerUtil.*;
-import static com.github.storytime.mapper.PbStatementsToDynamoDbMapper.generateUniqString;
+import static com.github.storytime.mapper.PbStatementsAlreadyPushedUtil.generateUniqString;
 import static com.github.storytime.service.util.STUtils.*;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.function.Predicate.not;

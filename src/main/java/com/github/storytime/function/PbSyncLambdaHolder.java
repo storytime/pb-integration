@@ -1,6 +1,6 @@
 package com.github.storytime.function;
 
-import com.github.storytime.mapper.PbStatementsToDynamoDbMapper;
+import com.github.storytime.mapper.PbStatementsAlreadyPushedUtil;
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.aws.PbStatement;
@@ -48,11 +48,10 @@ public class PbSyncLambdaHolder {
                                     .flatMap(Collection::stream)
                                     .collect(toUnmodifiableSet())
                                     .stream()
-                                    .map(PbStatementsToDynamoDbMapper::generateUniqString)
+                                    .map(PbStatementsAlreadyPushedUtil::generateUniqString)
                                     .collect(toUnmodifiableSet());
 
-                            final Set<String> allNewStatements = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed()
-                                    .stream())
+                            final Set<String> allNewStatements = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed().stream())
                                     .collect(toUnmodifiableSet());
 
                             return statementAsyncService.saveAll(dfStatements.setAlreadyPushed(allNewStatements), userId);
