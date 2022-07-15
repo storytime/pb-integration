@@ -18,6 +18,7 @@ import static com.github.storytime.error.AsyncErrorHandlerUtil.logGetPayee;
 import static com.github.storytime.service.util.STUtils.createSt;
 import static com.github.storytime.service.util.STUtils.getTimeAndReset;
 import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.function.Predicate.not;
@@ -44,6 +45,7 @@ public class CustomPayeeService {
             return userAsyncService.getById(userId)
                     .thenApply(Optional::get)
                     .thenApply(AppUser::getCustomPayee)
+                    .thenApply(cp -> cp.stream().sorted(comparing(CustomPayee::getCreateDate).reversed()).toList())
                     .whenComplete((r, e) -> logGetPayee(st, LOGGER, e));
         } catch (Exception e) {
             LOGGER.error("Cannot get payee for user: [{}], time [{}], error: [{}] - error, endpoint ===", userId, getTimeAndReset(st), e.getCause(), e);
