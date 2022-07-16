@@ -142,6 +142,6 @@ public class TransactionItem {
     }
 
     public boolean isAmountNotZero() {
-        return this.outcome != 0 && this.income != 0;
+        return (this.outcome != 0 && this.income == 0) ||  (this.outcome == 0 && this.income != 0);
     }
 }

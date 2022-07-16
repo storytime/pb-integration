@@ -91,7 +91,7 @@ public class CustomPayeeService {
                 .toList();
 
         if (newPayees.isEmpty() && updatedPayees.isEmpty()) {
-            LOGGER.debug("No payee's to update, for user: [{}]", appUser.getId());
+         //   LOGGER.debug("No payee's to update, for user: [{}]", appUser.getId());
             return appUser;
         } else {
             LOGGER.debug("Create new payees for user: [{}] payees: [{}]", appUser.getId(), newPayees);

@@ -25,21 +25,17 @@ public class AppUser {
     @DynamoDBAttribute(attributeName = "id")
     private String id;
 
-
     @DynamoDBAttribute(attributeName = "enabled")
     private boolean enabled;
 
     @DynamoDBAttribute(attributeName = "zenAuthToken")
     private String zenAuthToken;
 
-
     @DynamoDBAttribute(attributeName = "timeZone")
     private String timeZone;
 
-
     @DynamoDBAttribute(attributeName = "zenLastSyncTimestamp")
     private long zenLastSyncTimestamp;
-
 
     @DynamoDBAttribute(attributeName = "zenSyncEnabled")
     private boolean zenSyncEnabled;

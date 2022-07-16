@@ -122,7 +122,7 @@ public class PbSyncService {
 
         var allTrList = newPbTrList.stream().flatMap(List::stream).toList();
         if (allTrList.isEmpty()) {
-            customPayeeService.getPayeeByUserId(user.getId())
+            return customPayeeService.getPayeeByUserId(user.getId())
                     .thenApply(newCustomerPayee -> customPayeeService.mergeUserPayees(newCustomerPayee, user))
                     .thenCompose(userAsyncService::updateUser)
                     .thenApply(Optional::get)

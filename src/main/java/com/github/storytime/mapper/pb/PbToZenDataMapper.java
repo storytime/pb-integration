@@ -62,15 +62,22 @@ public class PbToZenDataMapper {
             // based on createIdForZenForOwnTransfer we can have 2 IDs for 2 transfer between own account
             final var groupedById = allMappedTransactionsForZen.stream().collect(groupingBy(TransactionItem::getId));
 
-            final Stream<TransactionItem> transactionItemsByUniqId = groupedById.values()
+            final List<TransactionItem> transactionItemsByUniqId = groupedById.values()
                     .stream().filter(x -> x.size() == 1).toList()
-                    .stream().flatMap(List::stream);
+                    .stream().flatMap(List::stream)
+                    .toList();
 
-            final Stream<TransactionItem> transactionOfTransfer = groupedById.values().stream().filter(trList -> trList.size() > 1).toList().stream()
-                    .flatMap(trList -> trList.stream().filter(TransactionItem::isAmountNotZero));
+            final List<TransactionItem> transactionOfTransfer = groupedById.values().stream().filter(trList -> trList.size() > 1).toList()
+                    .stream()
+                    .flatMap(trList -> List.of(trList.stream().filter(TransactionItem::isAmountNotZero).toList().stream().findAny()).stream())
+                    .toList()
+                    .stream()
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
 
-            final List<TransactionItem> allNew = Stream.concat(transactionItemsByUniqId, transactionOfTransfer).toList();
-            LOGGER.debug("Transactions from bank, are ready for user: [{}], total count: [{}]", appUser.getId(), allNew.size());
+            final List<TransactionItem> allNew = Stream.concat(transactionItemsByUniqId.stream(), transactionOfTransfer.stream()).toList();
+            LOGGER.debug("Transactions from bank, are ready for user: [{}], before not pushed: [{}] to push count: [{}]", appUser.getId(), allMappedTransactionsForZen.size(), allNew.size());
 
             return of(new ZenDiffRequest()
                     .setCurrentClientTimestamp(now().getEpochSecond())

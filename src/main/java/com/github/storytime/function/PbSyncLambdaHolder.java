@@ -9,6 +9,7 @@ import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.misc.DateService;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -31,10 +32,10 @@ public class PbSyncLambdaHolder {
         return (user, merchant) -> dateService.millisAwsUserDate(merchant.getSyncStartDate(), user);
     }
 
-    public TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> getAwsEndDate() {
+    public TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> getAwsEndDate(final Instant nowInst) {
         return (appUser, merchantInfo, startDate) -> {
             final var period = ofMillis(merchantInfo.getSyncPeriod());
-            final var now = now().withZoneSameInstant(of(appUser.getTimeZone()));
+            final var now = nowInst.atZone(of(appUser.getTimeZone()));
             return between(startDate, now).toMillis() < merchantInfo.getSyncPeriod() ? now : startDate.plus(period);
         };
     }

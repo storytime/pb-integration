@@ -136,6 +136,6 @@ public class PbStatementsService {
         final var merchantId = merchantInfo.getMerchantId();
         final var ed = dateService.millisToIsoFormat(endDate);
         final var lastDigits = right(merchantInfo.getCardNumber(), CARD_LAST_DIGITS);
-        LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync: [{}], card: [{}]", userId, desc, id, merchantId, sd, ed, lastDigits);
+        LOGGER.info("Syncing user: [{}], desc: [{}], mId: [{}], mNumb: [{}], sd: [{}] lastSync/ed: [{}], card: [{}]", userId, desc, id, merchantId, sd, ed, lastDigits);
     }
 }

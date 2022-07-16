@@ -1,7 +1,6 @@
 package com.github.storytime.scheduler;
 
 import com.github.storytime.function.PbSyncLambdaHolder;
-import com.github.storytime.function.TrioFunction;
 import com.github.storytime.model.aws.AppUser;
 import com.github.storytime.model.aws.PbMerchant;
 import com.github.storytime.model.aws.PbStatement;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +30,8 @@ public class PbSyncSchedulerExecutor {
     private final PbSyncService pbSyncService;
     private final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onSuccessFk;
     private final BiFunction<AppUser, PbMerchant, ZonedDateTime> startDateFk;
-    private final TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> endDateFk;
+    // private final TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> endDateFk;
+    private final PbSyncLambdaHolder pbSyncLambdaHolder;
 
     @Autowired
     public PbSyncSchedulerExecutor(final PbSyncService pbSyncService,
@@ -40,14 +41,16 @@ public class PbSyncSchedulerExecutor {
         this.pbSyncService = pbSyncService;
         this.onSuccessFk = pbSyncLambdaHolder.onAwsDbRegularSyncSuccess(statementAsyncService);
         this.startDateFk = pbSyncLambdaHolder.getAwsStartDate(dateService);
-        this.endDateFk = pbSyncLambdaHolder.getAwsEndDate();
+        //  this.endDateFk = pbSyncLambdaHolder.getAwsEndDate();
+        this.pbSyncLambdaHolder = pbSyncLambdaHolder;
     }
 
 
     @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
     public void awsSync() {
-        LOGGER.debug("#################### Starting sync");
-        pbSyncService.sync(onSuccessFk, startDateFk, endDateFk);
+        final var now = Instant.now();
+        LOGGER.debug("#################### Starting sync, now: [{}]", now.getEpochSecond());
+        pbSyncService.sync(onSuccessFk, startDateFk, pbSyncLambdaHolder.getAwsEndDate(now));
     }
 
 }

@@ -204,12 +204,12 @@ public class PbToZenTransactionMapper {
 
             if (internalFromFlag && isAccountExists) {
                 newZenBuilder.outcome(opAmount);
-                newZenBuilder.incomeBankID(null);
+                //newZenBuilder.incomeBankID(null);
                 newZenBuilder.outcomeAccount(maybeAcc.get());
             } else if (internalToFlag && isAccountExists) {
                 newZenBuilder.income(opAmount);
                 newZenBuilder.outcome(opAmount);
-                newZenBuilder.outcomeBankID(null);
+                //newZenBuilder.outcomeBankID(null);
                 newZenBuilder.incomeAccount(maybeAcc.get());
             } else {
                 LOGGER.warn("PBM not able to parse internal transfer cannot get to/from account tr id: [{}], user: [{}], id tr: [{}]", idForZenForOwnTransfer, userId, pbTr);
