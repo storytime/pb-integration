@@ -32,13 +32,13 @@ public class CacheResetScheduler {
         this.userAsyncService = userAsyncService;
     }
 
-    @Scheduled(fixedRateString = "${cache.clean.currency.millis}")
+    @Scheduled(fixedRateString = "${cache.clean.currency.millis}", initialDelayString = "${cache.clean.zentags.millis}")
     @CacheEvict(allEntries = true, value = {CURRENCY_CACHE})
     public void cleaningCurrencyCache() {
         LOGGER.debug("Cleaning up currency cache ...");
     }
 
-    @Scheduled(fixedRateString = "${cache.clean.zentags.millis}")
+    @Scheduled(fixedRateString = "${cache.clean.zentags.millis}", initialDelayString = "${cache.clean.zentags.millis}")
     @CacheEvict(allEntries = true, beforeInvocation = true, value = {TR_TAGS_DIFF, OUT_DATA_BY_MONTH, IN_DATA_BY_MONTH,
             OUT_DATA_BY_YEAR, IN_DATA_BY_YEAR, OUT_DATA_BY_QUARTER, IN_DATA_BY_QUARTER, ZM_SAVING_CACHE
     })

@@ -4,7 +4,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBDocument;
 import lombok.*;
 
-
 @Getter
 @Setter
 @Builder
@@ -27,6 +26,12 @@ public class CustomPayee {
 
     @Override
     public boolean equals(final Object obj) {
+        if (obj == null)
+            return false;
+
+        if (this.getClass() != obj.getClass())
+            return false;
+
         final CustomPayee that = (CustomPayee) obj;
         return that.id.equals(this.id) && that.payee.equals(this.payee);
     }

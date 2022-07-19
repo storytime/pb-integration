@@ -45,24 +45,25 @@ public class PbResponseMapper {
 
     public List<Statement> mapStatementRequestBody(final ResponseEntity<String> responseEntity) {
 
-        final var body = ofNullable(responseEntity.getBody()).orElse(EMPTY);
+        final var maybeBody = ofNullable(responseEntity.getBody()).orElse(EMPTY);
 
-        if (body.contains(customConfig.getPbBankSignature())) {
+        if (maybeBody.contains(customConfig.getPbBankSignature())) {
             throw new PbSignatureException(INVALID_SIGNATURE_ERROR);
         }
 
-        if (body.contains(INVALID_IP)) {
+        if (maybeBody.contains(INVALID_IP)) {
             throw new PbInvalidIpException(INVALID_IP_ERROR);
         }
 
         try {
-            if (!body.contains(SIGNATURE)) { // is error response, wrong ip etc
-                final var error = (com.github.storytime.model.pb.jaxb.statement.response.error.Response) jaxbStatementErrorUnmarshaller.unmarshal(new StringReader(body));
+            if (!maybeBody.contains(SIGNATURE)) { // is error response, wrong ip etc
+                final var error = (com.github.storytime.model.pb.jaxb.statement.response.error.Response) jaxbStatementErrorUnmarshaller.unmarshal(new StringReader(maybeBody));
                 LOGGER.error("Bank return response with error: [{}]", error.getData().getError().getMessage());
                 return emptyList();
             }
 
-            final var parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(body));
+            LOGGER.debug("Bank response string:\n [{}]", maybeBody);
+            final var parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(maybeBody));
             return ofNullable(parsedResponse.getData())
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data::getInfo)
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info::getStatements)
