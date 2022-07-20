@@ -136,6 +136,7 @@ public class CustomPayeeService {
                     .id(randomUUID().toString())
                     .build();
 
+            LOGGER.debug("CP data: [{}], [{}], [{}]", appUser, appUser.getCustomPayee(), newCustomPayee);
             appUser.getCustomPayee().add(newCustomPayee);
         }
     }
