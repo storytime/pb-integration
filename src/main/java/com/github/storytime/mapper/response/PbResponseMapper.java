@@ -64,6 +64,12 @@ public class PbResponseMapper {
 
             LOGGER.debug("Bank response string:\n [{}]", maybeBody);
             final var parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(maybeBody));
+
+            if (parsedResponse == null) {
+                LOGGER.error("Parsed response is null, noting to do, response: [{}]", maybeBody);
+                return emptyList();
+            }
+
             return ofNullable(parsedResponse.getData())
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data::getInfo)
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info::getStatements)
