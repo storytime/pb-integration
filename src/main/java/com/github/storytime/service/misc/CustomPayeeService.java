@@ -91,7 +91,7 @@ public class CustomPayeeService {
                 .toList();
 
         if (newPayees.isEmpty() && updatedPayees.isEmpty()) {
-         //   LOGGER.debug("No payee's to update, for user: [{}]", appUser.getId());
+            //   LOGGER.debug("No payee's to update, for user: [{}]", appUser.getId());
             return appUser;
         } else {
             LOGGER.debug("Create new payees for user: [{}] payees: [{}]", appUser.getId(), newPayees);
@@ -137,7 +137,12 @@ public class CustomPayeeService {
                     .build();
 
             LOGGER.debug("CP data user: [{}], size all: [{}], new: [{}]", appUser, appUser.getCustomPayee().size(), newCustomPayee);
-            appUser.getCustomPayee().add(newCustomPayee);
+
+            try {
+                appUser.getCustomPayee().add(newCustomPayee);
+            } catch (Exception e) {
+                LOGGER.error("CC error", e);
+            }
         }
     }
 }
