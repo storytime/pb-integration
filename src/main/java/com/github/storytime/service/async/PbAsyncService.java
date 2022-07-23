@@ -29,9 +29,9 @@ public class PbAsyncService {
         this.pool = cfThreadPool;
     }
 
-    public CompletableFuture<Optional<ResponseEntity<String>>> pullPbTransactions(final Request requestToBank) {
-        LOGGER.debug("Fetching bank transactions - started");
-        return supplyAsync(() -> pbStatementsHttpService.pullPbTransactions(requestToBank), pool);
+    public CompletableFuture<Optional<ResponseEntity<String>>> pullPbTransactions(final Request requestToBank, final String shortDesc) {
+        LOGGER.debug("Fetching bank transactions, desc: [{}] - started", shortDesc);
+        return supplyAsync(() -> pbStatementsHttpService.pullPbTransactions(requestToBank, shortDesc), pool);
     }
 
     public CompletableFuture<Optional<ResponseEntity<String>>> pullPbAccounts(final Request requestToBank) {

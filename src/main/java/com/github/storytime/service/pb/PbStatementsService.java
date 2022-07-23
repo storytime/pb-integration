@@ -67,7 +67,7 @@ public class PbStatementsService {
 
         logValues(appUser, merchantInfo, startDate, endDate);
         final var requestToBank = pbRequestBuilder.buildStatementRequest(merchantInfo, dateService.toPbFormat(startDate), dateService.toPbFormat(endDate));
-        return pbAsyncService.pullPbTransactions(requestToBank)
+        return pbAsyncService.pullPbTransactions(requestToBank, merchantInfo.getShortDesc())
                 .thenApply(Optional::get)
                 .thenApply(responseFromBank -> handleResponse(appUser, merchantInfo, startDate, endDate, responseFromBank))
                 .thenApply(stList -> additionalCommentService.addAdditionalAwsComments(stList, merchantInfo, appUser.getTimeZone()))

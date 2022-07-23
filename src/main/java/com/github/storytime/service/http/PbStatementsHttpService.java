@@ -31,15 +31,15 @@ public class PbStatementsHttpService {
         this.customConfig = customConfig;
     }
 
-    public Optional<ResponseEntity<String>> pullPbTransactions(final Request requestToBank) {
+    public Optional<ResponseEntity<String>> pullPbTransactions(final Request requestToBank, final String shortDesc) {
         final var st = createSt();
         try {
             final var pbTransactionsUrl = customConfig.getPbTransactionsUrl();
             final var response = of(restTemplate.postForEntity(pbTransactionsUrl, requestToBank, String.class));
-            LOGGER.debug("Fetched bank transactions, time: [{}] - finish", getTimeAndReset(st));
+            LOGGER.debug("Fetched bank transactions, desc: [{}],  time: [{}] - finish", shortDesc, getTimeAndReset(st));
             return response;
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch bank transactions, time: [{}], errors: [{}] - error", e.getMessage(), getTimeAndReset(st), e);
+            LOGGER.error("Cannot fetch bank transactions, desc: [{}], time: [{}], errors: [{}] - error", shortDesc, e.getMessage(), getTimeAndReset(st), e);
             return empty();
         }
     }
