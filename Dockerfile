@@ -7,9 +7,10 @@ RUN apk update && \
     cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime && \
     echo "Europe/Kiev" > /etc/timezone && \
     addgroup -g ${id} ${aUser} && adduser -u ${id} -G ${aUser} -h /home/${aUser} -D ${aUser} && \
+    mkdir -p /home/${aUser}/logs && \
     chown -R ${aUser}:${aUser} /home/${aUser}
 
 WORKDIR /home/${aUser}
 USER ${aUser}:${aUser}
 COPY build/libs/pb-integration.jar /home/${aUser}
-CMD mkdir -p /home/${aUser}/logs && java -Dserver.port=8080 $JAVA_OPTIONS -jar pb-integration.jar
+CMD java -Dserver.port=8080 $JAVA_OPTIONS -jar pb-integration.jar

@@ -42,5 +42,4 @@ public class CustomPayeeController {
                                                                        @PathVariable("userId") final String userId) {
         return customPayeeService.updatePayeeByUserId(userId, toUpdateList);
     }
-
 }
