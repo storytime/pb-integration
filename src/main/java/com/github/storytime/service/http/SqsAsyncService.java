@@ -1,8 +1,8 @@
 package com.github.storytime.service.http;
 
 import com.github.storytime.config.SqsConfig;
+import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import org.apache.logging.log4j.Logger;
-import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import static com.github.storytime.service.util.STUtils.createSt;

@@ -34,12 +34,20 @@ dependencies {
     implementation("com.sun.xml.bind:jaxb-core:2.3.0.1")
     implementation("javax.validation:validation-api:2.0.1.Final")
     implementation("one.util:streamex:0.8.1")
-    implementation("org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE") {
+
+    // https://stackoverflow.com/questions/73013519/org-springframework-cloud-vs-io-awspring-cloud/73013822
+    implementation("io.awspring.cloud:spring-cloud-starter-aws-messaging:2.4.2") {
         exclude group: 'com.amazonaws', module: 'aws-java-sdk-ec2'
         exclude group: 'com.amazonaws', module: 'aws-java-sdk-cloudformation'
         exclude group: 'com.amazonaws', module: 'aws-java-sdk-kms'
         exclude group: 'com.amazonaws', module: 'aws-java-sdk-sns'
         exclude group: 'com.amazonaws', module: 'aws-java-sdk-s3'
+    }
+
+    implementation("io.awspring.cloud:spring-cloud-starter-aws-parameter-store-config:2.4.2") {
+        exclude group: 'com.amazonaws', module: 'aws-java-sdk-ec2'
+        exclude group: 'com.amazonaws', module: 'aws-java-sdk-s3'
+        exclude group: 'com.amazonaws', module: 'aws-java-sdk-kms'
     }
 
     implementation("com.amazonaws:aws-java-sdk-dynamodb:1.12.243")

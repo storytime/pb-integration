@@ -72,7 +72,7 @@ public class PbResponseMapper {
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements::getStatement)
                     .orElse(emptyList());
         } catch (Exception e) {
-            LOGGER.error("Cannot parse bank response: [{}]", e.getMessage(), e);
+            LOGGER.error("Cannot parse bank XML response: [{}]", e.getMessage(), e);
             return emptyList();
         }
     }
