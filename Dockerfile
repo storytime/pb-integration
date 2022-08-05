@@ -2,8 +2,8 @@ FROM amazoncorretto:17-alpine
 EXPOSE 10080
 ENV aUser app
 ENV id 1525
-COPY repositories /etc/apk/repositories
-RUN apk update &&\
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.15/main" > /etc/apk/repositories &&\
+    apk update &&\
     apk add --no-cache tzdata && \
     cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime && \
     echo "Europe/Kiev" > /etc/timezone && \
