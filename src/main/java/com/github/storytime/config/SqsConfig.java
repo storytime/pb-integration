@@ -23,6 +23,9 @@ public class SqsConfig {
     @Value("${cloud.aws.end-point.uri}")
     private String shutdownQueue;
 
+    @Value("${aws.region}")
+    private String awsRegion;
+
     @Bean
     public QueueMessagingTemplate awsQueueMessagingTemplate(final AmazonSQSAsync amazonSQSAsync) {
         return new QueueMessagingTemplate(amazonSQSAsync);
@@ -32,7 +35,7 @@ public class SqsConfig {
     @Primary
     public AmazonSQSAsync amazonSQSAsync() {
         AWSStaticCredentialsProvider awsStaticCredentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
-        return AmazonSQSAsyncClientBuilder.standard().withRegion(Regions.EU_WEST_1)
+        return AmazonSQSAsyncClientBuilder.standard().withRegion(awsRegion)
                 .withCredentials(awsStaticCredentialsProvider)
                 .build();
     }

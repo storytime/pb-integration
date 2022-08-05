@@ -37,17 +37,14 @@ public class DateService {
     public static final int START_SEC = 0;
     public static final int FIRST_DAT_OF_MO = 1;
     private static final Set<DayOfWeek> WEEKEND = of(SATURDAY, SUNDAY);
-    private final DateTimeFormatter minfinDateTimeFormatter;
     private final DateTimeFormatter isoDateTimeFormatter;
     private final DateTimeFormatter pbDateTimeFormatter;
     private final DateTimeFormatter zenDateTimeFormatter;
 
     @Autowired
-    public DateService(final DateTimeFormatter minfinDateTimeFormatter,
-                       final DateTimeFormatter isoDateTimeFormatter,
+    public DateService(final DateTimeFormatter isoDateTimeFormatter,
                        final DateTimeFormatter zenDateTimeFormatter,
                        final DateTimeFormatter pbDateTimeFormatter) {
-        this.minfinDateTimeFormatter = minfinDateTimeFormatter;
         this.isoDateTimeFormatter = isoDateTimeFormatter;
         this.pbDateTimeFormatter = pbDateTimeFormatter;
         this.zenDateTimeFormatter = zenDateTimeFormatter;

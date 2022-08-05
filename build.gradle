@@ -16,7 +16,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
 
-sourceCompatibility = '16'
+sourceCompatibility = '17'
 archivesBaseName = 'pb-integration'
 
 repositories {

@@ -13,10 +13,6 @@ public class ApplicationConfig {
 
     @Bean
     public List<String> configsToPrint() {
-        return of(
-                "applicationConfig: [classpath:/application.properties]",
-                "class path resource [date.format.properties]",
-                "class path resource [custom.properties]"
-        );
+        return of("applicationConfig: [classpath:/application.properties]");
     }
 }

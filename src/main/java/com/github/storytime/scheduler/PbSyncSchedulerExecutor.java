@@ -30,7 +30,6 @@ public class PbSyncSchedulerExecutor {
     private final PbSyncService pbSyncService;
     private final BiFunction<List<List<Statement>>, String, CompletableFuture<Optional<PbStatement>>> onSuccessFk;
     private final BiFunction<AppUser, PbMerchant, ZonedDateTime> startDateFk;
-    // private final TrioFunction<AppUser, PbMerchant, ZonedDateTime, ZonedDateTime> endDateFk;
     private final PbSyncLambdaHolder pbSyncLambdaHolder;
 
     @Autowired
@@ -41,12 +40,11 @@ public class PbSyncSchedulerExecutor {
         this.pbSyncService = pbSyncService;
         this.onSuccessFk = pbSyncLambdaHolder.onAwsDbRegularSyncSuccess(statementAsyncService);
         this.startDateFk = pbSyncLambdaHolder.getAwsStartDate(dateService);
-        //  this.endDateFk = pbSyncLambdaHolder.getAwsEndDate();
         this.pbSyncLambdaHolder = pbSyncLambdaHolder;
     }
 
 
-    @Scheduled(fixedRateString = "${sync.first.priority.period.millis}")
+    @Scheduled(fixedRateString = "${sync.first.priority.period.millis}", initialDelayString = "${sync.first.priority.period.millis.init.delay}")
     public void awsSync() {
         final var now = Instant.now();
         LOGGER.debug("#################### Starting sync, now: [{}]", now.getEpochSecond());

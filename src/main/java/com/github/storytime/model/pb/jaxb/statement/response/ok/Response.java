@@ -61,7 +61,7 @@ public class Response {
         })
         public static class Info {
 
-            @XmlElement(required = true)
+            @XmlElement
             protected Response.Data.Info.Statements statements;
 
             @XmlAccessorType(XmlAccessType.FIELD)

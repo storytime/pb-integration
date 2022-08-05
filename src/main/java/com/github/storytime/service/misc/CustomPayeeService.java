@@ -137,11 +137,11 @@ public class CustomPayeeService {
                     .build();
 
             LOGGER.debug("CP data user: [{}], size all: [{}], new: [{}]", appUser, appUser.getCustomPayee().size(), newCustomPayee);
-
+            List<CustomPayee> customPayee = appUser.getCustomPayee();
             try {
-                appUser.getCustomPayee().add(newCustomPayee);
+                customPayee.add(newCustomPayee);
             } catch (Exception e) {
-                LOGGER.error("CC error", e);
+                LOGGER.error("CC error, cc:[{}], new cc: [{}]", customPayee, newCustomPayee, e);
             }
         }
     }

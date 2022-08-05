@@ -31,7 +31,7 @@ public class HttpClientConfig {
     @Value("${http.connect.timeout.millis}")
     private int httpConnectTimeoutMillis;
 
-    @Value("${http.connect.manager,timeout.millis}")
+    @Value("${http.connect.manager.timeout.millis}")
     private int httpConnectManagerTimeoutMillis;
 
     @Value("${http.request.timeout.millis}")

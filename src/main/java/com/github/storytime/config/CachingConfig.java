@@ -40,6 +40,4 @@ public class CachingConfig {
         cacheManager.setCaches(caches);
         return cacheManager;
     }
-
-
 }

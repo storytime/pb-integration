@@ -43,7 +43,7 @@ public class PbResponseMapper {
     }
 
 
-    public List<Statement> mapStatementRequestBody(final ResponseEntity<String> responseEntity) {
+    public List<Statement> mapStatementRequestBody(final ResponseEntity<String> responseEntity, final String shortDesc) {
 
         final var maybeBody = ofNullable(responseEntity.getBody()).orElse(EMPTY);
 
@@ -61,9 +61,10 @@ public class PbResponseMapper {
                 LOGGER.error("Bank return response with error: [{}]", error.getData().getError().getMessage());
                 return emptyList();
             }
-
+            LOGGER.debug("Bank response string:\n [{}]", maybeBody);
             final var parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(maybeBody));
-            LOGGER.debug("Bank response string:\n [{}], parsed: [{}]", maybeBody, parsedResponse);
+            LOGGER.debug("Bank response string parsed: [{}]", parsedResponse);
+
 
             return ofNullable(parsedResponse)
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response::getData)
@@ -72,7 +73,7 @@ public class PbResponseMapper {
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements::getStatement)
                     .orElse(emptyList());
         } catch (Exception e) {
-            LOGGER.error("Cannot parse bank XML response: [{}]", e.getMessage(), e);
+            LOGGER.error("Cannot parse bank XML, for merch: [{}] response: [{}]", shortDesc, e.getMessage(), e);
             return emptyList();
         }
     }

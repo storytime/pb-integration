@@ -5,22 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 @Setter
 @Getter
 @Configuration
-@PropertySource(value = "classpath:custom.properties", encoding = "UTF-8")
 public class CustomConfig {
-
-    @Value("${pb.exchange.url}")
-    private String pbExchangeUrl;
-
-    @Value("${minfin.exchange.url}")
-    private String minExchangeUrl;
-
-    @Value("${minfin.access.token}")
-    private String minfinToken;
 
     @Value("${pb.transactions.url}")
     private String pbTransactionsUrl;
@@ -102,9 +91,6 @@ public class CustomConfig {
 
     @Value("${cf.executor.thread.prefix}")
     private String cfThreadPrefix;
-
-    @Value("${ynab.budgets.url}")
-    private String ynabUrl;
 
     @Value("${pb.invalid.signature.max.rollback.period.ms}")
     private Long maxRollbackPeriod;

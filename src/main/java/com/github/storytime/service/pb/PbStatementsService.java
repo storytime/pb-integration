@@ -80,7 +80,7 @@ public class PbStatementsService {
                                            final ZonedDateTime endDate,
                                            final ResponseEntity<String> body) {
         try {
-            final List<Statement> allPbTransactions = pbResponseMapper.mapStatementRequestBody(body);
+            final List<Statement> allPbTransactions = pbResponseMapper.mapStatementRequestBody(body, m.getShortDesc());
             final List<Statement> onlyNewPbTransactions = filterNewPbTransactions(startDate, endDate, allPbTransactions, u);
             m.setSyncStartDate(endDate.toInstant().toEpochMilli()); // later will do save to update last sync time
             return onlyNewPbTransactions;

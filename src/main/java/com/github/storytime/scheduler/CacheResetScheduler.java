@@ -32,7 +32,7 @@ public class CacheResetScheduler {
         this.userAsyncService = userAsyncService;
     }
 
-    @Scheduled(fixedRateString = "${cache.clean.currency.millis}", initialDelayString = "${cache.clean.zentags.millis}")
+    @Scheduled(fixedRateString = "${cache.clean.currency.millis}", initialDelayString = "${cache.clean.currency.millis}")
     @CacheEvict(allEntries = true, value = {CURRENCY_CACHE})
     public void cleaningCurrencyCache() {
         LOGGER.debug("Cleaning up currency cache ...");
