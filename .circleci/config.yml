@@ -2,7 +2,7 @@ version: 2
 jobs:
   build_prod_artifact:
     docker:
-      - image: cimg/openjdk:16.0.0
+      - image: cimg/openjdk:17.0.3
     environment:
       TERM: dumb
       _JAVA_OPTIONS: "-Xmx3072m"
