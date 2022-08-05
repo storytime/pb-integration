@@ -17,7 +17,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
 
 sourceCompatibility = '17'
-archivesBaseName = 'pb-integration'
+archivesBaseName = 'sync-app'
 
 repositories {
     maven { url 'https://repo.spring.io/release' }

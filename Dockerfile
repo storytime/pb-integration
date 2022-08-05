@@ -12,5 +12,5 @@ RUN apk update && \
 
 WORKDIR /home/${aUser}
 USER ${aUser}:${aUser}
-COPY build/libs/pb-integration.jar /home/${aUser}
-CMD java -Dserver.port=8080 $JAVA_OPTIONS -jar pb-integration.jar
+COPY build/libs/sync-app.jar /home/${aUser}
+CMD java -Dserver.port=8080 $JAVA_OPTIONS -jar sync-app.jar
