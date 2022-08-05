@@ -1,8 +1,9 @@
-FROM amazoncorretto:17-alpine3.13
+FROM amazoncorretto:17-alpine
 EXPOSE 10080
 ENV aUser app
 ENV id 1525
-    RUN apk update &&\
+COPY repositories /etc/apk/repositories
+RUN apk update &&\
     apk add --no-cache tzdata && \
     cp /usr/share/zoneinfo/Europe/Kiev /etc/localtime && \
     echo "Europe/Kiev" > /etc/timezone && \
