@@ -1,0 +1,6 @@
+aws:
+  paramstore:
+    prefix: /config
+    enabled: true
+    profileSeparator: _
+    name: sync-app

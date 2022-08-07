@@ -1,0 +1,168 @@
+###### PROPS ARE TAKEN FROM AWS PARAM STORE #####
+
+# AWS_REGION / AWS_ACCESS_KEY_ID /AWS_SECRET_ACCESS_KEY - must be setupped before start (evn vars)
+# first its trying to get it from AWS, if not exists, them from this conf
+
+spring:
+    application:
+        name: sync-app
+    config:
+        import: 'aws-parameterstore:'
+
+#async:
+#    executor:
+#        core:
+#            pool:
+#                size: ${ASYNC_CORE_POOL_SIZE:10}
+#        max:
+#            pool:
+#                size: ${ASYNC_MAX_POOL_SIZE:50}
+#        thread:
+#            prefix: async-
+#aws:
+#    dynamodb:
+#        endpoint: https://dynamodb.eu-west-1.amazonaws.com
+#cache:
+#    clean:
+#        currency:
+#            millis: 300000
+#        zentags:
+#            millis: 3600000
+#cf:
+#    executor:
+#        core:
+#            pool:
+#                size: ${CF_CORE_POOL_SIZE:50}
+#        max:
+#            pool:
+#                size: ${CF_CORE_POOL_SIZE:100}
+#        thread:
+#            prefix: cf-
+#cloud:
+#    aws:
+#        credentials:
+#            access-key: ${AWS_AK:xxx}
+#            instanceProfile: false
+#            secret-key: ${AWS_SC:xxx}
+#        end-point:
+#            uri: ${AWS_SQS_SHUTDOWN_QUEUE:https://sqs...}
+#        region:
+#            auto: false
+#            static: ${AWS_REGION}
+#            use-default-aws-region-chain: true
+#        stack: false
+#        stack.auto: false
+#filter:
+#    new:
+#        transactions:
+#            start:
+#                time:
+#                    millis: ${FILTER_NEW_TRANSACTIONS_START:3600000}
+#http:
+#    connect:
+#        manager:
+#            timeout:
+#                millis: 90000
+#        timeout:
+#            millis: 90000
+#    request:
+#        keep:
+#            alive:
+#                millis: 600000
+#        max:
+#            connections: 1000
+#        timeout:
+#            millis: 600000
+#iso: yyyy-MM-dd HH:mm:ss
+#logbook:
+#    exclude: /app/api/**, /actuator**
+#    filter:
+#        enabled: true
+#    format:
+#        style: http
+#    write:
+#        category: http.wire-log
+#pb:
+#    account:
+#        url: https://api.privatbank.ua/p24api/balance
+#    bank:
+#        signature:
+#            error: <data><error message ="invalid signature" /></data>
+#    cash:
+#        url: https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5
+#    invalid:
+#        signature:
+#            max:
+#                rollback:
+#                    period:
+#                        ms: 1209600000
+#            rollback:
+#                period:
+#                    hours: ${PB_ROLL_BACK_PERIOD:1}
+#    transactions:
+#        url: https://api.privatbank.ua/p24api/rest_fiz
+#private:
+#    bank: dd.MM.yyyy
+#pushed:
+#    pb:
+#        zen:
+#            transaction:
+#                storage:
+#                    clean:
+#                        older:
+#                            millis: 86400000
+#scheduler:
+#    executor:
+#        core:
+#            pool:
+#                size: ${SCHEDULER_CORE_POOL_SIZE:25}
+#        thread:
+#            prefix: scheduler-
+#server:
+#    http2:
+#        enabled: true
+#    port: 8080
+#spring:
+#    application:
+#        name: sync-app
+#    banner:
+#        charset: UTF-8
+#        location: classpath:banner.txt
+#    config:
+#        import: 'aws-parameterstore:'
+#    jackson:
+#        default-property-inclusion: non_null
+#    jmx:
+#        enabled: false
+#    main:
+#        lazy-initialization: true
+#    output:
+#        ansi:
+#            enabled: always
+#sync:
+#    first:
+#        priority:
+#            period:
+#                millis: ${FIRST_PRIO_SYNC:30000}
+#                millis.init.delay: 50000
+#verbal:
+#    regexp:
+#        pb:
+#            cash:
+#                withdrawal: Снятие наличных
+#                withdrawal.new: Банкомат Отделение банка
+#            comment:
+#                separator: ':'
+#            money:
+#                back: ВОЗВРАТ СРЕДСТВ
+#            transfer:
+#                digit:
+#                    separator: '**'
+#                internal:
+#                    from: Перевод со своей карты
+#                    from.new: Со своей карты
+#                    to: Перевод на свою карту
+#                    to.new: На свою карту
+#                terminal: PrivatBank
+#zen: yyyy-MM-dd'T'HH:mm:ss
+#zen.diff.url: https://api.zenmoney.ru/v8/diff/
