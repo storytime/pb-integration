@@ -14,6 +14,7 @@ import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.storytime.config.props.Constants.*;
 import static java.math.RoundingMode.HALF_DOWN;
@@ -65,13 +66,15 @@ public class PbResponseMapper {
             final var parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(maybeBody));
             LOGGER.debug("Bank response for: [{}], string parsed: [{}]", shortDesc, parsedResponse);
 
+            Optional<com.github.storytime.model.pb.jaxb.statement.response.ok.Response> parsedResponseMaybe = ofNullable(parsedResponse);
+            Optional<com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data> dataMaybe = parsedResponseMaybe.map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response::getData);
+            Optional<com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info> infoMaybe = dataMaybe.map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data::getInfo);
+            Optional<com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements> statementsMaybe = infoMaybe.map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info::getStatements);
+            Optional<List<Statement>> statementsListMaybe = statementsMaybe.map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements::getStatement);
 
-            return ofNullable(parsedResponse)
-                    .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response::getData)
-                    .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data::getInfo)
-                    .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info::getStatements)
-                    .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements::getStatement)
-                    .orElse(emptyList());
+            LOGGER.debug("Before pas parsedResponseMaybe: [{}], dataMaybe: [{}], infoMaybe: [{}], statementsMaybe: [{}], statementsListMaybe: [{}]", parsedResponseMaybe, dataMaybe, infoMaybe, statementsMaybe, statementsListMaybe);
+
+            return statementsListMaybe.orElse(emptyList());
         } catch (Exception e) {
             LOGGER.error("Cannot parse bank XML, for: [{}], response: [{}]", shortDesc, e.getMessage(), e);
             return emptyList();
