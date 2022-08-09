@@ -58,12 +58,12 @@ public class PbResponseMapper {
         try {
             if (!maybeBody.contains(SIGNATURE)) { // is error response, wrong ip etc
                 final var error = (com.github.storytime.model.pb.jaxb.statement.response.error.Response) jaxbStatementErrorUnmarshaller.unmarshal(new StringReader(maybeBody));
-                LOGGER.error("Bank return response with error: [{}]", error.getData().getError().getMessage());
+                LOGGER.error("Bank return for: [{}], response with error: [{}]", shortDesc, error.getData().getError().getMessage());
                 return emptyList();
             }
-            LOGGER.debug("Bank response string:\n [{}]", maybeBody);
+            LOGGER.debug("Bank response for: [{}], string:\n [{}]", shortDesc, maybeBody);
             final var parsedResponse = (com.github.storytime.model.pb.jaxb.statement.response.ok.Response) jaxbStatementOkUnmarshaller.unmarshal(new StringReader(maybeBody));
-            LOGGER.debug("Bank response string parsed: [{}]", parsedResponse);
+            LOGGER.debug("Bank response for: [{}], string parsed: [{}]", shortDesc, parsedResponse);
 
 
             return ofNullable(parsedResponse)
@@ -73,7 +73,7 @@ public class PbResponseMapper {
                     .map(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements::getStatement)
                     .orElse(emptyList());
         } catch (Exception e) {
-            LOGGER.error("Cannot parse bank XML, for merch: [{}] response: [{}]", shortDesc, e.getMessage(), e);
+            LOGGER.error("Cannot parse bank XML, for: [{}], response: [{}]", shortDesc, e.getMessage(), e);
             return emptyList();
         }
     }
