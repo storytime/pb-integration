@@ -17,7 +17,7 @@ import java.util.List;
 @Accessors(chain = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@DynamoDBTable(tableName = "app-user-prod")
+@DynamoDBTable(tableName = "sync-app-user-prod")
 public class AppUser {
 
     @DynamoDBHashKey
