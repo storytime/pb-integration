@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -137,7 +138,7 @@ public class CustomPayeeService {
                     .build();
 
             LOGGER.debug("CP data user: [{}], size all: [{}], new: [{}]", appUser, appUser.getCustomPayee().size(), newCustomPayee);
-            List<CustomPayee> customPayee = appUser.getCustomPayee();
+            final ArrayList<CustomPayee> customPayee = (ArrayList<CustomPayee>) appUser.getCustomPayee();
             try {
                 customPayee.add(newCustomPayee);
             } catch (Exception e) {
