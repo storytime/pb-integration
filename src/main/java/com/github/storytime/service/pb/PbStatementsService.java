@@ -10,6 +10,7 @@ import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.In
 import com.github.storytime.service.async.PbAsyncService;
 import com.github.storytime.service.misc.AdditionalCommentService;
 import com.github.storytime.service.misc.DateService;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,10 @@ public class PbStatementsService {
         try {
             final List<Statement> allPbTransactions = pbResponseMapper.mapStatementRequestBody(body, m.getShortDesc());
             final List<Statement> onlyNewPbTransactions = filterNewPbTransactions(startDate, endDate, allPbTransactions, u);
+
+            List<Statement> statements1 = ListUtils.removeAll(allPbTransactions, onlyNewPbTransactions);
+            System.out.println(statements1);
+
             m.setSyncStartDate(endDate.toInstant().toEpochMilli()); // later will do save to update last sync time
             return onlyNewPbTransactions;
         } catch (PbSignatureException e) {
