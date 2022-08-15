@@ -123,7 +123,8 @@ public class CustomPayeeService {
     }
 
     public void updatePayeeForUser(final AppUser appUser, final String transactionDesc) {
-        final Optional<CustomPayee> maybeCustomPayee = appUser.getCustomPayee()
+        final List<CustomPayee> allUserCustomPayee = appUser.getCustomPayee();
+        final Optional<CustomPayee> maybeCustomPayee = allUserCustomPayee
                 .stream()
                 .filter(t -> t.getContainsValue().equals(transactionDesc))
                 .findFirst();
@@ -137,13 +138,9 @@ public class CustomPayeeService {
                     .id(randomUUID().toString())
                     .build();
 
-            LOGGER.debug("CP data user: [{}], size all: [{}], new: [{}]", appUser, appUser.getCustomPayee().size(), newCustomPayee);
-            final ArrayList<CustomPayee> customPayee = (ArrayList<CustomPayee>) appUser.getCustomPayee();
-            try {
-                customPayee.add(newCustomPayee);
-            } catch (Exception e) {
-                LOGGER.error("CC error, cc:[{}], new cc: [{}]", customPayee, newCustomPayee, e);
-            }
+            final List<CustomPayee> mergedUserCustomPayee = new ArrayList<>(allUserCustomPayee);
+            mergedUserCustomPayee.add(newCustomPayee);
+            appUser.setCustomPayee(mergedUserCustomPayee);
         }
     }
 }
