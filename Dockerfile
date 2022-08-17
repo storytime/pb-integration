@@ -13,5 +13,5 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.15/main" > /etc/apk/repositori
 
 WORKDIR /home/${aUser}
 USER ${aUser}:${aUser}
-COPY build/libs/sync-app.jar /home/${aUser}
+COPY sync-app.jar /home/${aUser}
 CMD java -Dserver.port=8080 $JAVA_OPTIONS -jar sync-app.jar
