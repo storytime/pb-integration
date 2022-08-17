@@ -15,7 +15,6 @@ import static javax.xml.bind.JAXBContext.newInstance;
 @Configuration
 public class JAXBConfig {
 
-
     @Bean
     public StringWriter stringWriter() {
         return new StringWriter();
@@ -23,8 +22,7 @@ public class JAXBConfig {
 
     @Bean
     public Marshaller jaxbMarshaller() throws JAXBException {
-        final JAXBContext jaxbContext = newInstance(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.class
-        );
+        final JAXBContext jaxbContext = newInstance(com.github.storytime.model.pb.jaxb.statement.response.ok.Response.class);
         return jaxbContext.createMarshaller();
     }
 
