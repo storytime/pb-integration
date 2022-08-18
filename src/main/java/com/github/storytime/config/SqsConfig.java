@@ -2,6 +2,7 @@ package com.github.storytime.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder;
@@ -14,17 +15,8 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class SqsConfig {
 
-    @Value("${cloud.aws.credentials.access-key}")
-    private String accessKey;
-
-    @Value("${cloud.aws.credentials.secret-key}")
-    private String secretKey;
-
     @Value("${cloud.aws.end-point.uri}")
     private String shutdownQueue;
-
-    @Value("${aws.region}")
-    private String awsRegion;
 
     @Bean
     public QueueMessagingTemplate awsQueueMessagingTemplate(final AmazonSQSAsync amazonSQSAsync) {
@@ -34,9 +26,8 @@ public class SqsConfig {
     @Bean
     @Primary
     public AmazonSQSAsync amazonSQSAsync() {
-        AWSStaticCredentialsProvider awsStaticCredentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
-        return AmazonSQSAsyncClientBuilder.standard().withRegion(awsRegion)
-                .withCredentials(awsStaticCredentialsProvider)
+        return AmazonSQSAsyncClientBuilder.standard()
+                .withCredentials(new EnvironmentVariableCredentialsProvider())
                 .build();
     }
 

@@ -41,9 +41,7 @@ spring:
 #cloud:
 #    aws:
 #        credentials:
-#            access-key: ${AWS_AK:xxx}
 #            instanceProfile: false
-#            secret-key: ${AWS_SC:xxx}
 #        end-point:
 #            uri: ${AWS_SQS_SHUTDOWN_QUEUE:https://sqs...}
 #        region:

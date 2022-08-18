@@ -18,7 +18,6 @@ public class DynamoDBConfiguration {
     private AmazonDynamoDB buildAmazonDynamoDB() {
         return AmazonDynamoDBClientBuilder
                 .standard()
-                //.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(dynamodbEndpoint, awsRegion))
                 .withCredentials(new EnvironmentVariableCredentialsProvider())
                 .build();
     }
