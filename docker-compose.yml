@@ -30,6 +30,7 @@ services:
           memory: 25MB
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 15
 
 #PLEASE NOTE!  dirs for volumes must be created
 volumes:
