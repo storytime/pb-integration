@@ -34,7 +34,7 @@ public class VerbalExpressionConfig {
         return regex()
                 .startOfLine()
                 .anything()
-                .oneOf(customConfig.getPbCashWithdrawal(), customConfig.getPbCashWithdrawalNew())
+                .oneOf(customConfig.getPbCashWithdrawal(), customConfig.getPbCashWithdrawalNew(), customConfig.getPbCashWithdrawalCashMachine())
                 .anything()
                 .endOfLine()
                 .build();
