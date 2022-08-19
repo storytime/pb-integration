@@ -19,6 +19,12 @@ services:
           memory: 150MB
       restart_policy:
         condition: on-failure
+  watchtower:
+    image: containrrr/watchtower
+    networks:
+      - backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 #PLEASE NOTE!  dirs for volumes must be created
 volumes:
