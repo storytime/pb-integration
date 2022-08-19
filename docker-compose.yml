@@ -23,6 +23,11 @@ services:
     image: containrrr/watchtower
     networks:
       - backend
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 25MB
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
