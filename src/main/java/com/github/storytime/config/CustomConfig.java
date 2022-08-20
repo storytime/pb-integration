@@ -35,6 +35,9 @@ public class CustomConfig {
     @Value("${async.executor.max.pool.size}")
     private Integer asyncMaxPoolSize;
 
+    @Value("${async.executor.keep.alive.sec}")
+    private Integer keepAliveSeconds;
+
     @Value("${async.executor.thread.prefix}")
     private String asyncThreadPrefix;
 
