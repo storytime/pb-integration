@@ -23,7 +23,7 @@ public class PrintAllConfigProperties {
     @EventListener
     public void handleContextRefreshed(ContextRefreshedEvent event) {
         try {
-            versionService.readVersion().thenAccept(v -> LOGGER.debug("========== Build date: [{}] ==========", v));
+         //   versionService.readVersion().thenAccept(v -> LOGGER.debug("========== Build date: [{}] ==========", v));
         } catch (Exception e) {
             LOGGER.error("Cannot print properties: [{}]", e.getMessage());
         }
