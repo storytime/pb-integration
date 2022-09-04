@@ -147,7 +147,7 @@ public class PbSyncService {
                 .thenApply(AppUser::getId)
                 .thenCompose(x -> onSuccessFk.apply(newPbTrList, user.getId()))
                 .thenApply(Optional::get)
-                .thenApply(PbStatement::getId)
+                .thenApply(PbStatement::getUserId)
                 .whenComplete((r, e) -> logSyncPushByUserNotEmpty(user.getId(), st, LOGGER, e));
     }
 
