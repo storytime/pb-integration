@@ -37,7 +37,7 @@ public class DynamoDbStatementService {
             LOGGER.debug("Pulled statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
             return allStatement;
         } catch (Exception e) {
-            LOGGER.debug("Error to fetch statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
+            LOGGER.error("Error to fetch statements from dynamo db time: [{}], error: [{}]", getTimeAndReset(st), e.getMessage(), e);
             return emptyList();
         }
     }
@@ -58,7 +58,7 @@ public class DynamoDbStatementService {
             LOGGER.debug("Pulled user statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), allStatement.size());
             return allStatement.isEmpty() ? PbStatement.builder().userId(userId).alreadyPushed(new TreeSet<>()).build() : allStatement.stream().findFirst().orElseThrow();
         } catch (Exception e) {
-            LOGGER.debug("Error to fetch users statements from dynamo db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
+            LOGGER.error("Error to fetch users statements from dynamo db time: [{}], error [{}]", getTimeAndReset(st), e.getMessage(), e);
             return PbStatement.builder().userId(userId).alreadyPushed(new TreeSet<>()).build();
         }
     }
@@ -70,7 +70,7 @@ public class DynamoDbStatementService {
             LOGGER.debug("Saved statements db time: [{}], id: [{}] - finish", getTimeAndReset(st), statementList.size());
             return statementList;
         } catch (Exception e) {
-            LOGGER.debug("Saved statements db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
+            LOGGER.error("Saved statements db time: [{}], error [{}]", getTimeAndReset(st), e.getMessage(), e);
             return emptyList();
         }
     }
@@ -82,7 +82,7 @@ public class DynamoDbStatementService {
             LOGGER.debug("Saved statement db time: [{}], user id: [{}] - finish", getTimeAndReset(st), pbStatement.getUserId());
             return of(pbStatement);
         } catch (Exception e) {
-            LOGGER.debug("Saved statements db time: [{}], amount [{}] - finish", getTimeAndReset(st), e);
+            LOGGER.error("Saved statements db time: [{}], error [{}]", getTimeAndReset(st), e.getMessage(), e);
             return empty();
         }
     }
