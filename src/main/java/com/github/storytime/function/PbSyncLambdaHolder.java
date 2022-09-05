@@ -7,6 +7,7 @@ import com.github.storytime.model.aws.PbStatement;
 import com.github.storytime.model.pb.jaxb.statement.response.ok.Response.Data.Info.Statements.Statement;
 import com.github.storytime.service.async.StatementAsyncService;
 import com.github.storytime.service.misc.DateService;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -23,9 +24,12 @@ import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
+import static org.apache.logging.log4j.LogManager.getLogger;
 
 @Component
 public class PbSyncLambdaHolder {
+
+    private static final Logger LOGGER = getLogger(PbSyncLambdaHolder.class);
 
     public BiFunction<AppUser, PbMerchant, ZonedDateTime> getAwsStartDate(final DateService dateService) {
         return (user, merchant) -> dateService.millisAwsUserDate(merchant.getSyncStartDate(), user);
@@ -53,6 +57,8 @@ public class PbSyncLambdaHolder {
 
                             final Set<String> allNewStatements = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed().stream())
                                     .collect(toUnmodifiableSet());
+
+                            LOGGER.debug("Update already, df: [{}], pushed: [{}], all to push: [{}]", pushedByNotCachedMapped.size(), dfStatements.getAlreadyPushed().size(), allNewStatements.size());
 
                             return statementAsyncService.saveAll(dfStatements.setAlreadyPushed(allNewStatements), userId);
                         }
