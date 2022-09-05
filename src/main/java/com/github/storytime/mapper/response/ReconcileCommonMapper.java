@@ -19,9 +19,9 @@ public class ReconcileCommonMapper {
     public List<PbZenReconcile> mapInfoForAccountJson(final List<AccountItem> zenAccs,
                                                       final List<PbAccountBalance> pbAccs) {
         return zenAccs.stream().map(za -> pbAccs.stream()
-                .filter(pa -> pa.getAccount().equals(za.getTitle())).toList()
-                .stream()
-                .map(x -> mapToZenPbAcc(za, x)).toList()).toList()
+                        .filter(pa -> pa.getAccount().equals(za.getTitle())).toList()
+                        .stream()
+                        .map(x -> mapToZenPbAcc(za, x)).toList()).toList()
                 .stream()
                 .flatMap(Collection::stream).toList();
     }

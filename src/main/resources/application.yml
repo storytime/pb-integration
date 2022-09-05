@@ -4,10 +4,10 @@
 # first its trying to get it from AWS, if not exists, them from this conf
 
 spring:
-    application:
-        name: sync-app
-    config:
-        import: 'aws-parameterstore:'
+  application:
+    name: sync-app
+  config:
+    import: 'aws-parameterstore:'
 
 #async:
 #    executor:

@@ -22,6 +22,8 @@ import java.util.function.BiFunction;
 import static java.time.Duration.between;
 import static java.time.Duration.ofMillis;
 import static java.time.ZoneId.of;
+import static java.util.Collections.emptySet;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static java.util.stream.Stream.concat;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -55,10 +57,11 @@ public class PbSyncLambdaHolder {
                                     .map(PbStatementsAlreadyPushedUtil::generateUniqString)
                                     .collect(toUnmodifiableSet());
 
-                            final Set<String> allNewStatements = concat(pushedByNotCachedMapped.stream(), dfStatements.getAlreadyPushed().stream())
+                            final Set<String> dfStatementsOrEmpty = ofNullable(dfStatements.getAlreadyPushed()).orElse(emptySet());
+                            final Set<String> allNewStatements = concat(pushedByNotCachedMapped.stream(), dfStatementsOrEmpty.stream())
                                     .collect(toUnmodifiableSet());
 
-                            LOGGER.debug("Update already, df: [{}], pushed: [{}], all to push: [{}]", pushedByNotCachedMapped.size(), dfStatements.getAlreadyPushed().size(), allNewStatements.size());
+                            LOGGER.debug("Update already, df: [{}], pushed: [{}], all to push: [{}]", pushedByNotCachedMapped.size(), dfStatementsOrEmpty.size(), allNewStatements.size());
 
                             return statementAsyncService.saveAll(dfStatements.setAlreadyPushed(allNewStatements), userId);
                         }

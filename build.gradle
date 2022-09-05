@@ -50,7 +50,7 @@ dependencies {
         exclude group: 'com.amazonaws', module: 'aws-java-sdk-kms'
     }
 
-    implementation("com.amazonaws:aws-java-sdk-dynamodb:1.12.243")
+    implementation('com.amazonaws:aws-java-sdk-dynamodb:1.12.290')
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok'
 

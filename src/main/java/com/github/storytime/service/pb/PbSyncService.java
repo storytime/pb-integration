@@ -26,6 +26,8 @@ import java.util.function.BiFunction;
 import static com.github.storytime.error.AsyncErrorHandlerUtil.*;
 import static com.github.storytime.mapper.PbStatementsAlreadyPushedUtil.generateUniqString;
 import static com.github.storytime.service.util.STUtils.*;
+import static java.util.Collections.emptySet;
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.function.Predicate.not;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -107,7 +109,7 @@ public class PbSyncService {
                 .thenApply(dbPbStatement -> userLevelStatements.stream()
                         .map(merchantLevel -> merchantLevel
                                 .stream()
-                                .filter(not(ap -> dbPbStatement.getAlreadyPushed().contains(generateUniqString(ap))))
+                                .filter(not(ap -> ofNullable(dbPbStatement.getAlreadyPushed()).orElse(emptySet()).contains(generateUniqString(ap))))
                                 .toList())
                         .filter(not(List::isEmpty)).toList())
                 .whenComplete((r, e) -> logSyncStatements(appUser.getId(), LOGGER, e));
