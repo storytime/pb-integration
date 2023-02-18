@@ -6,18 +6,24 @@
 [![](https://images.microbadger.com/badges/image/bobobo/pb-integration.svg)](https://microbadger.com/images/bobobo/pb-integration "MASTER Full container size")
 [![](https://images.microbadger.com/badges/version/bobobo/pb-integration.svg)](https://microbadger.com/images/bobobo/pb-integration "MASTER The latest container build version")
 
+## General (simplified) picture
+![image info](./misc/img.png)
+
+1. Time based event.
+2. Selection of suitable users.
+3. Selection of bank transactions/statements (in many threads). 
+4. Currency selection from DB (4.1 if currency is not available in DB, then it should located on 3rd part service)
+5. Upload to transactions/statements storage/service.
+6. Updated DB.
+
 ## Overview
-
-Simple integration service that collects data by schedule form bank and pushes it to [ZenMoney](https://zenmoney.ru/)
-with some customizations like currencySymbol rate.
-
 Supported banks:
 
 - [Private bank (not for business)](https://www.privat24.ua/)
 
 ## Requirements
 
-- Java 11
+- Java 17
 - Gradle 4 or more
 - Docker 18.06.0+ and Docker-compose(3.7) 1.21+
 
@@ -50,13 +56,6 @@ Swarm commands:
 - `docker service logs sync_pb-integration` - show logs for one the stack containers
 
 - `docker stack deploy -c docker-compose.yml sync` - run docker stack called *sync*
-
-## Database
-
-**Docker:** DB configs can be found in `variables.env` file
-
-**Without docker:** Some properties are taken from env variable(if exists), all other located
-in: `application.properties`
 
 ### How to insert custom comment generator
 
